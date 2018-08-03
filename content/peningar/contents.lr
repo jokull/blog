@@ -1,0 +1,120 @@
+title: Hvernig verða peningar til?
+---
+pub_date: 2018-08-03
+---
+author: Jökull Sólberg
+---
+body:
+
+Af einhverjum ástæðum eru bækur um hagfræði fullar af villandi útskýringum á því hvernig peningar verða til. Samkvæmt þeim ákveður seðlabanki magn af peningum sem hann lánar til viðskiptabanka, sem svo lána þá út í hagkerfið. Þar „margfaldast“ þeir eftir því sem þeir skipta oftar um hendur í viðskiptum. Með verði grunnmagni stýrir bankinn peningamagni og hitar þannig eða kælir hagkerfið til að tryggja stöðugleika. Með flóknum módelum geta þeir fínstillt hagkerfið. Þessi útskýring stenst ekki skoðun, þó að margir stjórnmálamenn, seðlabankamenn og viðskiptafræðingar haldi þessu fram.
+
+> „Anyone can create money… the problem lies in getting it accepted“ — Hyman Minsky
+
+Dæmi um þessa útskýringu [má sjá á Vísindavefnum](https://www.visindavefur.is/svar.php?id=68140) í svari frá Gylfa Magnússyni. Færslan var uppfærð 2014 í kjölfar [útgáfu skýrslu Bank of England](http://www.bankofengland.co.uk/publications/Documents/quarterlybulletin/2014/qb14q1prereleasemoneycreation.pdf) sem hrekur svokallaðr neoklassískar útskýringar á peningamyndun en útskýring Gylfa er enn ófullnægjandi og ruglandi sökum þess að kenningarnar sem koma fyrir í svarinu stangast á.
+
+Í nútímahagkerfi eru tvær „uppsprettur“ peninga. Sú fyrri er ríkissjóður sem setur pening í umferð þegar ríkissjóður reiðir út greiðslur fyrir starfsemi ríkisins. Ríkið tekur peninga úr umferð þegar það innheimtir skatt. Stjórnmálamenn sem vilja skila ríkisafgangi vilja í rauninni að ríkið taki meiri pening úr umferð en það setur inn. Ríkið sparar þó ekki pening í sama skilningi og heimili eða fyrirtæki gera, þó það sé samlíking sem gagnist mörgum stjórnmálamönnum þegar deilt er um ríkisfjármál. Seðlabankinn sem er undir stjórn ríkisvalds hefur ekki heimild til að setja hömlur á ríkissjóð, ríkishalla eða skuldir hans. Það er ekki seðlabanki sem ræður því hvort ríkið sé rekið með halla eða afgangi, heldur er það ákvörðun ríkisstjórna eða hreinlega viðbragð velferðarkerfis. Stjórnmálamenn sem berja sér á brjóst fyrir að skila afgangi af ríkissjóði hafa tekið tekið meiri pening úr hagkerfinu en sett var í það.
+
+Langmest magn peninga er hinsvegar búið til í viðskiptabankakerfinu. Á Íslandi eru það heil 95 prósent peningamagns sem verður til við útlán. Farið verður hér í saumana á því hvernig það ferli virkar.
+
+### Rætur nútíma peningakerfis
+
+Peningakerfi dagsins í dag tók við þegar gullfóturinn gaf undan. Tilgangur gullfótarins var að festa virði prentaðra seðla og myntar með því að bjóða hjá seðlabanka skipti á föstu magni af ákveðinni hrávöru (t.d gulli eða silfri)—hvort sem fólk kýs að skipta í hrávöruna eður ei. Gullfóturinn hamlaði verðbólgu með því að takmarka peningamagn við gullforða. Grunnur hugmyndafræðinnar er að absalút takmörkun sé nauðsynleg til að varðveita virði gjaldmiðils og verja hann fyrir verðbólgu.
+
+Gullfóturinn gaf sig fyrst í Bretlandi í fyrri heimstyrjöldinni þegar breski seðlabankinn skorti silfur til að tryggja uppgefið skiptiverð. Með pennastriki var tryggingin afnumin og seðlabankinn hóf „peningaprentun“ til að fjármagna stríðsrekstur. Ríkissjóðsskuldbindingar Breta fóru úr £650m árið 1914 í £7.4ma árið 1919, og í seinni heimsstyrjöldinni úr £7.1ma árið 1939 í £24.7ma árið 1949¹. Stríðsrekstur af þessari stærðargráðu á svo skömmum tíma hefði ekki verið mögulegur á gullfæti. Fleiri hagkerfi fylgdu í kjölfarið, og í kjölfar Kreppunnar miklu voru flest vestræn hagkerfi komin af gullfætinum. Gullfóturinn gaf undan í skrefum og með fullu þegar Bretton Woods gengisfyrirkomulagið molnaði á áttunda áratugnum.
+
+Ef gull tryggir ekki lengur virði gjaldmiðils hvað gerir það þá? Skattgreiðslur eru aðeins samþykktar í gjaldmiðli þess ríkissjóðs sem innheimtir þær. Það tryggir grunneftirspurn eftir gjaldmiðlinum. Ríkissjóður hefur í dag vald til þess að auka magn peninga í umferð og er ekki lengur bundinn af hrávöru.
+
+### Hvernig virkar kerfið í dag?
+Ég er sannfærður um að það væri ekki flókið fyrir geimveru að skilja peningakerfið. Það sem flækist fyrir okkur hinum eru hvernig við höldum að það virki, og ef til vill hvernig það virkaði einu sinni. Hagfræðibækur eru margar úreldar og hugtök eru oft villandi.
+
+Til að skilja peninga—hvernig þeir geta [blásið út](https://www.amazon.com/Another-Financial-Crisis-Future-Capitalism/dp/1509513736) í uppsveiflu eða [gufað upp í kreppum](https://www.youtube.com/watch?v=VRNQwmSvsfI), hver sé ábyrgð bankamanna, seðlabanka, eftirlitsaðila, stjórnmálamanna, viðskiptajöfra og neytenda—þá þarf að skilja hvernig nútímapeningakerfi virkar.
+
+#### Innstæður og greiðslukerfi bankanna
+
+Innstæður hafa tvenna eiginleika; eigandi þeirra getur tekið þær út í formi seðla eða millifært á aðra reikninga. Millifærslukerfið sem við þekkjum í daglegum viðskiptum er rekið af Reiknistofu bankanna sem er félag í eigu viðskiptabankanna. Þegar millifærslur innan sama banka eiga sér stað eru þær höndlaðar af viðkomandi banka og breyta engu fyrir aðra banka eða Seðlabankann. Millifærslur milli viðskiptabanka undir 10 m.kr. fara um Jafngreiðslukerfið (JG-kerfi) þar sem færslur til og frá banka eru nettaðar með ákveðnu millibili. Við nettun framkvæmist uppgjörsgreiðsla í Stórgreiðslukerfið (SG-kerfi). Millifærslur milli viðskiptabanka yfir 10 m.kr. fara beint í SG-kerfið þar sem lausafjárstaða banka er sannreynd jafnóðum. Bæði JG-kerfi og SG-keri eru rekin af Greiðsluveitunni ehf. sem er í eigu Seðlabanka Íslands. Saman ásamt verðbréfauppgjöri og gjaldmiðlamarkaði mynda þau millibankagreiðslukerfið.
+
+Tilgangur greiðslukerfisins er að gera upp stöðu bankanna, hafa umsjón og eftirlit með lausafjárstöðu bankanna og ríkissjóðs sem hefur beina aðild að millibankakerfinu.
+
+> „[…] þátttakandi skuldbindur sig til að ljúka greiðslufyrirmælum sem nema háum fjárhæðum sem fyrst á daginn og eiga samvinnu við aðra þátttakendur til að koma í veg fyrir truflanir í greiðsluflæði vegna dráttar á greiðslu frá mótaðila.“ — Fjármálainnviðir 2018, Seðlabanki Íslands
+
+Ef millifærsla á sér stað frá reikningi í Arion til Landsbankans, en einnig úr Landsbankans til Arion að sömu upphæð undir 10 m.kr. innan ákveðins tímaramma eru þær færslur nettaðar („núllaðar“) innan JG-kerfisins (A¹→L¹ og L²→A² breytist í A¹→A² og L²→L¹). Að öðrum kosti er JG-kerfið gert upp í formi kröfu frá einum banka á annan í SG-kerfinu.
+
+Í stuttu máli má segja að bankarnir, með aðstoð seðlabanka, treysti lausafjárstöðu hvors annars til skamms tíma og vinni saman í að framkvæmda eins fáar aðgerðir og hægt er án þess að ógna stöðugleika og áreiðanleika greiðslumiðlunar.
+
+[Nánari umfjöllun um millibankagreiðslumiðlun á Íslandi](https://rafhladan.is/bitstream/handle/10802/1245/2000-1%20Greiðslumiðlun%20-%20þróun%20og%20staða%20e.%20Tómas%20Örn%20Kristinsson.pdf?sequence=1)
+
+Athugið að bankarnir gera ekki allar millifærslur upp jafn óðum og því bregst millibankakerfið oft við eftir að ákvarðanir markaðarins hafa haft áhrif á stöður bankanna. Seðlabankinn er ekki ábyrgur fyrir að „leyfa“ millifærslur heldur er honum skylt að bregðast við þeim jafn óðum eða í uppgjöri, t.d. með lánveitingu. Millibankamarkaðurinn er gerður upp í seðlabankapeningum sem Seðlabankinn lánar bönkum gegn veði.
+
+Viðskiptabanki þarf að verða sér út um seðlabankapeninga (oftast kallað M0 í hagfræðibókum, e. reserves) fyrir þeirri upphæð sem uppgjör yfir daginn krefjast. Viðskiptabanki getur ekki notað seðlabankapeninga í öðrum viðskiptum en á millibankamarkaði heldur er millibankagreiðslukerfið lokað kerfi og einangrað frá almenningi (SG kerfið er meira að segja ekki á internetinu af öryggisástæðum). Viðskiptabanki getur þó losað sig við seðlabankapeninga, og gerir það gjarnan til að losa fé fyrir betri ávöxtun ef hann metur það svo að ekki sé þörf á öllu því lausafé á millibankamarkaði sem hann ræður yfir.
+
+Vextir á seðlabankapeningum sem lánaðir eru til viðskiptabanka á millibankamarkaði eru á daglegu kallaðir stýrivextir eða REPO vextir.
+
+> Helsta stjórntæki Seðlabankans eru vextir, þ.e. stýrivextir, á sérstökum lánum gegn veði til lánastofnana. Lán gegn veði (áður kallað endurhverf kaup — víða kallað REPO — dregið af enska heitinu „repurchase agreement“) eru ákveðin tegund af láni gegn tryggingu í verðbréfum. Þetta form viðskipta er víða notað í lánafyrirgreiðslu seðlabanka við banka og fjármálastofnanir. Lán Seðlabanka Íslands gegn veði við lánastofnanir eru nú til 7 daga í senn. Seðlabankinn lánar þá fé gegn veði í verðbréfum og gengur lánið til baka að 7 dögum liðnum. Hvati viðskiptanna er að lánastofnanir þurfa stundum laust fé í takmarkaðan tíma og geta fengið það frá Seðlabankanum gegn veði í verðbréfum. Lánastofnanir geta þannig tryggt lausafjárstöðu sína, en um leið hefur Seðlabankinn áhrif á vaxtastigið í landinu með því að ákveða vextina í þessum viðskiptum, því að lánastofnanirnar þurfa að fá jafnháa eða hærri vexti af fjármagninu (með því að lána féð áfram til viðskiptavina) til að tapa ekki á viðskiptunum við Seðlabankann. Lánastofnanir þurfa að leggja fram hæf verðbréf, þ.e.a.s. ríkistryggð bréf með virkri viðskiptavakt í Kauphöll Íslands. Uppboðin geta verið ýmist fastverðsuppboð eða uppboð þar sem heildarfjárhæð framboðinna samninga er tilkynnt. Fastverðsuppboð hafa verið reglan til þessa. —[Seðlabanki Íslands](http://gamli.sedlabanki.is/?PageID=59)
+
+Seðlabankinn stýrir ekki magni seðlabankapeninga heldur sér til þess að allri eftirspurn sé svarað á millibankamarkaði svo að greiðslukerfi sem þegnar landsins stóla á sé smurt og skilvirkt.
+
+[Yfirlit yfir vikulega samþykkt tilboð á seðlabankapening](https://www.sedlabanki.is/peningastefna/markadsvidskipti/adgerdir-sedlabanka-islands/)
+
+Þátttakendur í millibankakerfinu (ágúst 2018)
+
++ Arion banki hf.
++ Clearstream Banking S.A. í Lúxemborg.
++ Euroclear Bank SA/NV í Belgíu.
++ Íslandsbanki hf.
++ Kvika banki hf.
++ Landsbankinn hf.
++ Sparisjóður Austurlands hf.
++ Sparisjóður Höfðhverfinga ses.
++ Sparisjóður Strandamanna ses.
++ Sparisjóður Suður-Þingeyinga ses.
++ Seðlabanki Íslands.
+
+#### Útlán
+
+Næst ber að nefna útlán viðskiptabankanna til viðskiptavina. Haltu þér fast, spenntu beltið, dragðu fyrir, settu á silent og fáðu þér sterkt kaffi. Margir misskilja þetta ferli af því það stríðir gegn innri rökum og skilning okkar á peningum. Bankar búa til peninga þegar þeir lána; án fjármagns frá seðlabanka, án innstæðna annara viðskiptavina og án þess að færa sjóði frá eigin reikning yfir til þín.
+
+Þegar banki samþykkir að veita lán, að því gefnu að einstaklingur standist greiðslumat, lánshæfismat, veðhæfi o.s.fv., færir bankinn eftirfarandi til bókar:
+
+1. hækkar innstæðu viðskiptavinar sem nemur lánsfjárhæð og eykur þar við skuldbindingar sínar við viðskiptavininn (ekki eignir!)
+2. hækkar eignahlið sína með skuldabréfi
+
+Skuldabréfið tryggir bankanum tekjuflæði í framtíðinni í formi vaxta og það er sá hluti greiðslunnar sem bankinn bókfærir sem tekjur í hvert sinn sem greiðsla er færð á lánið.
+
+Innstæðan sem hækkar í kjölfar þess að lánið „greiðist út“ er ekki eign bankans heldur skuldbinding við lántakann. Innstæðan er heldur ekki tekin af innstæðureikningi annars viðskiptavinar eða fengin frá seðlabankanum í formi seðlabankapeninga. 
+
+Skuldbinding banka við viðskiptavin, í formi inneignar, hækkar um leið og banki greiðir lánsfjárhæð inn á innstæðureikning. Jafnframt flyst skuldbindingin þegar viðskiptavinur millifærir fjárhæðina, t.d. til fyrrum eiganda á íbúð sem hann er að kaupa. Í lok dags eru það seðlabankapeningar sem bankinn þarf að verða sér út um fyrir því sem vantar upp á í millibankauppgjöri, en bara ef millifærslan var ekki innan sama banka, og ef aðrar millifærslur í öfuga átt netta ekki út þá fyrri. Krafan um lausafjárstöðu banka á millibankamarkaði miðast við uppgjör en ekki heildarmagn útlána eða veltu á innlánum. 
+
+Innstæðukerfið sem fólk treystir á, ásamt millibankamarkaði sem bankar hafa einir aðgang að, eru ákveðin fríðindi sem fylgja bankaleyfi. Aðrar lánastofnanir, t.d. lífeyrissjóðir sem eru einnig á neytendalánamarkaði, njóta ekki sömu fríðinda, ef svo má kalla. Hjá þeim eru útlánveitingar bókaðar á allt annan hátt, enda eru þeir hvorki með innlánskerfi né eru þeira að gera upp á milli sín. Lífeyrissjóðir á Íslandi veita ekki lán nema að þeir eigi sjóði til að lána út og sætti sig við ávöxtun sem fæst á markaði.
+
+Margir af helstu hagfræðingum Íslands eru ennþá fastir í öðrum kenningum um peningmyndun, t.d. að innlán séu lánuð áfram:
+
+> „Bankar taka við innlánum, leggja til hliðar fyrir bindiskyldu og lána síðan aftur út. Útlán til eins kúnna breytast í innlán hjá öðrum og þannig hefst margföldunarferli sem skapar peningamagn.“  — Dr. Ásgeir Jónsson, [Hvað gerist þegar peningmagn er fjórfaldað á 4 árum?](https://www.sedlabanki.is/library/Skraarsafn/Malstofur/Peningamagn_málstofa_sedlabanki.pdf)
+
+Dr. Ásgeir hefur rangt fyrir sér. Orsakasamhengið er akkúrat öfugt. Fyrst framkvæmast millifærslur og útlán eru mynduð, svo líta bankar í kringum sig og leita að fé á millibankamarkaði til að gera upp á milli sín. Ef þeir eiga það ekki sjálfir geta þeir keypt það af öðrum bönkum, og ef ekki þá lætur Seðlabankinn það af hendi gegn veðum, t.d. ríkisskuldabréfum. Ólafur Margeirs [hefur svarað þessu hér](http://blog.dv.is/olafurm/2014/05/20/nei-asgeir-bindiskyldan-virkar-ekki/).
+
+Þýðir þetta að bankar hafa fullkomið framkvæmdavald þegar kemur að lánveitingum? Já.
+
+Þegar bankar efna til skuldbindinga við viðskiptavin eru þeir ekki að stækka bókhaldið sitt og væntan tekjustraum? Jú.
+
+Er eitthvað sem stoppar bankana í leit að nýjum lánum og tekjum sem af þeim má hafa? Nei.
+
+Auka bankar peningamagn í umferð þegar þeir veita lán? Já.
+
+Er samt ekki bindiskylda, lágmark eiginfjárhlutfalls og fleira sem heftir útlán? Jú, en það heftir ekki stök útlán, heldur hefur áhrif á vexti lána sem er ávöxtunarkrafa bankanna.
+
+1. http://positivemoney.org/how-money-works/advanced/what-about-the-national-debt/
+2. https://en.wikipedia.org/wiki/Basel_III
+
+### Heimildir
+
++ [Banks are not intermediaries of loanable funds — and why this matters](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2015/banks-are-not-intermediaries-of-loanable-funds-and-why-this-matters.pdf?la=en&hash=D6ACD5F0AC55064A95F295C5C290DA58AF4B03B5)
++ [Money & Banking](http://neweconomicperspectives.org/money-banking)
++ [Fjármálainnviðir 2018](https://www.sedlabanki.is/utgefid-efni/rit-og-skyrslur/rit/2018/06/14/Fjarmalainnvidir-2018/)
++ [Stórgreiðslukerfi, Seðlabanki Íslands](https://www.sedlabanki.is/fjarmalainnvidir/rekstur/storgreidslukerfi/)
+
+### Þakkir fyrir input og yfirlestur
+
++ Guðfinnur Sveinsson
++ Ólafur Margeirsson
+---
+twitter_handle: jokull

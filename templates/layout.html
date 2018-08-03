@@ -1,0 +1,23 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ '/static/style.css'|url }}">
+<title>{% block title %}Welcome{% endblock %} — blog</title>
+<body>
+  <header>
+    <h1>
+      <a href="{{ '/'|url }}">Jökull Sólberg</a>
+      <a href="mailto:jokull@solberg.is"></a>
+    </h1>
+    <div class="social">
+      <a href="https://twitter.com/jokull"><img src="{{ '/static/twitter.svg' }}"></a>
+      <a href="https://instagram.com/jokull"><img src="{{ '/static/instagram.svg' }}"></a>
+    </div>
+  </header>
+  <div class="page">
+    {% block body %}{% endblock %}
+  </div>
+  <footer>
+    <a href="mailto:jokull@solberg.is">jokull@solberg.is</a>
+  </footer>
+</body>

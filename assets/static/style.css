@@ -1,0 +1,114 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    padding: 50px 0;
+    background: url(background.svg);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 0 0;
+}
+
+a {
+    color: #111;
+    text-decoration: none;
+}
+
+a:hover {
+    color: blue;
+}
+
+header, footer, div.page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 20px;
+}
+
+header {
+    position: relative;
+}
+
+header h1 {
+    margin: 0;
+    font-weight: normal;
+    font-size: 22px;
+}
+
+header h1 a {
+    color: black;
+    border-bottom: 4px solid blue;
+}
+
+header .social {
+    position: absolute;
+    top: 23px;
+    right: 20px;
+}
+
+header .social a {
+    margin-left: 10px;
+}
+
+header .social img {
+    width: 20px;
+}
+
+header h1 a {
+    text-decoration: none;
+}
+
+header nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+header nav ul li {
+    display: inline;
+    margin: 0 8px 0 0;
+    padding: 0;
+}
+
+footer {
+    text-align: right;
+}
+
+footer a {
+    text-decoration: none;
+    color: #999;
+    font-size: small;
+}
+
+div.page {
+    line-height: 1.5;
+}
+
+.blog-post img {
+    max-width: 100%;
+}
+
+.blog-post img.right {
+    float: right; margin-left: 20px;
+}
+
+.blog-post blockquote, .blog-post .meta {
+    font-family: times;
+    font-style: italic;
+}
+
+.blog-post-body a {
+    text-decoration: underline;
+}
+
+hr {
+    height: 1px;
+    background: #ccc;
+    border: 0;
+    width: 80%;
+    margin: 40px auto;
+}
+
+@media only screen and (max-width: 600px) {
+    blockquote {
+        margin: 0 12px;
+    }
+}

@@ -1,0 +1,10 @@
+[project]
+name = Jökull Sólberg
+locale = is_IS
+url = http://www.solberg.is/
+
+[servers.production]
+name = Production
+enabled = yes
+default = yes
+target = ghpages://jokull/jokull.github.io?cname=www.solberg.is
