@@ -74,7 +74,7 @@ footer {
 
 footer a {
     text-decoration: none;
-    color: #999;
+    color: rgba(0,0,50,0.4);
     font-size: small;
 }
 
@@ -101,7 +101,7 @@ div.page {
 
 hr {
     height: 1px;
-    background: #ccc;
+    background: rgba(0,0,50,0.4);
     border: 0;
     width: 80%;
     margin: 40px auto;
