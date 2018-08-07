@@ -101,10 +101,9 @@ div.page {
 
 hr {
     height: 1px;
-    background: rgba(0,0,50,0.4);
+    background: rgba(0,0,50,0.2);
     border: 0;
-    width: 80%;
-    margin: 40px auto;
+    margin: 40px 0;
 }
 
 @media only screen and (max-width: 600px) {
