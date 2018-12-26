@@ -82,7 +82,7 @@ div.page {
     line-height: 1.5;
 }
 
-.blog-post p {
+.blog-post p, .blog-post li {
     font-size: 120%;
 }
 
@@ -119,6 +119,24 @@ div.page {
 }
 
 .blog-post-index span { color: rgba(0,0,0,0.4); }
+
+.footnotes {
+    font-size: 70%;
+}
+
+.footnotes p {
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.footnotes li {
+    margin-bottom: 0.4em;
+}
+
+.footnotes .footnote {
+    margin-left: 1em;
+    color: rgba(0,0,0,0.4);
+}
 
 /* 
 
