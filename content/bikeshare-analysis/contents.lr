@@ -6,25 +6,6 @@ pub_date: 2018-12-11
 ---
 body: 
 
-<style>
-.caption { margin: 2em 0 1em; }
-.caption p { font-size: x-small; text-align: right; color: rgba(0,0,0,0.4); }
-.shadow-img { box-shadow: 0 0 20px rgba(0,0,0,0.2); }
-table { 
-  box-shadow: 0 0 20px rgba(0,0,0,0.2);
-  background: white;
-  width: 100%; 
-  font-family: monospace;
-  font-size: 11pt;
-  font-variant-numeric: lining-nums tabular-nums;
-  padding: 0.3em 0.1em;
-}
-td, th {
-  padding: 0.125em 0.5em 0.25em 0.5em;
-  line-height: 1;
-}
-</style>
-
 This paper is an investigation of the viability and scale potential of operating a privately owned fleet of electric bikes in a dockless system, wherein users locate available bikes with an app and pay per trip.
 
 I conclude that not only is the global urban mobility sector being disrupted by a propagation of LEV’s (light electric vehicles) but that a local e-bike fleet operation in Reykjavík is cash flow positive within 12 months and can grow to 250 to 400 bikes and a valuable business within three years. 
