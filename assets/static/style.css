@@ -138,16 +138,26 @@ div.page {
     color: rgba(0,0,0,0.4);
 }
 
-/* 
+.caption { margin: 2em 0 1em; }
 
-hr {
-    height: 1px;
-    background: rgba(0,0,0,0.2);
-    border: 0;
-    margin: 40px 0;
+.caption p { font-size: x-small; text-align: right; color: rgba(0,0,0,0.4); }
+
+.shadow-img { box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+
+table { 
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  background: white;
+  width: 100%; 
+  font-family: monospace;
+  font-size: 11pt;
+  font-variant-numeric: lining-nums tabular-nums;
+  padding: 0.3em 0.1em;
 }
 
-*/
+td, th {
+  padding: 0.125em 0.5em 0.25em 0.5em;
+  line-height: 1;
+}
 
 hr {
   display: block;
@@ -160,6 +170,7 @@ hr {
   position: relative;
   transform: rotate(-45deg);
 }
+
 hr:before, hr:after {
   content: '';
   display: block;
@@ -169,18 +180,26 @@ hr:before, hr:after {
   height: 100%;
   top: -1px;
 }
+
 hr:before {
   right: 100%;
   top: -100%;
   margin-top: -1px;
 }
+
 hr:after {
   left: 100%;
   top: 100%;
 }
 
+.grey { color: grey; }
+
 @media only screen and (max-width: 600px) {
     blockquote {
         margin: 0 12px;
+    }
+
+    .blog-post p, .blog-post li {
+        font-size: 100%;
     }
 }
