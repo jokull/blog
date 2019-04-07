@@ -14,7 +14,7 @@ There are two important insights I want to share with fellow product managers:
 
 (I’m assuming software development with small release cycles, i.e. 90% of startups).
 
-#### Reactive vs. Feature
+## Reactive vs. Feature
 
 Before you launch a product the development effort is feature driven. The vision gets turned into a design which defines the _surface area_ of the user experience. Then the design gets turned into a functioning product; a sort of mold for experiences to flow through. Now starts the feedback process. Adjust design based on feedback. Rinse, repeat.
 
@@ -30,7 +30,7 @@ My advice is not to avoid Reactive work, but to account for it, time-wise and em
 
 Approximate split between reactive and feature development over time and through product launch
 
-#### Wishlist vs. Roadmap
+## Wishlist vs. Roadmap
 
 A big part of product management is managing expectations. The entities you need to communicate with are:
 
@@ -54,6 +54,6 @@ Make sure internal stakeholders and developers understand the difference between
 
 Armed with these two insights you will be able to make increasingly accurate predictions, and more importantly manage expectations of your product stakeholders.
 
-* * *
+***
 
 I am the co-founder and product manager of [Takumi](http://www.takumi.com). We make the influencer-first marketing platform. We run our product development in Reykjavík, Iceland.

@@ -18,9 +18,10 @@ a:hover {
 }
 
 header, footer, div.page {
-    max-width: 640px;
+    max-width: 680px;
     margin: 0 auto;
     padding: 20px 20px;
+    color: rgba(0,0,0,.84);
 }
 
 header {
