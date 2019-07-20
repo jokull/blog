@@ -1,13 +1,35 @@
 {% extends "layout.html" %}
-{% from "macros/blog.html" import render_blog_post %}
 {% from "macros/pagination.html" import render_pagination %}
 {% block title %}{{ this.title }}{% endblock %}
 {% block body %}
-  {% for child in this.pagination.items %}
-    {{ render_blog_post(child, from_index=true) }}
-  {% endfor %}
 
-  {% if this.pagination.pages > 1 %}
-    {{ render_pagination(this.pagination) }}
-  {% endif %}
+  <div class="intro">
+    <div class="bio">
+      <div>
+        <p>Ég starfa sem ráðgjafi hjá <a href="http://prl.is/">Parallel ráðgjöf</a>. Ég er stofnandi <a href="https://takumi.com/">Takumi International ltd.</a> ásamt öðrum og þar á undan starfaði ég sem forritari og vörustjóri hjá <a href="https://quizup.com">QuizUp</a>. </p>
+        <p>Ég held úti fréttabréfinu <a href="https://jokull.substack.com/">Reykjavík Mobility</a> þar sem fjallað er um samgöngur og skipulag í Reykjavík.</p>
+      </div>
+    </div>
+    <div class="picture">
+      <img alt="profile picture of jökull" src="{{ '/static/profile.jpg'|url }}">
+    </div>
+  </div>
+
+  <div class="index-posts">
+
+    <div class="legend">Greinar eftir mig</div>
+
+    {% for post in this.pagination.items %}
+      <a href="{{ post|url }}" class="post">
+        <div class="title">{{ post.title }}</div>
+        <div class="date">{{ post.pub_date|dateformat('long') }}</div>
+      </a>
+    {% endfor %}
+
+    {% if this.pagination.pages > 1 %}
+      {{ render_pagination(this.pagination) }}
+    {% endif %}
+
+  </div>
+
 {% endblock %}

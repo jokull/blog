@@ -1,19 +1,13 @@
-{% macro render_blog_post(post, from_index=false) %}
-  {% if from_index %}
-  <div class="blog-post-index">
-    <p><a href="{{ post|url }}">{{ post.title }}</a><span class="meta"> — {{ post.pub_date|dateformat('long') }}</span></p>
+{% macro render_blog_post(post) %}
+<div class="blog-post">
+  <div class="blog-post-header">
+    <h1>{{ post.title }}</h1>
+    <p class="meta">
+      {{ post.pub_date|dateformat('long', locale='is_IS') }}
+    </p>
   </div>
-  {% else %}
-  <div class="blog-post">
-    <div class="blog-post-header">
-      <h1>{{ post.title }}</h1>
-      <p class="meta">
-        {{ post.pub_date|dateformat('long', locale='is_IS') }}
-      </p>
-    </div>
-    <div class="blog-post-body">
-      {{ post.body }}
-    </div>
+  <div class="blog-post-body">
+    {{ post.body }}
   </div>
-  {% endif %}
+</div>
 {% endmacro %}
