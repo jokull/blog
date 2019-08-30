@@ -8,3 +8,8 @@ name = Production
 enabled = yes
 default = yes
 target = ghpages://jokull/jokull.github.io?cname=www.solberg.is
+
+[feed]
+name = Jökull Sólberg
+source_path = /
+url_path = /feed.xml

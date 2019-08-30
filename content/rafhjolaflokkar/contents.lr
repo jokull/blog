@@ -1,0 +1,128 @@
+title: Létt rafknúin farartæki
+---
+pub_date: 2019-08-16
+---
+body: 
+
+Yfirlit yfir flokkun tveggja- og þriggja hjóla rafknúina farartækja í umferðarlögum.
+
+[Umferðarlög á althingi.is](https://www.althingi.is/lagas/nuna/1987050.html)
+
+Þegar talað er um hámarksafl er átt við hámarksnafnafl (e. nominal power). 
+
+## Yfirlit
+
+| Flokkur        | EU Class | Afl watt | Hraði   | Stígar | Akbrautir |
+|:---------------|:---------|:---------|:--------|:-------|:----------|
+| Reiðhjól B     | —        | 250w     | 25km/h  | Já     | Já        |
+| Reiðhjól C     | —        | 250w     | 25km/h  | Já     | Nei       |
+| Létt bifhjól 1 | L1e-A    | 1.000w   | 25km/h  | Já     | Já        |
+| Létt bifhjól 2 | L1e-B    | 4.000w   | 45km/h  | Nei    | Já        |
+
+Það er 30% vörugjald á bifhjólum en engin vörugjöld á reiðhjólum. Það er fullur virðisauki á öllum flokkum (en rafbílar eru með nánast fulla niðurfellingu á VSK og engin vörugjöld!). Ríkisstjórnin hefur boðað endurskoðun á þessum álögum.
+
+## Reiðhjól B
+
+„Venjuleg“ hjól geta haft aðstoðarmótor með sveifarmótor (e. pedelec) sem slær út þegar hjólið er komið á 25 km/klst hraða. Hámarksafl sveifarmótors er 250w. 
+
+Langflest rafhjól sem eru seld á Íslandi falla í þennan flokk.
+
+Það að vélknúin tæki geti fallið undir flokkinn reiðhjól í lögunum hefur mikið að segja. T.d. eru víðari heimildir fyrir því hvernig skilið er við reiðhjól, hjálmskylda er ekki eins rík á reiðhjóli og göngustígar eru einungis ætlaðir reiðhjólum.
+
+Hjálmaskyldan eftir 1. janúar n.k. er fyrir 15 ára og yngri, þ.e. yngri en 16 ára.
+
+![](reidhjol-b.jpg)
+
+Dæmi: [Cube Cross Hybrid Race 500](https://tri.is/product/cube-cross-hybrid-race-500-allr-2019), [Mate X](https://www.ellingsen.is/ellingsen/reiðhjol/rafmagnshjol?ProductID=MAT-9-X250-BLACK)
+
++ **Trygging:** Nei
++ **Göngu- og hjólastígar:** Já
++ **Akbraut:** Já
++ **Ökuréttindi:** Engin
++ **Lágmarksaldur:** 0
++ **Hámarksafl:** 250w
++ **Hraði:** 25km/klst
++ **Hjálmskylda:** 15 ára og yngri
++ **Vörugjöld:** 0%
+
+## Reiðhjól C
+
+Önnur sambærileg tæki sem ná 25 km/klst hraða en án sveifarmótors. Styðjast þá heldur við ígjöf (e. throttle) eða sambærilegan búnað. Í lögunum er einfaldlega sagt; „Annað lítið vélknúið ökutæki sem ekki telst til létts bifhjóls [...]“ en létt bifhjól er ekki mjög þröngt skilgreindur flokkur þannig að ég skil afhverju eitthvað sem fellur ekki í Reiðhjól B ætti „ekki að teljast“ létt bifhjól af óskilgreindri ástæðu. Ég hef heimildir fyrir því að Xiaomi hlaupahjólin vinsælu eru reiðhjól í C flokki. Þannig að ... we’ll go with that.
+
+Þessi flokkur er einungis leyfður á göngu- og hjólastígum.
+
+![](reidhjol-c.jpg)
+
+Dæmi: [Mi Electric Scooter](https://mii.is/collections/dotabudin/products/electric-scooter-m365)
+
++ **Trygging:** Nei
++ **Göngu- og hjólastígar:** Já
++ **Akbraut:** Nei
++ **Ökuréttindi:** Engin
++ **Lágmarksaldur:** 0
++ **Hámarksafl:** Óskilgreint
++ **Hraði:** 25km/klst
++ **Hjálmskylda:** 16 ára og yngri
++ **Vörugjöld:** 0%
+
+## Létt bifhjól
+
+Önnur öflugri eða hraðari hjól flokkast sem létt bifhjól. Í EU flokkun er það L1e yfirflokkur. Þessi hjól þurfa baksýnisspegil vinstra megin, hliðarglitaugu, fetilglitaugu (á léttu bifhjóli þar sem ekki er hægt að leggja fetla að). Einnig er gerð krafa um hljóðmerkisbúnað. Æskilegt er að hjólin séu búin bremsuljósi og ljósi að framan. Sömuleiðis þarf að vera pláss fyrir númeraplötu, eitthvað sem á ekki við um Reiðhjól C.
+
+Lögum samkvæmt er þessi flokkur skráningarskyldur en Samgöngustofa hefur ekki hafið skráningu á Flokki I. 
+
+### Flokkur I
+
+Öflugri hjól sem eru hönnuð til aksturs allt að 25 km/klst. Flokkur 1 átti að samræmast L1e-A flokkuninni í EU, en þar er hámarksaflið 1 kW. Ekki er minnst sérstaklega á hámarksafl fyrir flokk 1, en hámarksafl fyrir létt bifhjól er 4 kW svo að það hlýtur að vera viðmiðið hér.
+
+Nánar er fjallað um [flokk 1](https://www.samgongustofa.is/umferd/fraedsla-og-oryggi/fraedsla/velknuin-hjol/) á vef Samgöngustofu.
+
+![](lett-bifhjol-1.jpg)
+
+Dæmi: [RadWagon](https://radpowerbikes.eu/products/radwagon-electric-cargo-bike)
+
++ **Trygging:** Nei
++ **Göngu- og hjólastígar:** Já
++ **Akbraut:** Já
++ **Ökuréttindi:** Nei
++ **Lágmarksaldur:** 13
++ **Hámarksafl:** 4 kW
++ **Hraði:** 25km/klst
++ **Hjálmskylda:** Já
++ **Vörugjöld:** 0%
+
+### Flokkur II
+
+Öflugri hjól sem eru önnuð til aksturs allt að 45 km/klst! Flokkur 2 samræmist L1e-B flokkun í EU reglugerðum, oft kallað S Pedelec þegar um sveifarmótor er að ræða. Þessi flokkur af farartækjum geta líka haft fóthvílur (e. pegs) ásamt ígjöf (e. throttle) í stýri — eru þá meira í ætt við mótorhjól í útliti og upplifun. 
+
+Það skrýtna við þessi tæki er að þau mega ekki nota hjólastíga og þurfa því að sameinast þungri umferð á hraðbrautum víðsvegar um höfuðborgarsvæðið, án þess þó að geta fylgt umferð því hámarkshraði er 45 km/klst. Einhverjir hafa farið þá leið að aflæsa hámarki (sem er ólöglegt, en eflaust öruggara ef maður er á annað borð kominn á hraðbraut) eða stelast einfaldlega inn á hjólastíga.
+
+Í Hollandi og Danmörku eru S Pedelec hjóla, sem eru í flokki II á Íslandi, leyfð á hjólastígum. Í Sviss og Þýskalandi eru þau það ekki.
+
+![](lett-bifhjol-2.jpg)
+
+Dæmi: [Super SOCO TC](https://www.nova.is/barinn/vara/rafmagnsmotorhjol-tc), [Trek Super Commuter+ 8S](https://www.trekbikes.com/us/en_US/bikes/hybrid-bikes/electric-hybrid-bikes/super-commuter/super-commuter-8s/p/17297/), [Stromer ST2](https://www.stromerbike.com/en_us/e-bikes/st2.html), [Burðarhjól Póstsins](https://jokull.substack.com/p/reykjavk-mobility-2-tgfa)
+
++ **Trygging:** Já (u.þ.b. 80-120 þús kr. á ári)
++ **Göngu- og hjólastígar:** Nei
++ **Akbraut:** Já
++ **Ökuréttindi:** Já
++ **Lágmarksaldur:** 15
++ **Hámarksafl:** 4 kW
++ **Hraði:** 45km/klst
++ **Hjálmskylda:** Já
++ **Vörugjöld:** 0%
+
+## Algengar spurning
+
+**Í hvaða tollaflokk er hvert og eitt hjól?** Reiðhjól B, C og Létt bifhjól flokkir 1 eru í tollaflokki 8711.6010. Flokkur II lendir í 8711.6090. 
+
+**Ef flokkur II má ekki vera á göngu- og hjólastígum, eiga þessi tæki þá að vera í umferð með bílum, jafnvel á hraðbrautum?** Já
+
+**Hvað kostar að tryggja létt bifhjól?** Í kringum 90.000 á ári
+
+**Hvernig lítur skráningarplatan út?**
+
+[](https://www.notion.so/19cf6a9fb8dd46fd8d5d20527a0cdf3c#0af12f0032bb4a1187fb900c0d4312b7)
+
+**Ertu með fleiri spurningar?** Hafðu samband við jokull@solberg.is og ég mun leitast við að uppfæra þetta skjal.
