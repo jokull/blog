@@ -1,0 +1,19 @@
+title: Loftgæði appið
+---
+pub_date: 2019-12-14
+---
+body: 
+
+Hægt er að fylgjast með loftgæðum á Íslandi í appi fyrir iPhone. Gögnin eru sótt sjálfkrafa af vefsíðunni loftgaedi.is. 
+
+JSON gögn sem eru scrape-uð af loftgaedi.is má nálgast beint á [loftgaedi.onrender.com](https://loftgaedi.onrender.com/). Gögnin eru uppfærð með skömmu millibili, en geta verið úreld um einhverjar mínútur miðað við það sem er á loftgaedi.is.
+
+Appið er **ekki** á vegum Umhverfisstofnunar eða þeirra sem mæla loftgæði og/eða reka mælingarstöðvar.
+
+Þjónustan notar Python FastAPI, requests og Postgres. Appið notar SwiftUI og þarfnast iOS 13 eða nýrri útgáfu af iOS.
+
+![](./promo.png)
+
++ [Terms and conditions](terms)
++ [Privacy policy](privacy)
++ [Download in the Apple App Store](./)
