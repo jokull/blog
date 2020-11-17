@@ -3,6 +3,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ '/static/style.css?v=1'|url }}">
 <link rel="alternate" type="application/atom+xml" title="Jökull Sólberg" href="/feed.xml" />
+{% block opengraph %}
+<meta content='{{ '/static/profile.jpg'|url(external=True) }}' property='og:image'>
+{% endblock %}
 <title>{% block title %}Welcome{% endblock %} — Jökull Sólberg</title>
 <body>
   <header>
