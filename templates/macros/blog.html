@@ -6,6 +6,11 @@
       {{ post.pub_date|dateformat('long', locale='is_IS') }}
     </p>
   </div>
+  {% if post.hero_image %}
+</div>
+<img src="./{{ post.hero_image }}" class="full-bleed">
+<div class="blog-post">
+  {% endif %}
   <div class="blog-post-body">
     {{ post.body }}
   </div>

@@ -5,7 +5,24 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  padding: 50px 0;
+  margin: 0;
+}
+
+.page {
+  display: grid;
+  grid-template-columns:
+    1fr
+    min(65ch, 100%)
+    1fr;
+}
+.page > * {
+  grid-column: 2;
+  padding: 0 1em;
+}
+.full-bleed {
+  width: 100%;
+  grid-column: 1 / 4;
+  padding: 0;
 }
 
 a {
@@ -17,11 +34,10 @@ a:hover {
   color: var(--hard-green);
 }
 
-header, footer, div.page {
+header, footer {
   margin: 0 auto;
-  padding: 20px 10px;
+  padding: 20px 1em;
   color: rgba(0,0,0,.84);
-  max-width: 680px;
 }
 
 header {
