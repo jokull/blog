@@ -23,6 +23,14 @@ body {
   width: 100%;
   grid-column: 1 / 4;
   padding: 0;
+  margin-bottom: 2em;
+}
+
+
+@media only screen and (max-width: 600px) {
+  .full-bleed {
+    margin-bottom: 1em;
+  }
 }
 
 a {
