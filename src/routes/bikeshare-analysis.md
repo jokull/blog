@@ -3,6 +3,10 @@ title: Viability of a Dockless e-Bike Fleet Operation in Reykjavík
 date: 2018-12-11
 ---
 
+<script>
+  import PhotoCaption from '../components/PhotoCaption.svelte';
+</script>
+
 This paper is an investigation of the viability and scale potential of operating a privately owned
 fleet of electric bikes in a dockless system, wherein users locate available bikes with an app and
 pay per trip.
@@ -154,10 +158,7 @@ What trips are micromobility solutions competing for? A research paper using eig
 data from one of the few s-pedelec dockless operators, Smide in Zurich, reveals some interesting
 insights[^smide-research].
 
-<div class="caption">
-  <img src="./modality-split-zurich.png" class="shadow-img">
-  <p>Distribution of trip distances compared. The figure shows median, and the upper/lower quartiles. <a href="https://www.slideshare.net/asymco/when-micromobility-attacks">Source</a>.</p>
-</div>
+<PhotoCaption url="/blog/modality-split-zurich.png" caption="Distribution of trip distances compared. The figure shows median, and the upper/lower quartiles: https://www.slideshare.net/asymco/when-micromobility-attacks" />
 
 Smide’s s-pedelecs compete with public transport, other electric bikes, regular bikes and a good
 amount of private car trips. Zurich has a very high penetration of public transport trips, so in
@@ -222,10 +223,7 @@ swaps are done by charging standalone batteries during the night and shipping wa
 during the day to swap cold batteries for warm ones. The Stromer bikes have swappable batteries
 locked and unlocked with a physical key.
 
-<div class="caption">
-  <img src="./stromer.png" alt="Stromer ST2 Bike" class="shadow-img">
-  <p>Stromer ST2 Bike, similar or same as intended fleet bikes.</p>
-</div>
+<PhotoCaption url="/blog/stromer.png" caption="Stromer ST2 Bike, similar or same as intended fleet bikes." />
 
 ### Service Area, Phase 1
 
@@ -240,7 +238,7 @@ Included
 | Hlíðar               | 3.3      | 9,612      |
 | Laugardalur          | 6.4      | 15,239     |
 | Háaleiti og Bústaðir | 4.3      | 13,755     |
-| —                    | **17.2** | **62,927** |
+| -                    | **17.2** | **62,927** |
 
 Excluded
 
@@ -251,12 +249,12 @@ Excluded
 | Grafarvogur                 | 14.0      | 18,130     |
 | Kjalarnes                   | 61.7      | 834        |
 | Grafarholt og Úlfarsárdalur | 22.5      | 5,416      |
-| —                           | **109.8** | **55,218** |
+| -                           | **109.8** | **55,218** |
 
-<div class="caption">
-  <img src="./service-area.png" alt="Reykjavík geofence" class="shadow-img">
-  <p>Image shows density of building square meters per hectare of land. Data from ssh.is. The phase 1 geofence is the green area. <a href="http://www.ssh.is/husnaedi/thettleiki">Source</a>.</p>
-</div>
+<PhotoCaption 
+  url="/blog/service-area.png" 
+  caption="Image shows density of building square meters per hectare of land. Data from ssh.is. The phase 1 geofence is the green area. http://www.ssh.is/husnaedi/thettleiki" 
+/>
 
 The capital area includes these connect municipalities which are potentially included with a single
 dockless fleet in later phases.
@@ -269,10 +267,7 @@ dockless fleet in later phases.
 | Mosfellsbær   | 9.350      |
 | Seltjarnarnes | 4.410      |
 
-<div class="caption">
-  <img src="./traffic-patterns.png" alt="Reykjavík Capital Region traffic patterns" class="shadow-img">
-  <p>The map shows traffic patterns and how many trips are by the geofence. Both Hamraborg in Kópavogur and Breiðholt seem to bring the most marginal volume expansion in later phases. <a href="http://ssh.is/images/stories/Samgongumal/2017_Screening-report-Borgarlina-recommendations.pdf">Source</a>.</p>
-</div>
+<PhotoCaption url="/blog/traffic-patterns.png" caption="The map shows traffic patterns and how many trips are by the geofence. Both Hamraborg in Kópavogur and Breiðholt seem to bring the most marginal volume expansion in later phases. http://ssh.is/images/stories/Samgongumal/2017_Screening-report-Borgarlina-recommendations.pdf" />
 
 ### Usage
 
@@ -281,10 +276,7 @@ average trip time length. Bike investment is around 1m ISK per vehicle and based
 I have confirmed that TDV for Stromer in Zurich is between 3 and 9 depending on climate, with rain
 having more impact than snow.
 
-<div class="caption">
-  <img src="./smide-usage.png" class="shadow-img">
-  <p>Image shows Smide usage distribution over days, trip time lengths and weekdays.</p>
-</div>
+<PhotoCaption url="/blog/smide-usage.png" caption="Image shows Smide usage distribution over days, trip time lengths and weekdays." />
 
 According to a Smide representative, their Stromer bikes in Zurich last _four years at an average of
 eight trips per day per bike_. Smide was started in 2015, whereas Lime was founded in 2017, so they
@@ -316,10 +308,7 @@ number. The service geofence captures at least 83% of all accomodation in the Ca
 year 2017)[^tourist-accomodation]. If we consider this part of the user base we can assume 8,473
 users on top of the 63 thousand habitants in this area. My adjusted population number is 63k.
 
-<div class="caption">
-  <img src="./accomodation.png" alt="Accomodation in the capital region" class="shadow-img">
-  <p>The concentration of accomodation in the Reykjavík Capital Region. The geofence covers at least 83% of it.</p>
-</div>
+<PhotoCaption url="/blog/accomodation.png" caption="The concentration of accomodation in the Reykjavík Capital Region. The geofence covers at least 83% of it." />
 
 Commuting patterns have not yet been analyzed, but this is an area with the biggest private and
 public employers in Iceland and there are traffic patterns showing lots of activity into and within

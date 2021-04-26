@@ -3,6 +3,10 @@ title: Setjum markið hærra en sjóðsstjórar á Wall Street
 date: 2019-01-13
 ---
 
+<script>
+  import PhotoCaption from '../components/PhotoCaption.svelte';
+</script>
+
 Greinin
 [birtist á Stundinni](https://stundin.is/grein/8234/setjum-markid-haerra-en-sjodsstjorar-wall-street/).
 
@@ -116,10 +120,7 @@ fjárlagahalla sem átti stóran þátt í aðlögun í kjölfar Fjármálakrepp
 gjaldeyrisforðans í dag, en geta ríkissjóðs er enn meiri þar sem hallarekstur er alltaf möguleiki
 hjá ríkissjóði sem gefur út eigin mynt.
 
-<div class="caption">
-  <img src="./budget-balance-iceland.svg" class="shadow-img" style="width:100%;">
-  <p>Fjárhágsjöfnuður ríkissjóðs.</p>
-</div>
+<PhotoCaption url='/blog/budget-balance-iceland.svg' caption='Fjárhágsjöfnuður ríkissjóðs' />
 
 „Aðhald“ í ríkisfjármálum var víðs fjarri þegar sjálfvirkir jafnarar fóru að hafa áhrif á jöfnuð
 ríkissjóðs. Í dag er „aðhaldið“ einkennandi fyrir ríkisfjármál þó að erlendar skuldir hafi lækkað,

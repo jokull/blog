@@ -3,8 +3,6 @@ title: Tenging samgangna og landnotkunar
 date: 2019-05-27
 ---
 
-## \_discoverable: no
-
 Ég rakst á þetta graf í skýrslu frá SSH (Samtök sveitarfélaga á Höfuðborgarsvæðinu). Hér sjáum við
 íbúafjölda sem hlutfall af landinu öllu, annarsvegar íbúa höfuðborgarsvæðisins og svo hinsvegar íbúa
 Reykjavíkur. Þetta sýnir hvernig Reykjavík stækkar í takt við önnur sveitarfélög á

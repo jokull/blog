@@ -19,7 +19,7 @@
 	};
 </script>
 
-<div class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto p-4 sm:p-8">
 	<div
 		class="flex flex-col sm:flex-row justify-between items-center mb-12 md:my-16 lg:my-24 lg:mb-32"
 	>

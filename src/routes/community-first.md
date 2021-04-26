@@ -1,6 +1,7 @@
 ---
 title: Instagram entrepreneurs - when communities precede products
 date: 2018-05-23
+image: influencers.jpg
 ---
 
 In this post I look at advantages influencers launching their own products have over traditional
@@ -90,7 +91,7 @@ avoid the traditionally substantial marketing cost and sell directly to her fans
 than competitors at Sephora, it means her formula is not only winning, but winning big bucks she can
 choose to pocket or reinvest into launching categories that require higher capital expenditures.
 
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Thank you guys for another record setting day for <a href="https://twitter.com/kyliecosmetics?ref_src=twsrc%5Etfw">@kyliecosmetics</a> sold out in about 7 minutes. We did it!</p>&mdash; Kylie Jenner (@KylieJenner) <a href="https://twitter.com/KylieJenner/status/704540705721430017?ref_src=twsrc%5Etfw">March 1, 2016</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Thank you guys for another record setting day for <a href="https://twitter.com/kyliecosmetics?ref_src=twsrc%5Etfw">@kyliecosmetics</a> sold out in about 7 minutes. We did it!</p>&mdash; Kylie Jenner (@KylieJenner) <a href="https://twitter.com/KylieJenner/status/704540705721430017?ref_src=twsrc%5Etfw">March 1, 2016</a></blockquote>
 
 Of course, community-first product launches are nothing new. Recording artists have sold merchandise
 and celebrities have pivoted to products before. So how are social influencers different? Writing a
