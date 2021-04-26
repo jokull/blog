@@ -1,0 +1,56 @@
+/* Write your global styles here, in PostCSS syntax */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	a {
+		@apply text-gray-900 hover:text-hardLime;
+	}
+}
+
+.page {
+	display: grid;
+	grid-template-columns:
+		1fr
+		min(72ch, 100%)
+		1fr;
+}
+.page > * {
+	grid-column: 2;
+	padding-right: 12px;
+	padding-left: 12px;
+}
+.page > hr {
+	margin-right: 12px;
+	margin-left: 12px;
+}
+.full-bleed {
+	width: 100%;
+	grid-column: 1 / 4;
+	padding: 0;
+	margin-bottom: 2em;
+}
+
+.page > pre,
+.page > .wider {
+	max-width: min(110ch, 100%);
+	grid-column: 1 / 4;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.page > table {
+	max-width: min(110ch, 100%);
+	min-width: 110ch;
+	overflow-x: scroll;
+	margin: 0 auto 2em auto;
+	padding: 0 12px;
+	grid-column: 1 / 4;
+}
+
+@media only screen and (max-width: 600px) {
+	.full-bleed {
+		margin-bottom: 1em;
+	}
+}

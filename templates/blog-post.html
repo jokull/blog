@@ -1,9 +1,0 @@
-{% extends "layout.html" %}
-{% from "macros/blog.html" import render_blog_post %}
-{% block opengraph %}
-{% if this.hero_image %}<meta content='{{ '{}/{}'.format(this.path, this.hero_image)|url(external=True) }}' property='og:image'>{% endif %}
-{% endblock %}
-{% block title %}{{ this.title }}{% endblock %}
-{% block body %}
-  {{ render_blog_post(this) }}
-{% endblock %}
