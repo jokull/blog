@@ -217,7 +217,7 @@ listaverk eftir [Ými Grönvold](https://www.instagram.com/p/B5qd0l7ApqP/). Hrei
 Ég fékk rafhjól á heilann og endaði á að kaupa eitt slíkt.
 
 Við Sunna borðuðum mikið af góðum mat og sóttum veitingastaði bæjarins margoft. Sjá myndir á
-[instagram.com/rvkfoodie](instagram.com/rvkfoodie).
+[instagram.com/rvkfoodie](https://www.instagram.com/rvkfoodie).
 
 Ég steig til hliðar sem CEO Takumi en er ennþá hluthafi. Þá losnaði tími fyrir aðra vinnu. Gerðist
 hluti af Parallel ráðgjöf hér heima og sé ekki eftir því. Hef fengið að taka þátt í mörgum spennandi

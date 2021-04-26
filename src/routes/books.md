@@ -89,7 +89,7 @@ countries. The US has similar problems, but is at least a coherent monetary regi
 
 [Link](https://www.amazon.com/dp/B07C77KV2N)
 
-I took extensive [notes](../eurotragedy) because I wanted to learn the history of the European Union
+I took extensive [notes](/eurotragedy-glosur) because I wanted to learn the history of the European Union
 and the Euro project. This is a critique of the Euro project, but thoroughly backed with endnotes.
 The Euro might work, but its current design is doing more harm than good.
 

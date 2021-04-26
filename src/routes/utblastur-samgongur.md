@@ -3,6 +3,10 @@ title: Við erum að keyra á vegg
 date: 2019-08-06
 ---
 
+<script>
+  import PhotoCaption from '../components/PhotoCaption.svelte';
+</script>
+
 Greinin [birtist á Stundinni](https://stundin.is/grein/9442/vid-erum-ad-keyra-vegg/).
 
 ---
@@ -21,10 +25,7 @@ viðskiptakerfisins né útblásturs sem hlýst af landnotkun. Kíkjum á það 
 kílótonn og þar af eru 975 kílótonn sem tengjast vegasamgöngum. Þriðjungur af umræddum útblæstri er
 vegna orkunotkunar í vegasamgöngum._
 
-<div class="caption">
-  <img src="./utblastur.png" class="shadow-img" style="width:100%;">
-  <p>Útblástur ársins 2017.</p>
-</div>
+<PhotoCaption url="/blog/utblastur.png"  caption="Útblástur ársins 2017" />
 
 Sérfræðingar eru sammála um að þessi hluti af útblæstri okkar þurfi að fara niður í 500 kílótonn á
 landsvísu fyrir árið 2030 til að samræmast markmiðum Parísarsáttmálans sem er 40% minni útblástur en

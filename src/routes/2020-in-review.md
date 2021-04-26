@@ -40,7 +40,7 @@ og vandamanna. Megi 2021 vera ykkur gjöfult og fagurt ár með bóluefnið hand
 
 ![](/blog/IMG_0567.JPG)
 ![](/blog/IMG_2528.JPG)
-![](/blog/Sunna,Jökull,Unnar-20.jpg)
+![](/blog/sunna-jokull-unnar-20.jpg)
 ![](/blog/IMG_6691.JPG)
 
 ## Sjónvarpsefni
