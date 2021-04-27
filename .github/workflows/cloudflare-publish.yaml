@@ -1,4 +1,4 @@
-name: gh-pages
+name: cloudflare-publish
 
 on:
   push:
@@ -32,9 +32,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn build
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Publish on Cloudflare
+        uses: cloudflare/wrangler-action@1.2.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
-          cname: www.solberg.is
+          apiToken: ${{ secrets.CF_API_TOKEN }}
