@@ -14,6 +14,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{title} - Jökull Sólberg</title>
+</svelte:head>
+
 <div class="prose page max-w-none">
 	<div class="py-8 sm:py-10 sm:text-center">
 		<div class="font-bold text-4xl mb-4">{title}</div>
