@@ -1,12 +1,10 @@
 <script>
-	import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
-	import 'prismjs/plugins/command-line/prism-command-line.css';
-	import 'prismjs/plugins/line-highlight/prism-line-highlight.css';
 	import '$lib/prism-theme.postcss';
 
 	export let title;
 	export let date;
 	export let image;
+
 	let dateDisplay = new Date(Date.parse(date)).toLocaleDateString('is-IS', {
 		year: 'numeric',
 		month: 'long',

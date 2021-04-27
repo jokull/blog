@@ -35,8 +35,18 @@ img.full-bleed {
 .page > pre,
 .page > table,
 .page > .wider {
+	@apply mx-auto;
+	min-width: min(50ch, 100%);
 	max-width: min(125ch, 100%);
 	grid-column: 1 / 4;
+}
+
+@media only screen and (max-width: 414px) {
+	/* iPhone 8 plus width */
+	.page > pre {
+		min-width: 100%;
+		border-radius: 0 !important;
+	}
 }
 
 .page > table {

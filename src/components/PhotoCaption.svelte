@@ -5,6 +5,6 @@
 </script>
 
 <div class={`${wider ? 'wider' : ''} mb-4`}>
-	<img class="!mb-2" src={url} alt={caption} />
+	<img class="!my-2" src={url} alt={caption} />
 	<div class="text-sm text-center">{caption}</div>
 </div>

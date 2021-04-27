@@ -151,7 +151,7 @@ um þjóðarsjóð sem ég tel ekki góða hugmynd.
 bréfum.
 
 Egill Helgason pikkaði upp eina grein sem fékk mjög góða umræðu:
-„[Sjálfkeyrandi bílar hafa ekkert í borgarlínu](/selfdriving/)“.
+„[Sjálfkeyrandi bílar hafa ekkert í borgarlínu](/selfdriving)“.
 
 ## Podcasts / Twitter / TV / o.fl.
 

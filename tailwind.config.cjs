@@ -17,6 +17,9 @@ module.exports = {
 							fontFamily: 'Garamond, serif',
 							fontWeight: 'normal',
 							fontStyle: false
+						},
+						'pre code': {
+							borderRadius: false
 						}
 					}
 				}
