@@ -2,7 +2,7 @@
 	import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 	import 'prismjs/plugins/command-line/prism-command-line.css';
 	import 'prismjs/plugins/line-highlight/prism-line-highlight.css';
-	import '$lib/prism-theme.css';
+	import '$lib/prism-theme.postcss';
 
 	export let title;
 	export let date;
@@ -18,7 +18,7 @@
 	<title>{title} - Jökull Sólberg</title>
 </svelte:head>
 
-<div class="prose page max-w-none">
+<div class="prose prose-sm sm:prose page max-w-none sm:max-w-none">
 	<div class="py-8 sm:py-10 sm:text-center">
 		<div class="font-bold text-4xl mb-4">{title}</div>
 		<div class="text-sm">{dateDisplay}</div>
