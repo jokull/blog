@@ -3,6 +3,7 @@ const adapter = require('@sveltejs/adapter-static');
 const { mdsvex } = require('mdsvex');
 const footnotes = require('remark-footnotes');
 const headings = require('remark-autolink-headings');
+const unwrapImages = require('remark-unwrap-images');
 const slug = require('remark-slug');
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -15,7 +16,7 @@ module.exports = {
 		mdsvex({
 			extensions: ['.md'],
 			layout: './src/components/blog-post.svelte',
-			remarkPlugins: [footnotes, slug, headings]
+			remarkPlugins: [footnotes, slug, headings, unwrapImages]
 		})
 	],
 	kit: {

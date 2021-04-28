@@ -39,8 +39,11 @@ Rökkvi dvelur hjá okkur á tveggja vikna fresti og eru það orðnar mínar ve
 og vandamanna. Megi 2021 vera ykkur gjöfult og fagurt ár með bóluefnið handan við hornið.
 
 ![](/blog/IMG_0567.JPG)
+
 ![](/blog/IMG_2528.JPG)
+
 ![](/blog/sunna-jokull-unnar-20.jpg)
+
 ![](/blog/IMG_6691.JPG)
 
 ## Sjónvarpsefni
