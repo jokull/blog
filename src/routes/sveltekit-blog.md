@@ -142,7 +142,6 @@ Markdown doesn't let you do captions below photos, something I wanted to support
 /* src/components/PhotoCaption.svelte */
 
 <script>
-    /**/
 	export let url;
 	export let caption;
 	export let wider = false;
@@ -163,13 +162,13 @@ title: My post
 date: 2020-1-1
 ---
 
-&lt;script&gt;
-  import PhotoCaption from &#39;../components/PhotoCaption.svelte&#39;;
-&lt;/script&gt;
+<script>
+  import PhotoCaption from "../components/PhotoCaption.svelte";
+</script>
 
 # Markdown header
 
-&lt;PhotoCaption url=&#39;/blog/biarritz.jpg&#39; caption=&#39;Family in Biarritz.&#39; /&gt;
+<PhotoCaption url='/blog/biarritz.jpg' caption='Family in Biarritz.' />
 
 Markdown paragraph
 ```
@@ -184,7 +183,6 @@ The blog svelte page used to render Markdown looks like this:
 ```svelte
 /* src/components/blog-post.svelte */
 <script>
-    /**/
 	import '$lib/prism-theme.postcss';
 
 	export let title;
@@ -364,7 +362,9 @@ since that can indicate a `&lt;br&gt;` — just set `proseWrap: "always"`.
 
 ## Issues
 
-- I still haven't got the footnotes Remark plugin to work.
+- ~~I still haven't got the footnotes Remark plugin to work.~~  
+  **UPDATE:** Make sure to install `npm add --save-dev remark-footnotes@2.0` - 3.0 does not work
+  with mdsvex.
 - It can be kind of frustrating that Tailwind Typography sets a `.prose` class on your top level
   element that stores the Markdown output in your DOM. There is currently no neat way to have other
   Tailwind classes (such as ones on the `PhotoCaption` component) take precedence. I resorted to
