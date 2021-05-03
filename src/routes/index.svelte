@@ -58,10 +58,10 @@
 		{#each posts as post}
 			<a
 				href={`./${post.slug}`}
-				class="block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
+				class="post block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
 			>
-				<div class="font-medium text-xl">{post.title}</div>
-				<div class="text-gray-400 font-light">{formatDate(post.date)}</div>
+				<div class="title font-medium text-xl">{post.title}</div>
+				<div class="date text-gray-400 font-light">{formatDate(post.date)}</div>
 			</a>
 		{/each}
 	</div>
