@@ -365,6 +365,7 @@ since that can indicate a `&lt;br&gt;` — just set `proseWrap: "always"`.
 - ~~I still haven't got the footnotes Remark plugin to work.~~  
   **UPDATE:** Make sure to install `npm add --save-dev remark-footnotes@2.0` - 3.0 does not work
   with mdsvex.
+- UPDATE May 3: [/feed.xml](/feed.xml) added
 - It can be kind of frustrating that Tailwind Typography sets a `.prose` class on your top level
   element that stores the Markdown output in your DOM. There is currently no neat way to have other
   Tailwind classes (such as ones on the `PhotoCaption` component) take precedence. I resorted to
