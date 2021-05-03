@@ -360,12 +360,50 @@ since that can indicate a `&lt;br&gt;` — just set `proseWrap: "always"`.
 }
 ```
 
+### RSS Feed
+
+Adding an RSS XML is easy in SvelteKit. Simply create a `routes/feed.xml.js` file that exports a get
+function that returns a `{body: xmlString}`. Mine looks like this:
+
+```js
+import getPosts from '$lib/getPosts';
+
+const siteUrl = 'https://www.solberg.is';
+
+const renderXmlRssFeed = (posts) => `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Jökull Sólberg</title>
+    <link>${siteUrl}</link>
+    ${posts
+			.map(
+				(post) => `
+    <item>
+       <title>${post.title}</title>
+       <link>${siteUrl}/${post.slug}</link>
+       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
+    </item>
+    `
+			)
+			.join('\n')}
+  </channel>
+</rss>`;
+
+export async function get() {
+	const feed = renderXmlRssFeed(await getPosts());
+	return {
+		body: feed,
+		headers: { 'content-type': 'application/rss+xml' }
+	};
+}
+```
+
 ## Issues
 
 - ~~I still haven't got the footnotes Remark plugin to work.~~  
   **UPDATE:** Make sure to install `npm add --save-dev remark-footnotes@2.0` - 3.0 does not work
   with mdsvex.
-- UPDATE May 3: [/feed.xml](/feed.xml) added
+- UPDATE May 3: [/feed.xml](/feed.xml) added - with a blog section.
 - It can be kind of frustrating that Tailwind Typography sets a `.prose` class on your top level
   element that stores the Markdown output in your DOM. There is currently no neat way to have other
   Tailwind classes (such as ones on the `PhotoCaption` component) take precedence. I resorted to
