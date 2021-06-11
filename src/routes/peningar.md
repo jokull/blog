@@ -280,3 +280,5 @@ og innlán, t.d. hámark veðhlutfalla á fasteignalánum.
 
 - Guðfinnur Sveinsson
 - Ólafur Margeirsson
+
+Fin
