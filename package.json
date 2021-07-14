@@ -1,5 +1,5 @@
 {
-	"name": "blog-jokull",
+	"name": "mysite-nkostic",
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "svelte-kit dev",

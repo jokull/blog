@@ -5,10 +5,10 @@
 <div class="font-inter h-screen flex flex-col">
 	<header class="flex justify-between mb-4 p-4 sm:p-8">
 		<h1>
-			<a href="/">Jökull Sólberg</a>
+			<a href="/">Nenad Kostic</a>
 		</h1>
 		<div class="social">
-			<a href="https://twitter.com/jokull" alt="Twitter">
+			<a href="https://twitter.com/Nesha8x8" alt="Twitter">
 				<svg class="h-5 w-5 mr-1.5 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 612"
 					><path
 						fill="currentColor"
@@ -16,7 +16,7 @@
 					/></svg
 				>
 			</a>
-			<a href="https://instagram.com/jokull" alt="Instagram">
+			<a href="https://www.instagram.com/bitjoggler/" alt="Instagram">
 				<svg class="h-5 w-5 mr-1.5 inline" viewbox="0 0 258 258" xmlns="http://www.w3.org/2000/svg">
 					<g>
 						<path
@@ -32,6 +32,6 @@
 		<slot />
 	</div>
 	<footer class="text-xs text-center sm:text-right p-4 sm:p-8 mt-16">
-		<a class="text-gray-600" href="mailto:jokull@solberg.is">jokull@solberg.is</a>
+		<a class="text-gray-600" href="mailto:nenadkostic@gmail.com">Contact Me</a>
 	</footer>
 </div>

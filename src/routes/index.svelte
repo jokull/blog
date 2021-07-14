@@ -20,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>Jökull Sólberg</title>
+	<title>Nenad Kostic</title>
 </svelte:head>
 
 <div class="max-w-2xl mx-auto p-4 sm:p-8">
@@ -29,24 +29,23 @@
 	>
 		<div class="order-1 sm:order-0 text-sm sm:text-base">
 			<div>
-				<p class="mb-2">
-					Ég er vörustjóri hjá <a class="font-bold" href="https://www.getsling.com">Sling</a> og
-					vinn að nýrri vöru þar sem heitir
-					<a
-						class="font-bold"
-						href="https://www.craft.do/s/0ZbFxiNPQ7j79d?fbclid=IwAR2hWTdZrhfE8iOPU33OcgyWDbky9-16XUJbBZGS67hLHS0JZuMfVO_s6JM"
-						>Inch</a
-					>. Ég hef starfað við ráðgjöf, meðal annars fyrir
-					<a class="font-bold" href="https://www.island.is/">Stafrænt Ísland</a>. Ég er stofnandi
-					<a class="font-bold" href="https://www.planitor.io/">Planitor</a> og
-					<a class="font-bold" href="https://takumi.com/">Takumi International ltd</a>. Þar á undan
-					starfaði ég sem forritari og vörustjóri hjá
-					<a class="font-bold" href="https://quizup.com">QuizUp</a>.
+				<p class="mb-4">
+					Welcome to my site. 
 				</p>
-				<p>
-					Ég hélt úti fréttabréfinu <a class="font-bold" href="https://jokull.substack.com/"
-						>Reykjavík Mobility</a
-					> þar sem fjallað er um samgöngur og skipulag í Reykjavík.
+			</div>
+			<div>
+				<p class="mb-4">
+					I am Javascript developer currently based in Calgary.
+				</p>
+			</div>
+			<div>
+				<p class="mb-4">
+					I work with a group of wanderfull people on a fast growing video platform called Vidflex. <a href="https://www.vidflex.com/">Check it out.</a>
+				</p>
+			</div>
+			<div>
+				<p class="mb-4">
+					In the past I have been working on a variaty of very interesting projects with Frontech Solutions from Edmonton Canada. <a href="https://www.frontech.ca/">Check it out.</a>
 				</p>
 			</div>
 		</div>
@@ -57,7 +56,7 @@
 	<div>
 		{#each posts as post}
 			<a
-				href={`./${post.slug}`}
+				href={`./blog/${post.slug}`}
 				class="post block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
 			>
 				<div class="title font-medium text-xl">{post.title}</div>
