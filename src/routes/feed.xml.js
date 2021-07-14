@@ -1,6 +1,6 @@
 import getPosts from '$lib/getPosts';
 
-const siteUrl = 'https://www.solberg.is';
+const siteUrl = 'https://nenadkostic.com';
 
 const renderXmlRssFeed = (posts) => `<?xml version="1.0"?>
 <rss version="2.0">
