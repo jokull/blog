@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<title>{title} - Jökull Sólberg</title>
+	<title>{title} - Nenad Kostic</title>
 </svelte:head>
 
 <div class="prose prose-sm sm:prose page max-w-none sm:max-w-none">

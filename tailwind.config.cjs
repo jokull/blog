@@ -1,4 +1,4 @@
-const lime = '#551ae5';
+const lime = '#1d12e4';
 
 module.exports = {
 	mode: 'jit',
@@ -26,7 +26,7 @@ module.exports = {
 			},
 			colors: {
 				lime: lime,
-				hardLime: '#551ae5'
+				hardLime: '#1d12e4'
 			}
 		}
 	},
