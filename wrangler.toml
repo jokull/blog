@@ -1,0 +1,10 @@
+name = "mysite-worker"
+type = "webpack"
+account_id = "2c467db700a778331d12d92229c557ae"
+workers_dev = true
+route = "www.nenadkostic.com/*"
+zone_id = "2c23afacb982f56ce8dd496ef6692047"
+
+[site]
+bucket = "./build"
+entry-point = "workers-site"
