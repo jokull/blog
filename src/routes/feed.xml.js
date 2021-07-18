@@ -1,11 +1,11 @@
 import getPosts from '$lib/getPosts';
 
-const siteUrl = 'https://www.solberg.is';
+const siteUrl = 'https://nenadkostic.com';
 
 const renderXmlRssFeed = (posts) => `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
-    <title>Jökull Sólberg</title>
+    <title>Nenad Kostic</title>
     <link>${siteUrl}</link>
     ${posts
 			.map(
