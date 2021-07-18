@@ -5,7 +5,7 @@
 	export let date;
 	export let image;
 
-	let dateDisplay = new Date(Date.parse(date)).toLocaleDateString('is-IS', {
+	let dateDisplay = new Date(Date.parse(date)).toLocaleDateString({
 		year: 'numeric',
 		month: 'long',
 		day: 'numeric'

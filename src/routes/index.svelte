@@ -11,7 +11,7 @@
 
 	const formatDate = (value) => {
 		const date = new Date(value);
-		return new Intl.DateTimeFormat('is-IS', {
+		return new Intl.DateTimeFormat({
 			year: 'numeric',
 			month: 'numeric',
 			day: 'numeric'
@@ -32,19 +32,20 @@
 				<p class="mb-4">Welcome to my site.</p>
 			</div>
 			<div>
-				<p class="mb-4">I am Javascript developer currently based in Calgary.</p>
+				<p class="mb-4">I am a Javascript developer currently based in Calgary.</p>
 			</div>
 			<div>
 				<p class="mb-4">
-					I work with a group of wanderfull people on a fast growing video platform called Vidflex. <a
+					I work with a group of wonderful people on a fast growing video platform called Vidflex. <a
 						href="https://www.vidflex.com/">Check it out.</a
 					>
 				</p>
 			</div>
 			<div>
 				<p class="mb-4">
-					In the past I have been working on a variaty of very interesting projects with Frontech
-					Solutions from Edmonton Canada. <a href="https://www.frontech.ca/">Check it out.</a>
+					In the past I have worked on a variety of interesting projects with Frontech Solutions. <a
+						href="https://www.frontech.ca/">Check it out.</a
+					>
 				</p>
 			</div>
 		</div>

@@ -6,8 +6,11 @@ date: 2021-07-15
 I launched my new site today. I am such a procrastinator and have been postponing it for some time
 but its' finally done.
 
-Read more about the idea from this fine Gentleman [here](https://www.solberg.is/sveltekit-blog). I
-forked his repo and created this site.
+Read more about inception of this site roots in detail in post made by this fine gentleman
+[here](https://www.solberg.is/sveltekit-blog). I was planning to bootstrap this stack myself; partly
+I already did but when I stumbled upon this repo I just decided to forked it and created
+[mysite](https://github.com/nkostic/mysite). Big kudos to Jökull Sólberg for making exactly what I
+needed.
 
 Why is this website different than the old one? Few important things:
 
@@ -21,7 +24,7 @@ Making a post and deploying with [mysite](https://github.com/nkostic/mysite) is 
 give or take:
 
 1. Write the article with mdsvex (md on svelte steroids)
-2. Create Artifact (format and lint are automated with vscode on save)
+2. Create Artifact (hint: automate format and lint with vscode on save)
 
 ```sh
 npm run build
