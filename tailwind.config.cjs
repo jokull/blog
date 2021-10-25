@@ -11,7 +11,6 @@ module.exports = {
 						'blockquote p:first-of-type::before': false,
 						'blockquote p:last-of-type::after': false,
 						blockquote: {
-							fontFamily: 'Georgia, Garamond, serif',
 							fontWeight: 'normal',
 							fontStyle: false
 						},

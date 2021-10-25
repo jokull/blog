@@ -64,3 +64,19 @@ img.full-bleed {
 		margin-bottom: 1em;
 	}
 }
+
+.prose blockquote {
+	@apply relative border-0 ml-4 leading-snug;
+}
+
+.prose blockquote {
+	@apply before:bg-gray-600 before:h-full before:w-1 before:absolute before:rounded before:-left-1.5;
+}
+
+.prose blockquote > * {
+	@apply mt-0;
+}
+
+.prose blockquote > :last-child {
+	@apply mb-0;
+}
