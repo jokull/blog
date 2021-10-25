@@ -322,20 +322,16 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Get yarn cache
-        id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-node-
 
-      - run: yarn install --frozen-lockfile
-      - run: yarn build
+      - run: npm install
+      - run: npm run build
 
       - name: Publish on Cloudflare
         uses: cloudflare/wrangler-action@1.2.0
