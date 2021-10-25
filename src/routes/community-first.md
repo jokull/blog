@@ -70,7 +70,7 @@ Example industries include beauty/fragrance, fashion, decor, jewelry and sportsw
 These industries are now creative canvases for entrepreneurial influencers. Other industries may
 turn out to be out of reach for one man armies (automobiles, travel, integrated electronics etc.).
 
-<img src="https://cdn-images-1.medium.com/max/1600/1*rdPOkhF9XAuiG1wEoDGFfg.png">
+<img src="https://cdn-images-1.medium.com/max/1600/1*rdPOkhF9XAuiG1wEoDGFfg.png" alt="Lips">
 
 Kylie Cosmetic’s biggest selling product
 

@@ -1,20 +1,17 @@
 const lime = '#A2E0A2';
 
 module.exports = {
-	mode: 'jit',
-	purge: ['./src/**/*.{html,js,svelte,ts}'],
+	content: ['./src/**/*.{html,js,svelte,ts,md}'],
 	theme: {
 		extend: {
 			typography: {
 				DEFAULT: {
 					css: {
-						color: '#111',
-						a: { '&:hover': { color: lime } },
 						// Remove quote characters from blockquotes
 						'blockquote p:first-of-type::before': false,
 						'blockquote p:last-of-type::after': false,
 						blockquote: {
-							fontFamily: 'Garamond, serif',
+							fontFamily: 'Georgia, Garamond, serif',
 							fontWeight: 'normal',
 							fontStyle: false
 						},

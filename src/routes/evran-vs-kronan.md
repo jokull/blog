@@ -5,8 +5,8 @@ date: 2019-08-27
 ---
 
 **Útgáfa af greininni birtist í
-[Stundinni]](https://stundin.is/grein/9507/fern-rok-gegn-upptoku-evru/) 26. ágúst undir
-fyrirsögninni _Fern rök gegn upptöku evru_ **
+[Stundinni](https://stundin.is/grein/9507/fern-rok-gegn-upptoku-evru/) 26. ágúst undir fyrirsögninni
+_Fern rök gegn upptöku evru_ **
 
 - &#8291;27. ágúst 2019: Útgáfa
 - &#8291;18. nóvember 2020: Uppfært fyrir 2020. Einfaldað.
