@@ -17,6 +17,11 @@ jobs:
         with:
           node-version: '12.x'
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
