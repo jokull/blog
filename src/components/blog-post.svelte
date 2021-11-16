@@ -18,8 +18,8 @@
 
 <div class="prose prose-sm sm:prose page max-w-none sm:max-w-none">
 	<div class="py-8 sm:py-10 sm:text-center">
-		<div class="font-bold text-4xl mb-4">{title}</div>
-		<div class="text-sm">{dateDisplay}</div>
+		<div class="leading-relaxed text-4xl mb-4 font-Outfit font-medium">{title}</div>
+		<div class="text-sm font-Outfit">{dateDisplay}</div>
 	</div>
 	{#if image}
 		<img src={`/blog/${image}`} class="full-bleed" alt="Banner" />

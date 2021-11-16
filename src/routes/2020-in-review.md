@@ -4,6 +4,10 @@ image: IMG_8766.jpeg
 date: 2020-12-31
 ---
 
+<script>
+  import PhotoCaption from '../components/PhotoCaption.svelte';
+</script>
+
 Stjórnmál toguðu mikið í mig á árinu. Ég fékk tækifæri til að funda með forsætisráðherra og varð að
 hennar ósk um að aðstoða VG við stefnumótun á málaflokki sem ég þekki vel til. Ég hugleiddi að
 styðja VG enn frekar og leggja mín lóð á þær vogarskálar en ákvað að fara í aðra átt á þessu sviði.
@@ -38,13 +42,13 @@ Rökkvi dvelur hjá okkur á tveggja vikna fresti og eru það orðnar mínar ve
 Ég loka þessu ári sæll og fullur þakklætis. Þakklætið nær líka til ykkar, lífsförunauta minna, vina
 og vandamanna. Megi 2021 vera ykkur gjöfult og fagurt ár með bóluefnið handan við hornið.
 
-![](/blog/IMG_0567.JPG)
+<PhotoCaption url='/blog/IMG_0567.JPG' />
 
-![](/blog/IMG_2528.JPG)
+<PhotoCaption url='/blog/IMG_2528.JPG' />
 
-![](/blog/sunna-jokull-unnar-20.jpg)
+<PhotoCaption url='/blog/sunna-jokull-unnar-20.jpg' />
 
-![](/blog/IMG_6691.JPG)
+<PhotoCaption url='/blog/IMG_6691.JPG' />
 
 ## Sjónvarpsefni
 

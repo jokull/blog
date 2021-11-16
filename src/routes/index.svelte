@@ -7,15 +7,20 @@
 </script>
 
 <script>
+	import Grouper from '../components/Grouper.svelte';
 	export let posts;
 
 	const formatDate = (value) => {
 		const date = new Date(value);
 		return new Intl.DateTimeFormat('is-IS', {
-			year: 'numeric',
-			month: 'numeric',
+			year: undefined,
+			month: 'long',
 			day: 'numeric'
 		}).format(date);
+	};
+
+	const getYearFromPost = (post) => {
+		return post.parsedDate.getFullYear();
 	};
 </script>
 
@@ -51,18 +56,23 @@
 			</div>
 		</div>
 		<div class="order-0 sm:order-1 mb-12 sm:mb-0 sm:ml-6 sm:flex-none text-center">
-			<img alt="Profile bust" src="/profile.jpg" class="rounded-full w-48 h-48 bg-hardLime " />
+			<img alt="Profile bust" src="/profile.png" class="rounded-full w-48 h-48 bg-lime " />
 		</div>
 	</div>
 	<div>
-		{#each posts as post}
-			<a
-				href={`./${post.slug}`}
-				class="post block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
-			>
-				<div class="title font-medium text-xl">{post.title}</div>
-				<div class="date text-gray-400 font-light">{formatDate(post.date)}</div>
-			</a>
-		{/each}
+		<Grouper items={posts} groupForItem={getYearFromPost} let:group let:item>
+			<div slot="group" class="my-6 first:mt-0">
+				<div class="text-xs text-gray-500">{group}</div>
+			</div>
+			<div slot="item">
+				<a
+					href={`./${item.slug}`}
+					class="item block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
+				>
+					<div class="title font-medium text-xl font-Outfit mb-1">{item.title}</div>
+					<div class="date text-gray-400 font-light text-sm">{formatDate(item.date)}</div>
+				</a>
+			</div>
+		</Grouper>
 	</div>
 </div>

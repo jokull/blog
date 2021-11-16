@@ -1,9 +1,15 @@
-const lime = '#A2E0A2';
-
 module.exports = {
 	content: ['./src/**/*.{html,js,svelte,ts,md}'],
 	theme: {
 		extend: {
+			fontFamily: {
+				Outfit: ['Outfit', 'sans-serif']
+			},
+			boxShadow: {
+				sm: 'var(--shadow-elevation-low)',
+				DEFAULT: 'var(--shadow-elevation-medium)',
+				lg: 'var(--shadow-elevation-high)'
+			},
 			typography: {
 				DEFAULT: {
 					css: {
@@ -21,8 +27,7 @@ module.exports = {
 				}
 			},
 			colors: {
-				lime: lime,
-				hardLime: '#7EE17D'
+				lime: 'var(--lime)'
 			}
 		}
 	},
