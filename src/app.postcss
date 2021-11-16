@@ -81,15 +81,13 @@ input[type='date'] {
 .page {
 	@apply grid;
 	grid-template-columns:
-		20px
 		1fr
 		min(72ch, 100%)
-		1fr
-		20px;
+		1fr;
 }
 .page > * {
 	@apply px-4;
-	grid-column: 3;
+	grid-column: 2;
 }
 .page > hr {
 	@apply mx-4;
@@ -97,7 +95,7 @@ input[type='date'] {
 
 .full-bleed {
 	@apply p-0 mb-4;
-	grid-column: 1 / 6;
+	grid-column: 1 / 4;
 }
 
 img.full-bleed {
@@ -109,7 +107,7 @@ img.full-bleed {
 	@apply mx-auto;
 	min-width: min(50ch, 100%);
 	max-width: min(125ch, 100%);
-	grid-column: 2 / 5;
+	grid-column: 1 / 4;
 }
 
 @media only screen and (max-width: 414px) {
@@ -121,9 +119,9 @@ img.full-bleed {
 }
 
 .page > table {
-	@apply mx-auto whitespace-nowrap;
-	max-width: min(125ch, 100%);
-	grid-column: 2 / 5;
+	@apply mx-auto;
+	max-width: min(125ch, calc(100% - 40px));
+	grid-column: 1 / 4;
 	overflow-x: auto;
 }
 
@@ -153,4 +151,8 @@ img.full-bleed {
 .prose h3,
 .prose h4 {
 	@apply font-Outfit;
+}
+
+.footnotes li {
+	@apply whitespace-pre-wrap max-w-full overflow-hidden;
 }
