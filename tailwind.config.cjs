@@ -10,6 +10,9 @@ module.exports = {
 				DEFAULT: 'var(--shadow-elevation-medium)',
 				lg: 'var(--shadow-elevation-high)'
 			},
+			backgroundImage: {
+				smooth: 'var(--smooth-gradient)'
+			},
 			typography: {
 				DEFAULT: {
 					css: {

@@ -42,13 +42,13 @@ Rökkvi dvelur hjá okkur á tveggja vikna fresti og eru það orðnar mínar ve
 Ég loka þessu ári sæll og fullur þakklætis. Þakklætið nær líka til ykkar, lífsförunauta minna, vina
 og vandamanna. Megi 2021 vera ykkur gjöfult og fagurt ár með bóluefnið handan við hornið.
 
-<PhotoCaption url='/blog/IMG_0567.JPG' />
+<PhotoCaption url='/blog/IMG_0567.JPG' fancy />
 
-<PhotoCaption url='/blog/IMG_2528.JPG' />
+<PhotoCaption url='/blog/IMG_2528.JPG' fancy />
 
-<PhotoCaption url='/blog/sunna-jokull-unnar-20.jpg' />
+<PhotoCaption url='/blog/sunna-jokull-unnar-20.jpg' fancy />
 
-<PhotoCaption url='/blog/IMG_6691.JPG' />
+<PhotoCaption url='/blog/IMG_6691.JPG' fancy />
 
 ## Sjónvarpsefni
 

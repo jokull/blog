@@ -31,7 +31,7 @@
 	<div class="flex-grow">
 		<slot />
 	</div>
-	<footer class="text-xs text-center sm:text-right p-4 sm:p-8 mt-16">
-		<a class="text-gray-600" href="mailto:jokull@solberg.is">jokull@solberg.is</a>
+	<footer class="text-xs text-center p-4 sm:p-8 mt-16">
+		<a href="mailto:jokull@solberg.is">jokull@solberg.is</a>
 	</footer>
 </div>

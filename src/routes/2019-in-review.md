@@ -229,10 +229,10 @@ verkefnum og hlakka til nýrra á næsta ári.
 
 ---
 
-<PhotoCaption url='/blog/biarritz.jpg' caption='Fjölskyldan í Biarritz.' />
-<PhotoCaption url='/blog/ebike.jpg' caption='Fékk rafhjól á heilann.' />
-<PhotoCaption url='/blog/billaus.jpg' caption='Bíllausi dagurinn var frekar kúl!' />
-<PhotoCaption url='/blog/unnar.jpg' caption='Kraftaverk og hápunktur ársins; Unnar Sólberg' />
-<PhotoCaption url='/blog/rokkvi.jpg' caption='Margar góðar stundir með Rökkva' />
-<PhotoCaption url='/blog/utskrift.jpg' caption='Sunna útskrifaðist og Rökkvi tilkynnti kynið á barninu sem var þarna á leiðinni' />
-<PhotoCaption url='/blog/unnar-2.jpg' caption='Unnar Sólberg Jökulsson' />
+<PhotoCaption url='/blog/biarritz.jpg' caption='Fjölskyldan í Biarritz.' fancy />
+<PhotoCaption url='/blog/ebike.jpg' caption='Fékk rafhjól á heilann.' fancy />
+<PhotoCaption url='/blog/billaus.jpg' caption='Bíllausi dagurinn var frekar kúl!' fancy />
+<PhotoCaption url='/blog/unnar.jpg' caption='Kraftaverk og hápunktur ársins; Unnar Sólberg' fancy />
+<PhotoCaption url='/blog/rokkvi.jpg' caption='Margar góðar stundir með Rökkva' fancy />
+<PhotoCaption url='/blog/utskrift.jpg' caption='Sunna útskrifaðist og Rökkvi tilkynnti kynið á barninu sem var þarna á leiðinni' fancy />
+<PhotoCaption url='/blog/unnar-2.jpg' caption='Unnar Sólberg Jökulsson' fancy />
