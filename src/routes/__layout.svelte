@@ -28,7 +28,7 @@
 			</a>
 		</div>
 	</header>
-	<div class="flex-grow">
+	<div class="flex-grow relative">
 		<slot />
 	</div>
 	<footer class="text-xs text-center p-4 sm:p-8 mt-16">

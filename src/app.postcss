@@ -78,6 +78,34 @@ input[type='date'] {
 	}
 }
 
+@-webkit-keyframes traverse-up-left {
+	to {
+		transform: translateY(-200px) translateX(-350px) rotate(180deg);
+	}
+}
+
+@keyframes traverse-up-left {
+	to {
+		transform: translateY(-200px) translateX(-350px) rotate(180deg);
+	}
+}
+
+.circle-a {
+	background: radial-gradient(closest-side, #2dd4bf, rgba(233, 168, 2, 0));
+	animation: traverse-up-left 10s ease-in-out infinite alternate;
+	z-index: -1;
+}
+
+.circle-b {
+	background: radial-gradient(closest-side, var(--lime), rgba(233, 168, 2, 0));
+	animation: traverse-up-right 12s ease-in-out infinite alternate;
+	z-index: -1;
+}
+
+.introduction a {
+	@apply font-medium underline underline-offset-2 decoration-lime decoration-2 hover:text-black hover:decoration-black;
+}
+
 .page {
 	@apply grid;
 	grid-template-columns:

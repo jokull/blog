@@ -28,13 +28,23 @@
 	<title>Jökull Sólberg</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto p-4 sm:p-8">
+<div class="absolute -top-36 ml-[50%] -left-[350px]">
+	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-0 left-16">
+		<div class="mix-blend-multiply absolute w-[700px] h-[900px] rounded-[40rem] circle-a" />
+	</div>
+	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-28 left-52">
+		<div class="mix-blend-multiply absolute w-[600px] h-[600px] rounded-[40rem] circle-b" />
+	</div>
+</div>
+
+<div class="max-w-2xl mx-auto p-4 sm:p-8 relative">
+	<!-- Two hazy circles playing -->
 	<div
 		class="flex flex-col sm:flex-row justify-between items-center mb-12 md:my-16 lg:my-24 lg:mb-32"
 	>
 		<div class="order-1 sm:order-0 text-sm sm:text-base">
-			<div>
-				<p class="mb-2">
+			<div class="introduction">
+				<p class="mb-3">
 					Ég er vörustjóri hjá <a class="font-bold" href="https://www.getsling.com">Sling</a> og
 					vinn að nýrri vöru þar sem heitir
 					<a
@@ -56,7 +66,11 @@
 			</div>
 		</div>
 		<div class="order-0 sm:order-1 mb-12 sm:mb-0 sm:ml-6 sm:flex-none text-center">
-			<img alt="Profile bust" src="/profile.png" class="rounded-full w-48 h-48 bg-lime " />
+			<img
+				alt="Profile bust"
+				src="/profile.png"
+				class="rounded-full w-48 h-48 bg-lime shadow-xl shadow-green-400"
+			/>
 		</div>
 	</div>
 	<div>

@@ -12,7 +12,7 @@
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^1.0.0-next.21",
 		"@sveltejs/kit": "^1.0.0-next.189",
-		"@tailwindcss/typography": "^0.5.0-alpha.2",
+		"@tailwindcss/typography": "^0.5.0",
 		"autoprefixer": "^10.3.7",
 		"cssnano": "^5.0.8",
 		"eslint": "^7.32.0",
@@ -33,7 +33,7 @@
 		"remark-unwrap-images": "^2.1.0",
 		"svelte": "^3.44.0",
 		"svelte-preprocess": "^4.9.8",
-		"tailwindcss": "^3.0.0-alpha.1",
+		"tailwindcss": "^3.0.5",
 		"tailwindcss-font-inter": "^2.0.3",
 		"vite": "^2.6.10"
 	},
