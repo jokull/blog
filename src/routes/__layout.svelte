@@ -1,5 +1,5 @@
 <script>
-	import '../app.postcss';
+	import '../app.css';
 </script>
 
 <div class="font-inter h-screen flex flex-col">
