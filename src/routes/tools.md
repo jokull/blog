@@ -24,10 +24,10 @@ date: 2021-10-25
 				/>
 			</g>
 		</svg>
-		<div slot="description">
+		<p slot="description">
 			Like Spotlight but faster and better. Has a smarter calculator, including currency conversions
 			like <code class="rounded-sm bg-slate-200">20 gbp in isk</code>.
-		</div>
+		</p>
 	</Tool>
 	<Tool url="https://eggerapps.at/postico/v1.php" name="Postico">
 		<svg
@@ -49,7 +49,7 @@ date: 2021-10-25
 				</g>
 			</g>
 		</svg>
-		<div slot="description">An excellent Postgres GUI for macOS.</div>
+		<p slot="description">An excellent Postgres GUI for macOS.</p>
 	</Tool>
 	<Tool url="https://cleanshot.com/" name="Cleanshot">
 		<img
@@ -58,10 +58,10 @@ date: 2021-10-25
 			class="w-8 max-w-none"
 			alt="Cleanshot app logo"
 		/>
-		<div slot="description">
+		<p slot="description">
 			Augments the screenshot utilities on macOS with hosting, copying, better annotations, GIF and
 			MP4, custom domains and more and more. Excellent support.
-		</div>
+		</p>
 	</Tool>
 	<Tool url="https://www.sketch.com" name="Sketch">
 		<svg
@@ -84,10 +84,10 @@ date: 2021-10-25
 				</g>
 			</g>
 		</svg>
-		<div slot="description">
+		<p slot="description">
 			I like Figma as much as the next person, but nothing beats the speed and native feel of macOS
 			apps.
-		</div>
+		</p>
 	</Tool>
 	<Tool url="https://rectangleapp.com/" name="Rectangle">
 		<img
@@ -96,25 +96,61 @@ date: 2021-10-25
 			class="w-8 max-w-none"
 			alt="Rectangle app logo"
 		/>
-		<div slot="description">
+		<p slot="description">
 			Window and monitor management. Map keyboard shortcuts to resize and move windows around,
 			between displays etc.
-		</div>
+		</p>
 	</Tool>
 	<Tool url="https://www.craft.do/" name="Craft">
 		<img src="/blog/craft.png" width="32" class="w-8 max-w-none" alt="Craft app logo" />
-		<div slot="description">
+		<p slot="description">
 			Block based editor with collaboration features. Like Google Docs, but native to macOS with
 			great publishing and hosting options.
-		</div>
+		</p>
 	</Tool>
 	<Tool url="https://www.plex.tv/" name="Plex">
 		<img src="/blog/plex.png" width="32" class="w-8 max-w-none" alt="Plex app logo" />
-		<div slot="description">
+		<p slot="description">
 			I'm a bit of a media server geek. Downloading and organizing media has always been a hobby of
-			mine. Today I have a mac mini set up with container orchestration from <a href="https://github.com/klutchell/mediaserver"
+			mine. Today I have a mac mini set up with container orchestration from <a
+			href="https://github.com/klutchell/mediaserver"
 				>klutchell/mediaserver</a
 			>.
-		</div>
+		</p>
+	</Tool>
+	<Tool url="https://meetingbar.leits.me" name="MeetingBar">
+		<img src="/blog/meetingbar.png" width="32" class="w-8 max-w-none" alt="MeetingBar app logo" />
+		<p slot="description">
+			This app puts a prominent text about your next upcoming meeting with convenient links to join
+			calls. You can configure a lot of things like what browser to use for what kind of meeting
+			link. I prefer Chrome for Google Meet links for example and MeetingBar takes care of that.
+			Bonus feature: Quickly create a meeting link.
+		</p>
+	</Tool>
+	<Tool name="iCloud Passwords">
+		<img src="/blog/macos-passwords.png" class="w-8  h-8 max-w-none object-contain" alt="iCloud Passwords" />
+		<p slot="description">
+			Apple has finally added security codes to passwords management. This means I no longer need
+			1Password and I have one more thing in the iCloud toolchain that just syncs across devices
+			without secondary apps. Password management is something that to me, belongs in the OS layer.
+		</p>
+	</Tool>
+	<Tool url="https://fastmail.com" name="Fastmail">
+		<img src="/blog/fastmail.png" width="32" class="w-8 max-w-none" alt="Fastmail logo" />
+		<p slot="description">
+			Fastmail used to be good just because it was a nice way to eject out of the Gmail ecosystem.
+			Today it is not only an alternative to Gmail but a better app, better search and better designed
+			product. Yeah, you pay a fee, but for email that makes sense.
+		</p>
+	</Tool>
+	<Tool url="https://sw.kovidgoyal.net/kitty/" name="Kitty">
+		<img src="/blog/kitty.png" width="32" class="w-8 max-w-none" alt="Kitty logo" />
+		<p slot="description">
+			Kitty is a highly configurable GPU accelerated terminal emulator that has a good build for
+			macOS. I use it with the fish shell and <a href="https://starship.rs"
+			target="_blank">Starship</a>. The icon displayed here on the right is an <a
+			href="https://github.com/DinkDonk/kitty-icon" target="_blank">alternative app icon found
+			here</a>.
+		</p>
 	</Tool>
 </div>
