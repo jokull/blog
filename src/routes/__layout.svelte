@@ -12,7 +12,7 @@
 	import '../app.css';
 </script>
 
-<div class="font-inter h-screen flex flex-col overflow-x-hidden">
+<div class="font-inter h-screen flex flex-col">
 	<header class="flex justify-between mb-4 p-4 sm:p-8">
 		<h1 class="font-Clash font-bold">
 			<a href="/">Jökull Sólberg</a>
@@ -38,13 +38,13 @@
 			</a>
 		</div>
 	</header>
-	<div class="flex-grow relative">
+	<div class="flex-grow">
 		<slot />
-		<!--
-			This is kind of a hack, it should be inside the book.svelte layout component, but it does
-			not seem to support module script tags.
-		-->
 		{#if url.pathname.indexOf('/books') > -1}
+			<!--
+				This is kind of a hack, it should be inside the book.svelte layout component, but it does
+				not seem to support module script tags.
+			-->
 			<div class="my-8 md:my-20">
 				<Books {books} current={slug} />
 			</div>

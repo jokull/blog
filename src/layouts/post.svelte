@@ -20,7 +20,9 @@
 
 <div class="page max-w-none sm:max-w-none">
 	<div class="py-8 sm:py-10 sm:text-center">
-		<div class="leading-relaxed text-4xl font-Clash font-medium">{title}</div>
+		<div class="leading-tight sm:leading-normal md:leading-relaxed text-4xl font-Clash font-medium">
+			{title}
+		</div>
 		{#if date}
 			<div class="text-sm font-Clash mt-4">{dateDisplay}</div>
 		{/if}

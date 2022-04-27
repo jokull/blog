@@ -51,6 +51,10 @@
 	font-display: swap;
 }
 
+html {
+	overflow-x: hidden;
+}
+
 :root {
 	/*
 	 * Specify sRGB colors, but for Safari, specify more vibrant versions in the p3 space
