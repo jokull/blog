@@ -1,39 +1,42 @@
-name: cloudflare-publish
-
+name: Deploy
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch:
-
+    branches: main
+  repository_dispatch:
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    name: Deploying on Cloudflare Workers
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Node
-        uses: actions/setup-node@v2
+      - name: Set up Node
+        uses: actions/setup-node@v1
         with:
-          node-version: '16.x'
+          node-version: 16.x
 
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - uses: actions/cache@v2
-        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+      - name: Cache dependencies
+        uses: actions/cache@v2
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.OS }}-npm-
+            ${{ runner.OS }}-
 
-      - run: npm install
-      - run: npm run build
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Publish on Cloudflare
-        uses: cloudflare/wrangler-action@1.2.0
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
+      - name: Install dependencies
+        run: npm ci && npm i @cloudflare/wrangler
+
+      - name: Code format check
+        run: npx prettier --check src
+
+      - name: Code linting
+        run: npx eslint . --ext .js,.mjs,.ts,.tsx
+
+      - name: Publish
+        run: npx wrangler publish
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

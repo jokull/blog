@@ -549,29 +549,64 @@ in the case of a collision.
 Cities want to understand the effect of dockless e-bikes. Are they replacing car trips? What kind of
 trips are they? What is the rate of accidents? Are they causing more issues than they are solving?
 
-[^modal-split-rvk]: https://www.mbl.is/frettir/innlent/2018/01/31/73_prosent_allra_ferda_i_borginni_a_einkabilum/
-[^modal-split-eu]: https://www.citylab.com/transportation/2017/10/riding-bikes-buses-trains-in-european-cities/543141/
+[^modal-split-rvk]:
+    https://www.mbl.is/frettir/innlent/2018/01/31/73_prosent_allra_ferda_i_borginni_a_einkabilum/
+
+[^modal-split-eu]:
+    https://www.citylab.com/transportation/2017/10/riding-bikes-buses-trains-in-european-cities/543141/
+
 [^bike-power-output]:
     Wilson, David Gordon; Jim Papadopoulos (2004). Bicycling Science (Third ed.). The MIT Press.
     p. 44. ISBN 0-262-73154-1.
 
-[^lime-gen-2]: https://www.li.me/blog/lime-announces-new-name-new-electric-scooter-and-3-million-rides
+[^lime-gen-2]:
+    https://www.li.me/blog/lime-announces-new-name-new-electric-scooter-and-3-million-rides
+
 [^lime-gen-3]: https://www.li.me/blog/lime-s-gen-3-electric-scooter-transform-micro-mobility
-[^s-pedelec-sales]: https://www.bike-eu.com/sales-trends/nieuws/2018/12/speed-pedelec-sales-shows-steady-growth-10134978
-[^guardian-bike-lanes]: https://www.theguardian.com/environment/bike-blog/2016/oct/06/cycle-lanes-dont-cause-traffic-jams-theyre-part-of-the-solution
-[^nacto-trips-per-bike]: https://nacto.org/wp-content/uploads/2015/09/NACTO_Walkable-Station-Spacing-Is-Key-For-Bike-Share_Sc.pdf
+[^s-pedelec-sales]:
+    https://www.bike-eu.com/sales-trends/nieuws/2018/12/speed-pedelec-sales-shows-steady-growth-10134978
+
+[^guardian-bike-lanes]:
+    https://www.theguardian.com/environment/bike-blog/2016/oct/06/cycle-lanes-dont-cause-traffic-jams-theyre-part-of-the-solution
+
+[^nacto-trips-per-bike]:
+    https://nacto.org/wp-content/uploads/2015/09/NACTO_Walkable-Station-Spacing-Is-Key-For-Bike-Share_Sc.pdf
+
 [^dozza-bike-speed]: https://core.ac.uk/download/pdf/70610459.pdf
-[^vegagerdin-road-speeds]: http://www.vegagerdin.is/vefur2.nsf/Files/Skipul_houdborg-sjalfb_throun-samg/$file/Skipul_houdborg-sjalfb_throun-samg.pdf
-[^reykjavik-cycling-accidents]: http://www.vegagerdin.is/vefur2.nsf/Files/nakvaem_greining_hjolreidaslysa/$file/Nákvæm_greining_hjólreiðaslysa_2014.pdf
-[^smide-interview]: https://medium.com/micromobility/going-premium-the-iphone-model-of-bikeshares-interviewing-corinne-vogel-of-smide-505a2213c743
-[^pedelec-motor-growth]: https://www.bike-eu.com/sales-trends/nieuws/2018/11/is-e-bike-motor-market-becoming-overcrowded-10134917
+[^vegagerdin-road-speeds]:
+    http://www.vegagerdin.is/vefur2.nsf/Files/Skipul_houdborg-sjalfb_throun-samg/$file/Skipul_houdborg-sjalfb_throun-samg.pdf
+
+[^reykjavik-cycling-accidents]:
+    http://www.vegagerdin.is/vefur2.nsf/Files/nakvaem_greining_hjolreidaslysa/$file/Nákvæm_greining_hjólreiðaslysa_2014.pdf
+
+[^smide-interview]:
+    https://medium.com/micromobility/going-premium-the-iphone-model-of-bikeshares-interviewing-corinne-vogel-of-smide-505a2213c743
+
+[^pedelec-motor-growth]:
+    https://www.bike-eu.com/sales-trends/nieuws/2018/11/is-e-bike-motor-market-becoming-overcrowded-10134917
+
 [^car-trip-distance]: https://nhts.ornl.gov/tables09/fatcat/2009/vt_TRPMILES.html
-[^portland-scooter-questionnaire]: https://ggwash.org/view/69621/scooters-are-taking-cars-off-the-road-a-survey-says
-[^uk-vehicle-occupancy]: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/8940/nts2010-09.pdf
-[^mannvit-traffic-model]: https://ssh.is/images/stories/Sóknaráætlun/Lokaskyrslur/Vaxtarsamningur/Mat_samgongusv_loka_NET.pdf
-[^ssh-tillogur]: https://www.stjornarradid.is/lisalib/getfile.aspx?itemid=92fed458-f4a1-11e8-942f-005056bc530c
-[^mannvit-umferdarspa]: http://www.ssh.is/images/stories/Samgongumal/2017_Greinagerd_Umferdarspa_2030_LOKA.pdf
+[^portland-scooter-questionnaire]:
+    https://ggwash.org/view/69621/scooters-are-taking-cars-off-the-road-a-survey-says
+
+[^uk-vehicle-occupancy]:
+    https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/8940/nts2010-09.pdf
+
+[^mannvit-traffic-model]:
+    https://ssh.is/images/stories/Sóknaráætlun/Lokaskyrslur/Vaxtarsamningur/Mat_samgongusv_loka_NET.pdf
+
+[^ssh-tillogur]:
+    https://www.stjornarradid.is/lisalib/getfile.aspx?itemid=92fed458-f4a1-11e8-942f-005056bc530c
+
+[^mannvit-umferdarspa]:
+    http://www.ssh.is/images/stories/Samgongumal/2017_Greinagerd_Umferdarspa_2030_LOKA.pdf
+
 [^smide-twitter]: https://twitter.com/smide_picknride/status/1072396711283359744
-[^smide-research]: https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/279562/ab1364.pdf?sequence=1&isAllowed=y
-[^reykjavik-bike-paths-budget]: https://fundur.reykjavik.is/sites/default/files/agenda-items/svar_threnging_ofl.pdf
-[^tourist-accomodation]: https://px.hagstofa.is/pxis/pxweb/is/Atvinnuvegir/Atvinnuvegir__ferdathjonusta__Gisting__3_allartegundirgististada/?rxid=702593fb-5924-43f4-939d-8d7120a5144e
+[^smide-research]:
+    https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/279562/ab1364.pdf?sequence=1&isAllowed=y
+
+[^reykjavik-bike-paths-budget]:
+    https://fundur.reykjavik.is/sites/default/files/agenda-items/svar_threnging_ofl.pdf
+
+[^tourist-accomodation]:
+    https://px.hagstofa.is/pxis/pxweb/is/Atvinnuvegir/Atvinnuvegir__ferdathjonusta__Gisting__3_allartegundirgististada/?rxid=702593fb-5924-43f4-939d-8d7120a5144e
