@@ -101,7 +101,7 @@ input[type='date'] {
 }
 
 .introduction a {
-	@apply font-medium underline underline-offset-2 decoration-lime decoration-2 hover:text-black hover:decoration-black;
+	@apply font-medium underline underline-offset-1 decoration-lime transition-all hover:decoration-2 hover:underline-offset-2 hover:text-black;
 }
 
 .page {
@@ -166,7 +166,7 @@ img.full-bleed {
 }
 
 .prose blockquote {
-	@apply relative border-0 ml-4 font-Outfit font-light;
+	@apply relative border-0 ml-4 font-Clash font-light;
 }
 
 .prose blockquote {
@@ -184,7 +184,7 @@ img.full-bleed {
 .prose h2,
 .prose h3,
 .prose h4 {
-	@apply font-Outfit;
+	@apply font-Clash;
 }
 
 .footnotes li {

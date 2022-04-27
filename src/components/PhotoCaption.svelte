@@ -11,14 +11,14 @@
 		{#if fancy}
 			<div
 				class="
-					text-sm font-Outfit text-center pb-3 pt-6 px-4 font-medium text-white absolute
+					text-sm font-Clash text-center pb-3 pt-6 px-4 font-medium text-white absolute
 					bg-smooth rounded-lg inset-x-4 bottom-2
 				"
 			>
 				{caption}
 			</div>
 		{:else}
-			<div class="text-sm font-Outfit text-center my-4">{caption}</div>
+			<div class="text-sm font-Clash text-center my-4">{caption}</div>
 		{/if}
 	{/if}
 </div>

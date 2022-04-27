@@ -2,9 +2,9 @@
 	import '../app.css';
 </script>
 
-<div class="font-inter h-screen flex flex-col">
+<div class="font-inter h-screen flex flex-col overflow-x-hidden">
 	<header class="flex justify-between mb-4 p-4 sm:p-8">
-		<h1 class="font-Outfit">
+		<h1 class="font-Clash">
 			<a href="/">Jökull Sólberg</a>
 		</h1>
 		<div class="social">
@@ -32,6 +32,6 @@
 		<slot />
 	</div>
 	<footer class="text-xs text-center p-4 sm:p-8 mt-16">
-		<a href="mailto:jokull@solberg.is">jokull@solberg.is</a>
+		<a href="mailto:jokull@solberg.is" class="text-gray-400">jokull@solberg.is</a>
 	</footer>
 </div>

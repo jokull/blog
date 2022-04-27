@@ -1,14 +1,15 @@
 <script context="module">
 	export const prerender = true;
 	export async function load({ session }) {
-		const posts = session.posts;
-		return { props: { posts } };
+		return { props: { posts: session.posts, books: session.books } };
 	}
 </script>
 
 <script>
+	import Books from '../components/Books.svelte';
 	import Grouper from '../components/Grouper.svelte';
 	export let posts;
+	export let books;
 
 	const formatDate = (value) => {
 		const date = new Date(value);
@@ -28,8 +29,8 @@
 	<title>Jökull Sólberg</title>
 </svelte:head>
 
-<div class="absolute -top-36 ml-[50%] -left-[350px]">
-	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-0 left-16">
+<div class="absolute -top-36 ml-[50%] -left-[350px] scale-50 sm:scale-75 md:transform-none">
+	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-0 left-4">
 		<div class="mix-blend-multiply absolute w-[700px] h-[900px] rounded-[40rem] circle-a" />
 	</div>
 	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-28 left-52">
@@ -69,6 +70,9 @@
 			/>
 		</div>
 	</div>
+</div>
+
+<div class="max-w-2xl mx-auto p-4 sm:p-8 relative z-10">
 	<div>
 		<Grouper items={posts} groupForItem={getYearFromPost} let:group let:item>
 			<div slot="group" class="my-6 first:mt-0">
@@ -79,10 +83,15 @@
 					href={`./${item.slug}`}
 					class="item block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
 				>
-					<div class="title font-medium text-xl font-Outfit mb-1">{item.title}</div>
+					<div class="title font-medium text-xl font-Clash mb-1">{item.title}</div>
 					<div class="date text-gray-400 font-light text-sm">{formatDate(item.date)}</div>
 				</a>
 			</div>
 		</Grouper>
 	</div>
+</div>
+
+<div class="border-t py-8">
+	<div class="text-center text-3xl md:text-5xl font-bold font-Clash my-8">Bækur</div>
+	<Books {books} />
 </div>

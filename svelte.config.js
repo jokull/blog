@@ -14,13 +14,14 @@ const config = {
 		}),
 		mdsvex({
 			extensions: ['.md'],
-			layout: './src/components/blog-post.svelte',
+			layout: {
+				_: './src/layouts/post.svelte',
+				books: './src/layouts/book.svelte'
+			},
 			remarkPlugins: [footnotes, slug, headings, unwrapImages]
 		})
 	],
 	kit: {
-		// hydrate the <div id="svelte"> element in src/app.html
-		target: '#svelte',
 		adapter: adapter()
 	}
 };
