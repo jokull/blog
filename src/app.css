@@ -215,7 +215,7 @@ img.full-bleed {
 }
 
 .prose blockquote {
-	@apply relative border-0 ml-4 font-Clash font-light;
+	@apply relative border-0 ml-4 font-mono;
 }
 
 .prose blockquote {

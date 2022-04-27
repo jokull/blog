@@ -1,6 +1,4 @@
 <script>
-	import Books from '../components/Books.svelte';
-
 	export let title;
 	export let author;
 	export let link;
@@ -20,7 +18,7 @@
 	<div class="py-8 sm:py-10 flex gap-6 md:gap-16 items-center mb-4">
 		<img src={imageUrl} alt="Book cover" class="shadow-lg w-32 rounded-sm inline" />
 		<div class="flex-grow">
-			<div class="leading-tight text-4xl font-Clash font-bold">{title}</div>
+			<div class="leading-none mb-2 text-4xl font-Clash font-bold">{title}</div>
 			<div class="font-Clash mb-2">By {author}</div>
 			<div class="text-xs uppercase"><a href={link} class="text-gray-500">{linkHost}</a></div>
 		</div>
