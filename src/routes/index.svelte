@@ -28,7 +28,9 @@
 	<title>Jökull Sólberg</title>
 </svelte:head>
 
-<div class="absolute -top-36 ml-[50%] -left-[350px] scale-50 sm:scale-75 md:transform-none">
+<div
+	class="absolute -top-36 ml-[50%] -left-[200px] md:-left-[350px] scale-50 sm:scale-75 md:scale-100"
+>
 	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-0 left-4">
 		<div class="mix-blend-multiply absolute w-[700px] h-[900px] rounded-[40rem] circle-a" />
 	</div>

@@ -13,7 +13,7 @@
 </script>
 
 <div class="font-inter h-screen flex flex-col">
-	<header class="flex justify-between mb-4 p-4 sm:p-8">
+	<header class="flex justify-between mb-4 p-4 sm:p-8 relative z-20 mix-blend-multiply">
 		<h1 class="font-Clash font-bold">
 			<a href="/">Jökull Sólberg</a>
 		</h1>
