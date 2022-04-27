@@ -7,7 +7,7 @@
 <script>
 	export let url;
 	export let books;
-	export let slug = url && url.pathname.split('/').at(-1);
+	export let slug = url && url.pathname && url.pathname.split('/').at(-1);
 	import Books from '../components/Books.svelte';
 	import '../app.css';
 </script>
