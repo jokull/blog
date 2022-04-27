@@ -4,7 +4,7 @@
 
 <div class="font-inter h-screen flex flex-col overflow-x-hidden">
 	<header class="flex justify-between mb-4 p-4 sm:p-8">
-		<h1 class="font-Clash">
+		<h1 class="font-Clash font-bold">
 			<a href="/">Jökull Sólberg</a>
 		</h1>
 		<div class="social">

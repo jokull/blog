@@ -91,7 +91,7 @@
 	</div>
 </div>
 
-<div class="border-t py-8">
-	<div class="text-center text-3xl md:text-5xl font-bold font-Clash my-8">Bækur</div>
+<div class="border-y py-8 md:py-20 my-8">
+	<div class="text-center text-3xl md:text-5xl font-bold font-Clash mb-4 sm:mb-8">Bækur</div>
 	<Books {books} />
 </div>

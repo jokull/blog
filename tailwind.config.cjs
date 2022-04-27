@@ -3,7 +3,7 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				Clash: ['Clash Display', 'sans-serif']
+				Clash: ['Clash', 'sans-serif']
 			},
 			boxShadow: {
 				sm: 'var(--shadow-elevation-low)',
