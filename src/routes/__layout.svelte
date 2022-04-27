@@ -1,4 +1,5 @@
 <script context="module">
+	export const prerender = true;
 	export async function load({ url, session }) {
 		return { props: { books: session.books, url } };
 	}
