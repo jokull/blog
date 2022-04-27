@@ -29,12 +29,12 @@
 </svelte:head>
 
 <div
-	class="absolute -top-36 ml-[50%] -left-[200px] md:-left-[350px] scale-50 sm:scale-75 md:scale-100"
+	class="absolute -top-36 ml-[50%] -left-[200px] md:-left-[350px] scale-50 sm:scale-75 md:scale-[0.85] lg:scale-125"
 >
-	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-0 left-4">
+	<div class="absolute overflow-visible opacity-40 dark:opacity-20 top-0 left-4">
 		<div class="mix-blend-multiply absolute w-[700px] h-[900px] rounded-[40rem] circle-a" />
 	</div>
-	<div class="absolute overflow-visible opacity-50 dark:opacity-20 top-28 left-52">
+	<div class="absolute overflow-visible opacity-40 dark:opacity-20 top-28 lg:top-0 right-0">
 		<div class="mix-blend-multiply absolute w-[600px] h-[600px] rounded-[40rem] circle-b" />
 	</div>
 </div>
@@ -67,7 +67,7 @@
 			<img
 				alt="Profile bust"
 				src="/profile.png"
-				class="rounded-full w-48 h-48 bg-lime shadow-xl shadow-green-400"
+				class="rounded-full w-48 h-48 lg:w-52 lg:h-52 bg-lime"
 			/>
 		</div>
 	</div>

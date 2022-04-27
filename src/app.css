@@ -143,13 +143,13 @@ input[type='date'] {
 
 .circle-a {
 	background: radial-gradient(closest-side, #2dd4bf, rgba(233, 168, 2, 0));
-	animation: traverse-up-left 10s ease-in-out infinite alternate;
+	animation: traverse-up-left 5s ease-in-out infinite alternate;
 	z-index: -1;
 }
 
 .circle-b {
 	background: radial-gradient(closest-side, var(--lime), rgba(233, 168, 2, 0));
-	animation: traverse-up-right 12s ease-in-out infinite alternate;
+	animation: traverse-up-right 6s ease-in-out infinite alternate;
 	z-index: -1;
 }
 
