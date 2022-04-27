@@ -219,11 +219,11 @@ img.full-bleed {
 }
 
 .prose blockquote {
-	@apply relative border-0 ml-4 font-mono;
+	@apply relative border-0 ml-4 font-mono text-xs pr-4 leading-relaxed;
 }
 
 .prose blockquote {
-	@apply before:bg-gray-600 before:h-full before:w-1 before:absolute before:rounded before:-left-1.5;
+	@apply before:bg-slate-900 before:h-full before:w-0.5 before:absolute before:rounded before:-left-1.5;
 }
 
 .prose blockquote > * {
