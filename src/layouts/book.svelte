@@ -1,5 +1,6 @@
 <script>
 	export let title;
+	export let subtitle;
 	export let author;
 	export let link;
 	export let imageUrl;
@@ -18,8 +19,13 @@
 	<div class="py-8 sm:py-10 flex gap-6 md:gap-16 items-center mb-4">
 		<img src={imageUrl} alt="Book cover" class="shadow-lg w-32 rounded-sm inline" />
 		<div class="flex-grow">
-			<div class="leading-none mb-2 text-2xl sm:text-4xl md:text-4xl font-Clash font-bold">
-				{title}
+			<div class="mb-2">
+				<div class="leading-[0.8] text-2xl sm:text-3xl md:text-5xl font-Clash font-bold">
+					{title}
+				</div>
+				{#if subtitle}
+					<div class="font-sm text-gray-600 mb-2">{subtitle}</div>
+				{/if}
 			</div>
 			<div class="font-Clash mb-2">By {author}</div>
 			<div class="text-xs uppercase"><a href={link} class="text-gray-500">{linkHost}</a></div>

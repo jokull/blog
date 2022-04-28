@@ -1,13 +1,12 @@
 <script context="module">
-	export async function load({ url, session }) {
-		return { props: { books: session.books, url } };
+	export async function load({ session }) {
+		return { props: { books: session.books } };
 	}
 </script>
 
 <script>
-	export let url;
+	import { page } from '$app/stores';
 	export let books;
-	export let slug = url && url.pathname && url.pathname.split('/').at(-1);
 	import Books from '../components/Books.svelte';
 	import '../app.css';
 </script>
@@ -40,13 +39,13 @@
 	</header>
 	<div class="flex-grow">
 		<slot />
-		{#if url.pathname.indexOf('/books') > -1}
+		{#if $page.url.pathname.indexOf('/books') > -1}
 			<!--
 				This is kind of a hack, it should be inside the book.svelte layout component, but it does
 				not seem to support module script tags.
 			-->
 			<div class="my-8 md:my-20">
-				<Books {books} current={slug} />
+				<Books {books} />
 			</div>
 		{/if}
 	</div>

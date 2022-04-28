@@ -1,6 +1,7 @@
 <script>
+	import { page } from '$app/stores';
+	$: slug = $page.url?.pathname.split('/').at(-1);
 	export let books;
-	export let current = null;
 </script>
 
 <div
@@ -9,14 +10,12 @@
 	{#each books as book}
 		<a
 			href={`/books/${book.slug}`}
-			class={`${current === book.slug ? 'scale-[1.08] -translate-y-1' : ''}`}
+			class={`${slug === book.slug ? 'scale-[1.11] -translate-y-1' : ''}`}
 		>
 			<img
 				src={book.imageUrl}
 				alt={`Cover for ${book.title}`}
-				class={`object-cover aspect-[10/16] w-full shadow-lg block ${
-					current === book.slug ? 'border-white border-2 rounded-sm' : 'rounded-sm'
-				}`}
+				class="object-cover aspect-[10/16] w-full shadow-lg block"
 			/>
 		</a>
 	{/each}
