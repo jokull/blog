@@ -24,7 +24,7 @@
 					{title}
 				</div>
 				{#if subtitle}
-					<div class="font-sm text-gray-600 mb-2">{subtitle}</div>
+					<div class="font-sm md:text-lg text-gray-600 my-2 leading-tight">{subtitle}</div>
 				{/if}
 			</div>
 			<div class="font-Clash mb-2">By {author}</div>
