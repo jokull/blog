@@ -119,17 +119,27 @@ new Temporal.PlainDate(2022, 5, 15)
 I suggest never using the JS Date constructor directly in your project code. Rely on `date-fns`
 parsers and constructors.
 
-## API shifts to UTC before storing and sending back datetimes
+## If possible let the browser or client environment determine the user timezone
 
 Modern browsers and client environments have consistent ways to get the timezone of the user.
+Browsers inherit the operating system settings for timezone and time. You can grab it in modern
+browsers from `Intl`.
 
 ```js
 Intl.DateTimeFormat().resolvedOptions().timeZone;
 ```
 
-To make API responses more cachable and consistent it's always best to store and send aware and UTC
-shifted dates, then rely on the client timezone awareness to shift dates back before displaying
-them. This is also crucial to have indexable and sortable column values in many databases.
+Depending on your needs you might want to sync this timezone with your user preferences on the API,
+allow the user to overwrite this settings, set it explicitly, inherit from an org or workspace, etc.
+
+The simple solution is to just follow the browser timezone and display all datetimes shifted to this
+timezone.
+
+## API shifts to UTC before storing and sending back datetimes
+
+To make API responses deterministic, cachable and consistent it's always best to store and send
+aware and UTC shifted dates, then rely on the client timezone awareness to shift dates back before
+displaying them. This is also crucial to have indexable and sortable column values in your database.
 
 ```
 Client > Server {parse, shift}
@@ -144,9 +154,13 @@ notifications and such, but in most scenarios the timezone is, and should be, co
 and otherwise ignored. When timezone is really needed (example below) let the client provide it
 alongside other request parameters.
 
+In most scenarios you can trim off the offset from your ISO dates in your database, or choose naive
+column types in your db since you'll be shifting everything to UTC. Just be aware that you'll need
+to convert your fields to aware by applying UTC or appending `Z` to the end of your ISO datetimes.
+
 ## How to interpret values from clients
 
-Example 1: The client wants to set the delivery (calendar) date of an order
+Example 1: The client wants to set the delivery calendar date of an order
 
 ```
 HTTP PUT /orders/{id}
@@ -164,6 +178,18 @@ potentially problematic scenario is demonstrated here:
 ```
 
 Shifting results in another calendar date. This is very likely not what the API consumer meant.
+
+Therefore my recommendation is to accept datetime or calendar date ISO values for these fields, but
+if the API receives an aware datetime it should _not_ shift it, so the rules, different form above
+become:
+
+```
+Client > Server {parse, ignore/scrub offset, tz if datetime}
+Server > Client {parse} > UI
+```
+
+SQL databases usually have a column type for calendar date values. If datetime is only support I
+recommend storing as midnight naive and then presenting in `YYYY-MM-DD` format in API responses.
 
 Example 2: The client wants to filter orders by placement datetime
 
