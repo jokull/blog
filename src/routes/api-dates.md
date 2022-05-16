@@ -142,8 +142,8 @@ aware and UTC shifted dates, then rely on the client timezone awareness to shift
 displaying them. This is also crucial to have indexable and sortable column values in your database.
 
 ```
-Client > Server {parse, shift}
-Server > Client {parse} > UI {shift}
+Client > Server {parse, shift} > DB {make naive}
+DB > Server {make aware} > Client {parse} > UI {shift}
 ```
 
 In short: Servers shift on the way in, clients shift as they display in UI using functions like
@@ -184,8 +184,8 @@ if the API receives an aware datetime it should _not_ shift it, so the rules, di
 become:
 
 ```
-Client > Server {parse, ignore/scrub offset, tz if datetime}
-Server > Client {parse} > UI
+Client > Server {parse, ignore/scrub offset, tz if datetime} > DB
+DB > Server > Client {parse} > UI
 ```
 
 SQL databases usually have a column type for calendar date values. If datetime is only support I
