@@ -47,15 +47,13 @@
 		<div class="order-1 sm:order-0 text-sm sm:text-base">
 			<div class="introduction">
 				<p class="mb-3">
-					Ég er vörustjóri hjá <a href="https://www.getsling.com">Sling</a> og vinn að nýrri vöru
-					þar sem heitir
-					<a href="https://www.tryinch.com/">Inch</a>. Ég hef starfað við ráðgjöf, meðal annars
-					fyrir
-					<a href="https://www.island.is/">Stafrænt Ísland</a>. Ég er stofnandi
-					<a href="https://www.planitor.io/">Planitor</a> og
-					<a href="https://takumi.com/">Takumi International ltd</a>. Þar á undan starfaði ég sem
-					forritari og vörustjóri hjá
-					<a href="https://quizup.com">QuizUp</a>.
+					Ég er sjálfstætt starfandi forritari og ráðgjafi. Ég kom að stofnun
+					<a href="https://www.planitor.io/" target="_blank">Planitor</a> og
+					<a href="https://takumi.com/">Takumi</a>. Ég hef unnið við vörustjórn og leitt
+					þróunarteymi hjá bæði
+					<a href="https://quizup.com" target="_blank">QuizUp</a> og
+					<a href="https://www.tryinch.com/" target="_blank">Inch</a>
+					(í eigu <a href="https://www.getsling.com" target="_blank">Sling</a>).
 				</p>
 				<p>
 					Ég hélt úti fréttabréfinu <a href="https://jokull.substack.com/">Reykjavík Mobility</a> þar
