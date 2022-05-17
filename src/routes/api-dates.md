@@ -25,8 +25,8 @@ Glossary:
   as a user field.
 - **Shifting**: The operation of taking an aware datetime and getting its counterpart datetime in
   another timezone.
-- **Nulling**: The operation of taking an aware datetime and removing without shifting its time and
-  offset components.
+- **Nulling**: The operation of taking an aware datetime and removing – without shifting – its time
+  and offset components.
 
 ## Stick with ISO 8601 formatting
 
