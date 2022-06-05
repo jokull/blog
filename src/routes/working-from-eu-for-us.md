@@ -25,7 +25,7 @@ these are mandatory, don’t apply or are simply state provided regardless of em
 case in many European countries, but even within Europe the situation with healthcare and pensions
 varies considerably.
 
-## US company sets up a branch/subsidiary
+## Option 1: US company sets up a branch/subsidiary
 
 A startup is unlikely to set up a branch subsidiary in a country they have no previous experience
 with or presence in. They don’t know how to navigate the environment, find accountants and lawyers
