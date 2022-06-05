@@ -1,6 +1,5 @@
 <script context="module">
 	export async function load({ session }) {
-		console.log(session.posts);
 		return {
 			props: {
 				posts: session.posts.filter(({ status }) => status !== 'draft'),
@@ -15,15 +14,6 @@
 	import Grouper from '../components/Grouper.svelte';
 	export let posts;
 	export let books;
-
-	const formatDate = (value) => {
-		const date = new Date(value);
-		return new Intl.DateTimeFormat('is-IS', {
-			year: undefined,
-			month: 'long',
-			day: 'numeric'
-		}).format(date);
-	};
 
 	const getYearFromPost = (post) => {
 		return post.parsedDate.getFullYear();
@@ -89,7 +79,13 @@
 					class="item block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
 				>
 					<div class="title font-medium text-xl font-Clash mb-1">{item.title}</div>
-					<div class="date text-gray-400 font-light text-sm">{formatDate(item.date)}</div>
+					<div class="date text-gray-400 font-light text-sm">
+						{item.parsedDate.toLocaleDateString(undefined, {
+							year: undefined,
+							month: 'long',
+							day: 'numeric'
+						})}
+					</div>
 				</a>
 			</div>
 		</Grouper>

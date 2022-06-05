@@ -6,7 +6,7 @@
 	export let image = null;
 
 	let dateDisplay = date
-		? new Date(Date.parse(date)).toLocaleDateString('is-IS', {
+		? new Date(Date.parse(date)).toLocaleDateString(undefined, {
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric'
@@ -18,13 +18,13 @@
 	<title>{title} - Jökull Sólberg</title>
 </svelte:head>
 
-<div class="page max-w-none sm:max-w-none">
-	<div class="py-8 sm:py-10 sm:text-center">
-		<div class="leading-tight sm:leading-normal md:leading-relaxed text-4xl font-Clash font-medium">
+<div class="page">
+	<div class="my-8 sm:my-10 text-center full-bleed">
+		<div class="leading-tight sm:leading-normal text-4xl font-Clash font-medium px-4">
 			{title}
 		</div>
 		{#if date}
-			<div class="text-sm font-Clash mt-4">{dateDisplay}</div>
+			<div class="text-sm my-4">{dateDisplay}</div>
 		{/if}
 	</div>
 	{#if image}

@@ -188,7 +188,7 @@ The blog svelte page used to render Markdown looks like this:
 	export let title;
 	export let date;
 	export let image;
-	let dateDisplay = new Date(Date.parse(date)).toLocaleDateString('is-IS', {
+	let dateDisplay = new Date(Date.parse(date)).toLocaleDateString(undefined, {
 		year: 'numeric',
 		month: 'long',
 		day: 'numeric'

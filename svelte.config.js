@@ -6,6 +6,7 @@ import headings from 'remark-autolink-headings';
 import unwrapImages from 'remark-unwrap-images';
 import slug from 'remark-slug';
 
+/** @type {import('@sveltejs/kit').Config} */
 const config = {
 	extensions: ['.svelte', '.md'],
 	preprocess: [
