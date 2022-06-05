@@ -1,6 +1,12 @@
 <script context="module">
 	export async function load({ session }) {
-		return { props: { posts: session.posts, books: session.books } };
+		console.log(session.posts);
+		return {
+			props: {
+				posts: session.posts.filter(({ status }) => status !== 'draft'),
+				books: session.books
+			}
+		};
 	}
 </script>
 
