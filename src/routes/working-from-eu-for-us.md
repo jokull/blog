@@ -14,10 +14,10 @@ specific jurisdiction and layer on top their own staff policies for additional b
 workers local labor laws and tax regulations are vastly different between countries.
 
 The first thing someone might notice is that quoted salaries are completely different. The US
-commonly quotes annual salaries but in Europe it’s monthly, and of course in local currency. In
-Iceland quoted salaries will not significant non-voluntary pension payments which go from the
-employer directly to the pension fund. Federal taxes are also transferred directly from the
-employer. And on, and on and on.
+commonly quotes annual salaries but in many European countries it’s monthly, and of course in local
+currency. In Iceland quoted salaries will have significant non-voluntary pension payments which go
+from the employer directly to the pension fund. Federal taxes are also transferred directly from the
+employer, and on and on.
 
 Sizzling employee benefits like “paid time off”, “401k/pension contributions” and “medical
 insurance” can be ambiguous and meaningless for someone that will be working out of a country where
