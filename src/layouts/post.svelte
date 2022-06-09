@@ -7,7 +7,7 @@
 	export let locale = 'en-US';
 
 	let dateDisplay = date
-		? new Date(Date.parse(date)).toLocaleDateString(locale, { dateStyle: 'full' })
+		? new Date(Date.parse(date)).toLocaleDateString(locale, { dateStyle: 'long' })
 		: null;
 </script>
 
@@ -22,8 +22,7 @@
 		</div>
 		{#if date}
 			<div class="my-8">
-				<span class="text-lime px-4 py-1.5 relative text-md">
-					<div class="inset-0 absolute bg-lime opacity-10 rounded-full" />
+				<span class="text-lime font-semibold px-4 py-1.5 relative text-md border-t-2 border-lime">
 					{dateDisplay}
 				</span>
 			</div>
