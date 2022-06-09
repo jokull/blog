@@ -11,6 +11,7 @@
 	"devDependencies": {
 		"@sveltejs/kit": "^1.0.0-next.323",
 		"@tailwindcss/typography": "^0.5.2",
+		"@types/tailwindcss": "3.0.10",
 		"autoprefixer": "^10.4.0",
 		"cssnano": "^5.0.8",
 		"eslint": "^7.32.0",

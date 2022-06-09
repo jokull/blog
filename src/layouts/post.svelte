@@ -4,13 +4,10 @@
 	export let title;
 	export let date;
 	export let image = null;
+	export let locale = 'en-US';
 
 	let dateDisplay = date
-		? new Date(Date.parse(date)).toLocaleDateString(undefined, {
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric'
-		  })
+		? new Date(Date.parse(date)).toLocaleDateString(locale, { dateStyle: 'full' })
 		: null;
 </script>
 
@@ -24,7 +21,12 @@
 			{title}
 		</div>
 		{#if date}
-			<div class="text-sm my-4">{dateDisplay}</div>
+			<div class="my-8">
+				<span class="text-lime px-4 py-1.5 relative text-md">
+					<div class="inset-0 absolute bg-lime opacity-10 rounded-full" />
+					{dateDisplay}
+				</span>
+			</div>
 		{/if}
 	</div>
 	{#if image}

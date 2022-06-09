@@ -2,6 +2,7 @@
 title: Blásið á glóðir eða í blöðrur
 image: roman-purtov-Z5Phu-u_sac-unsplash-2.jpg
 date: 2021-02-10
+locale: is-IS
 ---
 
 Tesla hefur að undanförnu fjárfest í Bitcoin fyrir ríflega 1,5 milljarða bandaríkjadala og hyggst

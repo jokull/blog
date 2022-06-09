@@ -121,11 +121,7 @@ input[type='date'] {
 
 @layer base {
 	a {
-		@apply text-gray-900 hover:text-gray-700;
-	}
-	header a,
-	footer a {
-		@apply hover:text-lime;
+		@apply text-gray-900 hover:text-lime no-underline hover:underline hover:decoration-lime;
 	}
 }
 
@@ -165,19 +161,11 @@ input[type='date'] {
 		1fr;
 }
 .page > * {
-	@apply px-4;
+	@apply px-4 sm:px-8;
 	grid-column: 2;
 }
 .page > hr {
 	@apply mx-4;
-}
-
-.page a {
-	@apply underline underline-offset-2 decoration-1 decoration-gray-600 hover:decoration-black;
-}
-
-.page p a {
-	@apply underline underline-offset-2 decoration-1 decoration-gray-600 hover:decoration-black;
 }
 
 .full-bleed {

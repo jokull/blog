@@ -1,3 +1,4 @@
+/** @type {import("@types/tailwindcss/tailwind-config").TailwindConfig} **/
 module.exports = {
 	content: ['./src/**/*.{html,js,svelte,ts,md}'],
 	theme: {
@@ -13,9 +14,11 @@ module.exports = {
 			backgroundImage: {
 				smooth: 'var(--smooth-gradient)'
 			},
-			typography: {
+			typography: () => ({
 				DEFAULT: {
 					css: {
+						h2: { fontWeight: '500' },
+						h3: { fontWeight: '500' },
 						// Remove quote characters from blockquotes
 						'blockquote p:first-of-type::before': false,
 						'blockquote p:last-of-type::after': false,
@@ -25,10 +28,11 @@ module.exports = {
 						},
 						'pre code': {
 							borderRadius: false
-						}
+						},
+						'--tw-prose-bullets': 'var(--lime)'
 					}
 				}
-			},
+			}),
 			colors: {
 				lime: 'var(--lime)'
 			}

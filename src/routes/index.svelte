@@ -76,10 +76,10 @@
 			<div slot="item">
 				<a
 					href={`./${item.slug}`}
-					class="item block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0"
+					class="item block mb-4 pb-4 border-b border-gray-100 last:border-none last:mb-0 group hover:no-underline"
 				>
 					<div class="title font-medium text-xl font-Clash mb-1">{item.title}</div>
-					<div class="date text-gray-400 font-light text-sm">
+					<div class="date text-gray-400 font-light text-sm group-hover:no-underline">
 						{item.parsedDate.toLocaleDateString(undefined, {
 							year: undefined,
 							month: 'long',
