@@ -1,14 +1,11 @@
 <script>
 	import '$lib/prism-theme.postcss';
+	import PostHeading from '../components/PostHeading.svelte';
 
 	export let title;
 	export let date;
 	export let image = null;
 	export let locale = 'en-US';
-
-	let dateDisplay = date
-		? new Date(Date.parse(date)).toLocaleDateString(locale, { dateStyle: 'long' })
-		: null;
 </script>
 
 <svelte:head>
@@ -16,21 +13,21 @@
 </svelte:head>
 
 <div class="page">
-	<div class="my-8 sm:my-10 text-center full-bleed">
-		<div class="leading-tight sm:leading-normal text-4xl font-Clash font-medium px-4">
-			{title}
-		</div>
-		{#if date}
-			<div class="my-8">
-				<span class="text-lime font-semibold px-4 py-1.5 relative text-md border-t-2 border-lime">
-					{dateDisplay}
-				</span>
+	<div class="full-bleed">
+		{#if image}
+			<div class="relative mb-16 sm:mb-24">
+				<div class="absolute inset-0 bg-gradient-to-t from-black/70" />
+				<div class="flex flex-col items-center justify-center absolute inset-x-0 bottom-[10%]">
+					<PostHeading {date} {locale} {title} darkMode={true} />
+				</div>
+				<img src={`/blog/${image}`} class="w-full max-h-[70vh] object-cover" alt="Banner" />
+			</div>
+		{:else}
+			<div class="py-16 sm:py-24 py">
+				<PostHeading {date} {locale} {title} />
 			</div>
 		{/if}
 	</div>
-	{#if image}
-		<img src={`/blog/${image}`} class="full-bleed mb-4 sm:mb-8" alt="Banner" />
-	{/if}
 	<div class="prose max-w-none">
 		<slot />
 	</div>
