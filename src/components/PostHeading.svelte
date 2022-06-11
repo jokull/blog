@@ -11,7 +11,7 @@
 
 <div class="text-center">
 	<div
-		class={`leading-tight sm:leading-normal text-4xl xl:text-5xl font-Clash font-medium px-4 max-w-5xl mx-auto ${
+		class={`text-3xl sm:text-4xl xl:text-5xl font-Clash font-medium px-4 max-w-5xl mx-auto ${
 			darkMode && 'text-white'
 		}`}
 	>

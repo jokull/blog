@@ -20,7 +20,11 @@
 				<div class="flex flex-col items-center justify-center absolute inset-x-0 bottom-[10%]">
 					<PostHeading {date} {locale} {title} darkMode={true} />
 				</div>
-				<img src={`/blog/${image}`} class="w-full max-h-[70vh] object-cover" alt="Banner" />
+				<img
+					src={`/blog/${image}`}
+					class="w-full min-h-[80vh] sm:min-h-0 max-h-[70vh] object-cover"
+					alt="Banner"
+				/>
 			</div>
 		{:else}
 			<div class="py-16 sm:py-24 py">
