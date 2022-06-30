@@ -10,7 +10,7 @@
 	},
 	"devDependencies": {
 		"@csstools/postcss-oklab-function": "^1.1.0",
-		"@sveltejs/kit": "^1.0.0-next.357",
+		"@sveltejs/kit": "^1.0.0-next.352",
 		"@tailwindcss/typography": "^0.5.2",
 		"@tsconfig/svelte": "^3.0.0",
 		"@types/tailwindcss": "3.0.10",
