@@ -3,16 +3,23 @@
 	import postcssOKLabFunction from '@csstools/postcss-oklab-function';
 
 	function getStyles(chroma: number, hue: number) {
-		const css = [...PALETTE.entries()]
-			.map(([step, lightness]) => `--primary-${step}: oklch(${lightness} ${chroma / 1000} ${hue});`)
-			.join('');
-		return postcss([
+		const css = [...PALETTE.entries()].map(
+			([step, lightness]) => `--primary-${step}: oklch(${lightness} ${chroma / 1000} ${hue});`
+		);
+		let output = postcss([
 			postcssOKLabFunction({
+				preserve: true,
 				subFeatures: {
 					displayP3: false
 				}
 			})
-		]).process(css).css;
+		]).process(css.join('')).css;
+		output += output
+			.split(';')
+			.filter((s) => !s.includes('oklch')) // Filter out oklch lines
+			.map((s) => s.replace('--primary', '--primary-safe'))
+			.join(';');
+		return output;
 	}
 
 	const PALETTE = new Map<number, string>([
@@ -31,16 +38,35 @@
 	const [CHROMA_MIN, CHROMA_MAX] = [0, 370]; // divided by 1000
 	const [HUE_MIN, HUE_MAX] = [0, 360];
 
-	let chroma = CHROMA_MAX;
-	let hue = HUE_MAX;
+	let fallback: boolean = false;
+	let chroma = 300;
+	let hue = 17;
 	$: css = getStyles(chroma, hue);
 </script>
 
 <div class="w-full my-12" style={css}>
+	<div class="mb-8">
+		<label class="flex font-bold items-center gap-2 text-black">
+			<input class="shrink-0 w-4 h-4" type="checkbox" bind:checked={fallback} />
+			Show RGB fallback
+		</label>
+	</div>
 	<div class="mb-8 grid grid-cols-5 gap-4 text-center font-black">
 		{#each [...PALETTE.keys()] as step}
-			<div class={`p-3 sm:p-6 rounded`} style="background-color: var(--primary-{step});">
-				<span class={step > 400 ? 'text-white' : 'text-black'}>{step}</span>
+			<div
+				class={`p-3 sm:p-6 rounded relative overflow-hidden`}
+				style="background-color: var(--primary-{step});"
+			>
+				&nbsp;
+				{#if fallback}
+					<div
+						class="absolute inset-0"
+						style="background-color: var(--primary-safe-{step}); clip-path: polygon(0% 0, 100% 100%, 0 100%);"
+					/>
+				{/if}
+				<div class={(step > 400 ? 'text-white' : 'text-black') + ' absolute inset-0 p-3 sm:p-6 '}>
+					{step}
+				</div>
 			</div>
 		{/each}
 	</div>
