@@ -11,9 +11,9 @@
 		let css = postcss([
 			postcssOKLabFunction({
 				enableProgressiveCustomProperties: true,
-				preserve: true,
+				preserve: false,
 				subFeatures: {
-					displayP3: false
+					displayP3: true
 				}
 			})
 		]).process(`:root { ${variables.join(';') + ';'}}`).css;
@@ -21,7 +21,10 @@
 		// Now create the safe palette used to overlay a comparison "triangle" inside each cell
 		const safe = postcss([
 			postcssOKLabFunction({
-				preserve: false
+				preserve: false,
+				subFeatures: {
+					displayP3: false
+				}
 			})
 		])
 			.process(variables.join(';') + ';')
@@ -47,7 +50,7 @@
 	const [CHROMA_MIN, CHROMA_MAX] = [0, 370]; // divided by 1000
 	const [HUE_MIN, HUE_MAX] = [0, 360];
 
-	let fallback: boolean = false;
+	let fallback: boolean = true;
 	let chroma = 300;
 	let hue = 17;
 
