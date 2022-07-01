@@ -1,25 +1,34 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import postcss from 'postcss';
 	import postcssOKLabFunction from '@csstools/postcss-oklab-function';
 
 	function getStyles(chroma: number, hue: number) {
-		const css = [...PALETTE.entries()].map(
-			([step, lightness]) => `--primary-${step}: oklch(${lightness} ${chroma / 1000} ${hue});`
+		const variables = [...PALETTE.entries()].map(
+			([step, lightness]) => `--primary-${step}: oklch(${lightness} ${chroma / 1000} ${hue})`
 		);
-		let output = postcss([
+
+		let css = postcss([
 			postcssOKLabFunction({
+				enableProgressiveCustomProperties: true,
 				preserve: true,
 				subFeatures: {
 					displayP3: false
 				}
 			})
-		]).process(css.join('')).css;
-		output += output
-			.split(';')
-			.filter((s) => !s.includes('oklch')) // Filter out oklch lines
-			.map((s) => s.replace('--primary', '--primary-safe'))
-			.join(';');
-		return output;
+		]).process(`:root { ${variables.join(';') + ';'}}`).css;
+
+		// Now create the safe palette used to overlay a comparison "triangle" inside each cell
+		const safe = postcss([
+			postcssOKLabFunction({
+				preserve: false
+			})
+		])
+			.process(variables.join(';') + ';')
+			.css.split(';')
+			.map((s) => s.replace('--primary', '--primary-safe'));
+
+		return `${css} :root { ${safe.join(';')}; }`;
 	}
 
 	const PALETTE = new Map<number, string>([
@@ -41,11 +50,33 @@
 	let fallback: boolean = false;
 	let chroma = 300;
 	let hue = 17;
+
+	// The `style` block is special in Svelte so we have to "hack" our own dynamic style block
+	let container: HTMLDivElement;
 	$: css = getStyles(chroma, hue);
+
+	$: if (container) {
+		container.firstElementChild.textContent = css;
+	}
+
+	onMount(() => {
+		const child = document.createElement('style');
+		child.textContent = css;
+		container.appendChild(child);
+	});
 </script>
 
-<div class="w-full my-12" style={css}>
-	<div class="mb-8">
+<div bind:this={container} />
+
+<div class="w-full my-12">
+	<style>
+		@supports (color: oklch(0% 0 0)) {
+			.show-fallback {
+				display: block;
+			}
+		}
+	</style>
+	<div class="mb-8 show-fallback hidden">
 		<label class="flex font-bold items-center gap-2 text-black">
 			<input class="shrink-0 w-4 h-4" type="checkbox" bind:checked={fallback} />
 			Show RGB fallback
