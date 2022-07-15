@@ -32,7 +32,7 @@
 		"remark-parse": "^9.0.0",
 		"remark-slug": "^6.1.0",
 		"remark-unwrap-images": "^2.1.0",
-		"svelte": "^3.47.0",
+		"svelte": "^3.49.0",
 		"svelte-check": "^2.8.0",
 		"svelte-preprocess": "^4.10.7",
 		"tailwindcss": "^3.0.24",
