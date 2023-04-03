@@ -211,4 +211,5 @@ function App() {
 I hope the combination of libraries presented here has given you some ideas for how to create
 more accessible and good looking interactive components for your project. A great place to explore
 good component practises is [github.com/shadcn/ui](http://github.com/shadcn/ui) - a great collection
-of components using Radix UI and Tailwind.
+of components using Radix UI and Tailwind. In fact - this component is largely based on shadcn's
+dialog wrapper.
