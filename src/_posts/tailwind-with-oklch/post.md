@@ -4,7 +4,7 @@ date: 2022-06-28
 ---
 
 <script>
-	import TailwindPalette from '../components/TailwindPalette.svelte';
+	import TailwindPalette from '../../components/TailwindPalette.svelte';
 </script>
 
 The future of CSS colors is OKLCH. It is a human friendly and powerful syntax to define colors.

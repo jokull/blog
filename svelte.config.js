@@ -1,30 +1,24 @@
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-cloudflare';
 import { mdsvex } from 'mdsvex';
-import footnotes from 'remark-footnotes';
-import headings from 'remark-autolink-headings';
-import unwrapImages from 'remark-unwrap-images';
-import slug from 'remark-slug';
+import remarkFootnotes from 'remark-footnotes';
+import remarkSlug from 'remark-slug';
+import remarkAutolinkHeadings from 'remark-autolink-headings';
+import remarkUnwrapImages from 'remark-unwrap-images';
 
 /** @type {import('@sveltejs/kit').Config} */
-const config = {
+export default {
 	extensions: ['.svelte', '.md'],
 	preprocess: [
+		mdsvex({
+			extensions: ['.svelte.md', '.md', '.svx'],
+			remarkPlugins: [remarkFootnotes, remarkSlug, remarkAutolinkHeadings, remarkUnwrapImages]
+		}),
 		preprocess({
 			postcss: true
-		}),
-		mdsvex({
-			extensions: ['.md'],
-			layout: {
-				_: './src/layouts/post.svelte',
-				books: './src/layouts/book.svelte'
-			},
-			remarkPlugins: [footnotes, slug, headings, unwrapImages]
 		})
 	],
 	kit: {
 		adapter: adapter()
 	}
 };
-
-export default config;

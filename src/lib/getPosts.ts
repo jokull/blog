@@ -1,13 +1,30 @@
-export default async () => {
-	let posts = await Promise.all(
-		Object.entries(import.meta.glob('/src/routes/*.md')).map(async ([path, page]) => {
-			const { metadata } = await page();
-			let pathComponents = path.split('/');
-			const filename = pathComponents.pop();
-			const slug = filename.split('.md', 1)[0];
-			return { ...metadata, filename, slug, parsedDate: new Date(metadata.date) };
+import { z } from 'zod';
+
+const metadataSchema = z.object({
+	title: z.string(),
+	date: z.coerce.date(),
+	image: z.string().optional(),
+	locale: z.string().optional()
+});
+
+export async function load() {
+	const mdModules = import.meta.glob('../posts/**/index.md');
+	const posts = await Promise.all(
+		Object.keys(mdModules).map(async (path) => {
+			const slug = path.split('/').at(-2);
+			const { metadata } = (await mdModules[path]()) as { metadata: unknown };
+			if (metadata) {
+				const result = metadataSchema.safeParse({ ...metadata, slug });
+				if (result.success) {
+					return result.data;
+				}
+			}
 		})
 	);
-	posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-	return posts;
-};
+
+	return {
+		posts: posts
+			.flatMap((post) => (post ? [post] : []))
+			.sort((a, b) => b.date.valueOf() - a.date.valueOf())
+	};
+}

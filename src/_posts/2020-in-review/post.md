@@ -5,7 +5,7 @@ date: 2020-12-31
 ---
 
 <script>
-  import PhotoCaption from '../components/PhotoCaption.svelte';
+  import PhotoCaption from '../../components/PhotoCaption.svelte';
 </script>
 
 Stjórnmál toguðu mikið í mig á árinu. Ég fékk tækifæri til að funda með forsætisráðherra og varð að

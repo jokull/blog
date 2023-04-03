@@ -4,7 +4,7 @@ date: 2019-01-13
 ---
 
 <script>
-  import PhotoCaption from '../components/PhotoCaption.svelte';
+  import PhotoCaption from '../../components/PhotoCaption.svelte';
 </script>
 
 Greinin

@@ -4,7 +4,7 @@ date: 2019-03-15
 ---
 
 <script>
-  import PhotoCaption from '../components/PhotoCaption.svelte';
+  import PhotoCaption from '../../components/PhotoCaption.svelte';
 </script>
 
 Greinin birtist í 11. tölublaði Vísbendingu, 15. mars 2019.

@@ -4,7 +4,7 @@ date: 2019-12-26
 ---
 
 <script>
-  import PhotoCaption from '../components/PhotoCaption.svelte';
+  import PhotoCaption from '../../components/PhotoCaption.svelte';
 </script>
 
 ## Bækur 2019

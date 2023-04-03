@@ -4,7 +4,7 @@ date: 2021-10-25
 ---
 
 <script>
-  import Tool from '../components/Tool.svelte';
+  import Tool from '../../components/Tool.svelte';
 </script>
 
 <div class="not-prose">

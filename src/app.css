@@ -153,32 +153,24 @@ input[type='date'] {
 	@apply font-medium underline underline-offset-1 decoration-lime transition-all hover:decoration-2 hover:underline-offset-2 hover:text-black;
 }
 
-.page {
-	@apply grid;
-	grid-template-columns:
-		1fr
-		min(72ch, 100%)
-		1fr;
-}
-.page > * {
+.prose > * {
 	@apply px-4 sm:px-8;
-	grid-column: 2;
 }
-.page > hr {
+
+.prose > hr {
 	@apply mx-4;
 }
 
-.full-bleed {
+.prose > .full-bleed {
 	@apply p-0 mb-4;
-	grid-column: 1 / 4;
 }
 
 img.full-bleed {
 	@apply w-full mx-auto;
 }
 
-.page > pre,
-.page > .wider {
+.prose > pre,
+.prose > .wider {
 	@apply mx-auto;
 	min-width: min(50ch, 100%);
 	max-width: min(125ch, 100%);
@@ -187,13 +179,13 @@ img.full-bleed {
 
 @media only screen and (max-width: 414px) {
 	/* iPhone 8 plus width */
-	.page > pre {
+	.prose > pre {
 		min-width: 100%;
 		border-radius: 0 !important;
 	}
 }
 
-.page > table {
+.prose > table {
 	@apply mx-auto;
 	max-width: min(125ch, calc(100% - 40px));
 	grid-column: 1 / 4;

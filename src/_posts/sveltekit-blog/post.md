@@ -4,7 +4,7 @@ date: 2021-04-27
 ---
 
 <script>
-  import PhotoCaption from '../components/PhotoCaption.svelte';
+  import PhotoCaption from '../../components/PhotoCaption.svelte';
 </script>
 
 Up until now I've used [Lektor](https://www.getlektor.com), a Python based static site generator.

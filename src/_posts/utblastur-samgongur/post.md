@@ -4,7 +4,7 @@ date: 2019-08-06
 ---
 
 <script>
-  import PhotoCaption from '../components/PhotoCaption.svelte';
+  import PhotoCaption from '../../components/PhotoCaption.svelte';
 </script>
 
 Greinin [birtist á Stundinni](https://stundin.is/grein/9442/vid-erum-ad-keyra-vegg/).

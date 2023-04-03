@@ -1,35 +1,40 @@
 ---
-title: Create a Stunning Dialog Component with Radix UI, Tailwind CSS & Framer Motion
-date: 2023-02-02
+title: Create a Dialog Component with Radix UI, Tailwind CSS & Framer Motion
+date: 2023-04-02
 ---
 
 <script lang="ts">
-  import Stackblitz from "../components/Stackblitz.svelte";
+  import Stackblitz from "../../components/Stackblitz.svelte";
 </script>
 
-Welcome to the ultimate guide on creating a captivating, responsive dialog component that will level
-up your UI game! In this tutorial, we'll dive into the world of Radix UI, Tailwind CSS, and Framer
-Motion to create a dialog that animates from the bottom up on mobile viewports and slides in from
-the right like a drawer on desktop.
+In this tutorial, we'll dive into the world of Radix UI, Tailwind CSS, and Framer Motion to create a
+dialog that animates from the bottom up on mobile viewports and slides in from the right like a
+drawer on desktop.
 
 By following these step-by-step instructions, you'll learn how to create a versatile, accessible,
-and visually stunning component that's sure to impress. Get ready to elevate your web development
-skills and leave a lasting impression on your audience.
+and visually impressive component.
 
-1. Setting Up the Project To kick things off, let's clone the starter repo that has React and Vite
-   already set up for you. Open your terminal and run the following commands:
+To get you started quickly, here's a project demonstrating the component. Resize the mini-browser
+area to see the different transitions and layouts for the modal in smaller and larger viewports.
 
-Copy code
+<Stackblitz id="radix-dialog-w-framer-motion" options={{
+	forceEmbedLayout: true,
+	openFile: 'src/dialog.tsx',
+	clickToLoad: true,
+}} />
+
+**Setting up the project to kick things off.**
+
+Fork the Stackblitz project above, or if you'd like to add this to your own React project, roughly
+follow these commands:
 
 ```bash
-git clone https://github.com/your-username/react-vite-starter.git
-cd react-vite-starter
+npm create vite@latest my-react-app -- --template react-ts
+cd my-react-app
 npm install
 ```
 
 Next, we'll install the necessary dependencies: Radix UI, Tailwind CSS, and Framer Motion.
-
-Copy code
 
 ```bash
 npm install -D tailwindcss postcss autoprefixer
@@ -37,41 +42,174 @@ npm install @radix-ui/react-dialog framer-motion
 npm install usehooks-ts classnames
 ```
 
-2. Integrating Tailwind CSS
+**Integrating Tailwind CSS**
 
 ```bash
 npx tailwindcss init -p
 ```
 
-Now that our project is set up, it's time to configure Tailwind CSS. First, create a configuration
-file, then import the base styles into your project.
+Copy the `tailwind.config.cjs` and `index.css` from the Stackblitz.
 
-1. Building the Dialog Component With Tailwind CSS integrated, let's start building our dialog
-   component. We'll leverage the power of Radix UI to create an accessible, flexible, and
-   customizable component.
+You should now be able to run the project
 
-1. Adding Framer Motion Animation With our dialog component in place, it's time to breathe life into
-   it using Framer Motion. We'll create two animations: one for mobile viewports and another for
-   desktop.
+```bash
+npm run dev
+```
 
-1. Creating Responsive Animations To ensure our dialog component looks fantastic on both mobile and
-   desktop devices, we'll use Tailwind CSS breakpoints to detect the viewport size and apply the
-   appropriate animation.
+**Building the Dialog Component With Tailwind CSS integrated, let's start building our dialog
+component. We'll leverage the power of Radix UI to create an accessible, flexible, and
+customizable component.**
 
-1. Enhancing the Dialog with Additional Functionality Now that our responsive dialog component is
-   ready, let's add some finishing touches. We'll explore how to further customize our dialog and
-   make it even more engaging.
+[Radix dialogs](https://www.radix-ui.com/docs/primitives/components/dialog) have a specific
+component structure. We'll be relying on Radix for accessibility and certain behavior expected of
+dialogs, focus trapping, keyboard navigation and more.
 
-1. Conclusion Congratulations! You've just created a stunning, responsive dialog component using
-   Radix UI, Tailwind CSS, and Framer Motion. With this new skill set, you're ready to tackle more
-   complex UI challenges and create truly memorable user experiences.
+```jsx
+import * as Dialog from '@radix-ui/react-dialog';
+export default () => (
+	<Dialog.Root>
+		<Dialog.Trigger />
+		<Dialog.Portal>
+			<Dialog.Overlay />
+			<Dialog.Content>
+				<Dialog.Title />
+				<Dialog.Description />
+				<Dialog.Close />
+			</Dialog.Content>
+		</Dialog.Portal>
+	</Dialog.Root>
+);
+```
 
-By following this step-by-step guide, you'll not only learn how to create a visually appealing and
-accessible dialog component but also improve your proficiency with Radix UI, Tailwind CSS, and
-Framer Motion. So, don't wait any longer - let's dive in and start creating some magic!
+This looks a bit verbose, but every component serves a purpose.
 
-<Stackblitz id="radix-dialog-w-framer-motion" options={{
-    forceEmbedLayout: true,
-    openFile: 'src/dialog.tsx',
-    clickToLoad: true,
-  }} />
+Radix renders the dialog in a portal outside the React DOM hierarchy which makes it easier to
+style and position on top of the UI.
+
+We'll want to animate both the `Dialog.Overlay` and the `Dialog.Content`. The overlay is a
+layer between the UI and dialog itself which we'll use to darken out the UI to draw attention to
+the dialog.
+
+An easy way to let Frame Motion animate these elements is to ask Radix to always keep the top level
+`Dialog.Portal` mounted and wrap it in `AnimatePresence`. This way we can pass an `open` prop to
+toggle the portal.
+
+Before continuing to the actual animation, you might be wondering about `useMediaQuery`. Aren't
+media queries a CSS thing? Usually yes, but Frame Motion does not have a notion of media queries so
+we'll have to use this hook from the [usehook-ts](http://usehooks-ts.com) collection library. Another
+way to achieve this is to write two separate components and simple toggle visibility with media
+query targeting. Using the hook we can have just one component.
+
+```jsx
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    open: boolean;
+  }
+>(({ className, children, open, ...props }, ref) => {
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  return (
+    <AnimatePresence>
+      {open ? (
+        <DialogPortal forceMount>
+					{/* see next snippet 👇🏻 */}
+        </DialogPortal>
+      ) : null}
+    </AnimatePresence>
+  );
+});
+```
+
+The `forceMount` is necessary to let Frame Motion keep the component around during its exit animation.
+
+**Adding Framer Motion Animation With our dialog component in place, it's time to breathe life into
+it using Framer Motion. We'll create two animations: one for mobile viewports and another for
+desktop.**
+
+The `Dialog.Overlay` is wrapped in a simple opacity in-out animation. This fades the UI into the background
+and tints it a darker color.
+
+```jsx
+<DialogPortal forceMount>
+	<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+		<DialogOverlay />
+	</motion.div>
+	<DialogPrimitive.Content asChild ref={ref} {...props}>
+		{/* see next snippet for content 👇🏻 */}
+	</DialogPrimitive.Content>
+</DialogPortal>
+```
+
+Now let's zoom into the main part - `Dialog.Content`! Here we're using the `isMobile` to toggle
+between animating the full width of the dialog from the right on desktop, or the full height
+from the bottom, like a sheet UI that is common on smaller screens, where controls and buttons are
+likely to be closer to the thumb.
+
+The close button is stuck to the top, but `{children}` lets us use re-use this component for
+different use cases.
+
+```jsx
+<DialogPrimitive.Content asChild ref={ref} {...props}>
+	<motion.div
+		initial={isMobile ? { y: '100%' } : { x: '100%' }}
+		animate={isMobile ? { y: 0 } : { x: 0 }}
+		exit={isMobile ? { y: '100%' } : { x: '100%' }}
+		transition={{ ease: 'linear', duration: 0.15 }}
+		className={classNames(
+			'fixed z-50 mx-4 flex max-h-[80vh] w-full flex-col gap-4 overflow-y-auto rounded-t-xl bg-white p-6',
+			'sm:mr-0 sm:h-screen sm:max-h-none sm:max-w-lg sm:rounded-none sm:shadow-lg',
+			className
+		)}
+	>
+		<div className="flex w-full justify-end sm:justify-start">
+			<DialogPrimitive.Close asChild>
+				<Button>Close</Button>
+			</DialogPrimitive.Close>
+		</div>
+		{children}
+	</motion.div>
+</DialogPrimitive.Content>
+```
+
+[Framer Motion](http://framer.com/motion/examples/) provides an expressive and complete
+control of animations - from simple to complex orchestrated transitions.
+
+**Congratulations! You've just created a responsive dialog component using Radix UI,
+Tailwind CSS, and Framer Motion.**
+
+Here's how the component is put to use, with a single state hook.
+
+```jsx
+function App() {
+	const [open, setOpen] = useState(false);
+	return (
+		<div className="p-4">
+			<Dialog
+				onOpenChange={(open) => {
+					setOpen(open);
+				}}
+			>
+				<DialogTrigger asChild>
+					<Button>Open</Button>
+				</DialogTrigger>
+				<DialogContent open={open}>
+					<DialogHeader>
+						<DialogTitle>I'm a dialog</DialogTitle>
+						<DialogDescription asChild>
+							<div>Content - put anything here!</div>
+						</DialogDescription>
+					</DialogHeader>
+				</DialogContent>
+			</Dialog>
+		</div>
+	);
+}
+```
+
+In many situations it's actually not bad to have controlled state like that – retaining the ability
+to pass the open prop to other components, track events etc.
+
+I hope the combination of libraries presented here has given you some ideas for how to create
+more accessible and good looking interactive components for your project. A great place to explore
+good component practises is [github.com/shadcn/ui](http://github.com/shadcn/ui) - a great collection
+of components using Radix UI and Tailwind.

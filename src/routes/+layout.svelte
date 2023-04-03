@@ -1,4 +1,4 @@
-<script context="module">
+<script context="module" type="ts">
 	export async function load({ session }) {
 		return { props: { books: session.books } };
 	}
@@ -17,7 +17,7 @@
 			<a href="/">Jökull Sólberg</a>
 		</h1>
 		<div class="social">
-			<a href="https://twitter.com/jokull" alt="Twitter">
+			<a href="https://twitter.com/jokull">
 				<svg class="h-5 w-5 mr-1.5 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 612"
 					><path
 						fill="currentColor"
@@ -25,8 +25,8 @@
 					/></svg
 				>
 			</a>
-			<a href="https://instagram.com/jokull" alt="Instagram">
-				<svg class="h-5 w-5 mr-1.5 inline" viewbox="0 0 258 258" xmlns="http://www.w3.org/2000/svg">
+			<a href="https://instagram.com/jokull">
+				<svg class="h-5 w-5 mr-1.5 inline" viewBox="0 0 258 258" xmlns="http://www.w3.org/2000/svg">
 					<g>
 						<path
 							fill="currentColor"
