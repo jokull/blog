@@ -87,8 +87,8 @@ Radix renders the dialog in a portal outside the React DOM hierarchy which makes
 style and position on top of the UI.
 
 We'll want to animate both the `Dialog.Overlay` and the `Dialog.Content`. The overlay is a
-layer between the UI and dialog itself which we'll use to darken out the UI to draw attention to
-the dialog.
+layer between the UI and dialog itself which we'll use to block and tint the UI so that it
+looks inaccessible, drawing attention to the dialog.
 
 An easy way to let Frame Motion animate these elements is to ask Radix to always keep the top level
 `Dialog.Portal` mounted and wrap it in `AnimatePresence`. This way we can pass an `open` prop to
@@ -96,9 +96,10 @@ toggle the portal.
 
 Before continuing to the actual animation, you might be wondering about `useMediaQuery`. Aren't
 media queries a CSS thing? Usually yes, but Frame Motion does not have a notion of media queries so
-we'll have to use this hook from the [usehook-ts](http://usehooks-ts.com) collection library. Another
-way to achieve this is to write two separate components and simple toggle visibility with media
-query targeting. Using the hook we can have just one component.
+we'll have to use this hook from the [usehook-ts](http://usehooks-ts.com) collection library.
+Another way to achieve this is to write two separate components and simply toggle visibility with
+media query targeting, or simply use CSS animations and not Framer Motion. Using the hook we can
+have just one component.
 
 ```jsx
 const DialogContent = React.forwardRef<
@@ -122,17 +123,18 @@ const DialogContent = React.forwardRef<
 
 The `forceMount` is necessary to let Frame Motion keep the component around during its exit animation.
 
-**Adding Framer Motion Animation With our dialog component in place, it's time to breathe life into
-it using Framer Motion. We'll create two animations: one for mobile viewports and another for
+### Adding Framer Motion Animation
+
+**With our dialog component in place and wrapped in `AnimatePresence`, it's time to breathe life
+into it using Framer Motion. We'll create two animations: one for mobile viewports and another for
 desktop.**
 
-The `Dialog.Overlay` is wrapped in a simple opacity in-out animation. This fades the UI into the background
-and tints it a darker color.
+The `Dialog.Overlay` is wrapped in a simple opacity in-out animation.
 
 ```jsx
 <DialogPortal forceMount>
 	<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-		<DialogOverlay />
+		<DialogOverlay className="bg-black/50" />
 	</motion.div>
 	<DialogPrimitive.Content asChild ref={ref} {...props}>
 		{/* see next snippet for content 👇🏻 */}
@@ -145,8 +147,8 @@ between animating the full width of the dialog from the right on desktop, or the
 from the bottom, like a sheet UI that is common on smaller screens, where controls and buttons are
 likely to be closer to the thumb.
 
-The close button is stuck to the top, but `{children}` lets us use re-use this component for
-different use cases.
+Notice that `{children}` is being passed in, letting us re-use this component for different dialog
+use cases – like confirmation dialogs, settings, user input and more.
 
 ```jsx
 <DialogPrimitive.Content asChild ref={ref} {...props}>
@@ -205,9 +207,6 @@ function App() {
 	);
 }
 ```
-
-In many situations it's actually not bad to have controlled state like that – retaining the ability
-to pass the open prop to other components, track events etc.
 
 I hope the combination of libraries presented here has given you some ideas for how to create
 more accessible and good looking interactive components for your project. A great place to explore
