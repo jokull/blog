@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@csstools/postcss-oklab-function": "^1.1.0",
-		"@sveltejs/kit": "^1.15.0",
+		"@sveltejs/kit": "^1.15.2",
 		"@tailwindcss/typography": "^0.5.2",
 		"autoprefixer": "^10.4.0",
 		"cssnano": "^5.0.8",
