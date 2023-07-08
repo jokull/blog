@@ -15,10 +15,12 @@ unexpected differences. Here are a few key "gotchas" to keep in mind:
   typing rules apply to that table. This strictness requires every column definition to specify a
   datatype and enforces that inserted data must be either NULL (if there is no NOT NULL constraint)
   or of the type specified. Datatypes must be one of INT, INTEGER, REAL, TEXT, BLOB, ANY.
-- **Limited ALTER TABLE command**: SQLite's ALTER TABLE command allows you to rename a table or to
-  add a new column to an existing table, but it doesn't allow for other alterations like dropping a
-  column, changing a column's type, renaming a column, etc. There are workarounds, but they can be
-  cumbersome.
+- **Limited ALTER TABLE command**: SQLite's ALTER TABLE command allows you to rename a table, rename
+  a column, add a new column, or drop a column, but other alterations like changing a column's type,
+  adding a `NOT NULL`, or modifying constraints are not directly supported. However, [a
+  workaround](https://www.sqlite.org/lang_altertable.html#otheralter) involving creating a new table
+  with the desired changes, copying data, and then renaming the new table to the old one's name can
+  be used.
 - **Lack of concurrent writes**: SQLite allows multiple processes to have the database file open at
   once, and multiple processes can be doing a SELECT at the same time. But for writing, only one
   process can be doing that at once. This means SQLite may not be suitable for write-heavy
@@ -68,3 +70,4 @@ interesting reading.
 - **[Kysely](https://kysely-org.github.io/kysely/index.html)**: A pure query builder, Drizzle is
   more complete (adding an ORM and CLI toolkit) but Kysely is more of a specialist tool for building
   queries with typed results.
+- **[LiteFS by Fly.io](https://fly.io/docs/litefs/)**: Another distributed cloud SQLite solution.
