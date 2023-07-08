@@ -20,7 +20,7 @@ unexpected differences. Here are a few key "gotchas" to keep in mind:
   adding a `NOT NULL`, or modifying constraints are not directly supported. However, [a
   workaround](https://www.sqlite.org/lang_altertable.html#otheralter) involving creating a new table
   with the desired changes, copying data, and then renaming the new table to the old one's name can
-  be used. The command line utility **[`sqlite-utils transform`](https://simonwillison.net/2020/Sep/23/sqlite-advanced-alter-table/)** automates some of the tricker column transformations.
+  be used. The command line utility **[`sqlite-utils transform`](https://sqlite-utils.datasette.io/en/stable/cli.html#transforming-tables)** automates some of the tricker column transformations.
 - **Lack of concurrent writes**: SQLite allows multiple processes to have the database file open at
   once, and multiple processes can be doing a SELECT at the same time. But for writing, only one
   process can be doing that at once. This means SQLite may not be suitable for write-heavy
