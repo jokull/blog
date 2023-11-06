@@ -71,3 +71,4 @@ interesting reading.
   more complete (adding an ORM and CLI toolkit) but Kysely is more of a specialist tool for building
   queries with typed results.
 - **[LiteFS by Fly.io](https://fly.io/docs/litefs/)**: Another distributed cloud SQLite solution.
+- **[Why you should be using SQLite](https://www.epicweb.dev/why-you-should-probably-be-using-sqlite)**
