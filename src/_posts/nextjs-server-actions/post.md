@@ -174,7 +174,7 @@ export default {
 } satisfies Config;
 ```
 
-As you can see, I use Turso in production, but raw-dog the underlying libSQL tech in development. This allows me to read and write to a regular SQLite 3 database file that can be explored in an app like TablePlus - as opposed to being tied to an external networked service in development mode.
+As you can see, I use Turso in production, but raw-dog the underlying libSQL tech in development. This allows me to read and write to a regular SQLite 3 database file that can be explored in an app like TablePlus - as opposed to being tied to an external networked service in development mode. For production the beauty of Turso kicks in: It presents a single connection string but routes traffic to the nearest geographic replica, minimizing latency. This is especially important as the aggregate I/O can build up when calling sequentially from a Vercel edge to a single database instance far away. Turso solves this with their replication technology! They also happen to have a generous free tier so I highly recommend developers explore their offering. I'm just a happy customer btw - no other affiliation.
 
 Here's the gymrat schema defined in TypeScript. Drizzle uses powerful inference of these schemas to provide a query builder with typed parameters and output.
 
