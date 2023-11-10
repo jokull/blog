@@ -100,7 +100,7 @@ export async function login(prevState: unknown, formData: FormData) {
 And can be called simply like this:
 
 ```tsx
-export function Form(props: { login }) {
+export function Form(props: { login: typeof login }) {
 	const [message, action] = useFormState(props.login, null);
 
 	return (
