@@ -285,7 +285,7 @@ export async function createWorkout(prevState: unknown, formData: FormData) {
 }
 ```
 
-Finally I'm going to demonstrate how forms can be juiced with autocomplete and fancier interactions than the standard form field components browsers provide. In this component I'm having the server action passed from above, but using `<input type="hidden" />` to copy over a controlled field value - something routine in Django type stacks when augmenting forms with interactivity and high fidelity UI. You can mix and match controlled and uncontrolled inputs - ultimately just ensuring data ends up in `FormData` since that is what is sent to the server via the Server Action. Unfortunately `FormData` API is not as expressive as raw JSON - a slight downside to what one might be used to in GraphQL or with tRPC.
+Finally I'm going to demonstrate how forms can be juiced with autocomplete and fancier interactions than the standard form field components browsers provide. In this component I'm having the server action passed from above, but using `<input type="hidden" />` to copy over a controlled field value - something routine in Django type stacks when augmenting forms with interactivity and high fidelity UI. You can mix and match controlled and uncontrolled inputs - ultimately just ensuring data ends up in `FormData` since that is what is sent to the server via the Server Action. Unfortunately `FormData` API is not as expressive as raw JSON - a slight downside to what one might be used to in GraphQL or with tRPC. (Hint: `z.coerce` is your friend here!).
 
 ```tsx
 "use client";
