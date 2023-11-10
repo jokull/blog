@@ -3,6 +3,8 @@ title: Next.js Server Actions Simplify Everything
 date: 2023-11-10
 ---
 
+(If you want to dive directly into code samples, scroll down!)
+
 As a full-stack developer, I'm always evolving my ideal tech stack. The tooling needs to be simple to set up and scalable, able to grow with a project without sacrificing essential features. They should cover key aspects of developer experience, including form validation, authentication, handling transactional emails, migrations, timezones, managing fonts, caching, notifications, analytics, and testing.
 
 I prefer using tools like Framer Motion to enhance user interfaces without significantly increasing the size of the client-side code. Server-side rendering (SSR) is vital for fast, SEO-friendly initial page loads, and it's best done close to the user to reduce delay. The challenge in web development is to increase functionality without adding too much complexity. This has led me to explore frameworks like SvelteKit and Remix, and more recently, Next.js's App Router. With the introduction of Server Actions, Next.js seems to offer a straightforward solution that meets the comprehensive needs of modern web applications.
