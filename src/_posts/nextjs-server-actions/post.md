@@ -392,6 +392,6 @@ export function CreateWorkoutFieldset({
 }
 ```
 
-I hope these examples have provided some insight and starting points for you to test server actions!
+I hope these examples have provided some insight and starting points for you to test server actions with SQLite in production!
 
 The [gymrat repo](http://github.com/jokull/gymrat) is open source if you want to fork it or look around for more code samples.
