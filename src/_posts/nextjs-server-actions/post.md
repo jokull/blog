@@ -3,9 +3,15 @@ title: Next.js Server Actions Simplify Everything
 date: 2023-11-10
 ---
 
-As a fullstack developer, I'm constantly searching for perfect tooling. I need tools that support rich UI interactivity and are SEO-friendly. They should be easy to host and get going locally, yet capable of scaling with the project's growth without compromising core stack components. Moreover, they should encompass all aspects of developer experience (DX) – elegant form validation, authentication, transactional email, migrations, timezones, fonts, caching, toasts, analytics, and yes, testing.
+As a full-stack developer, I'm always evolving my ideal tech stack. The tooling needs to be simple to set up and scalable, able to grow with a project without sacrificing essential features. They should cover key aspects of developer experience, including form validation, authentication, handling transactional emails, migrations, timezones, managing fonts, caching, notifications, analytics, and testing.
 
-I aim to use tools like Framer Motion to add zest to UI without inflating client bundle sizes. Server-side rendering (SSR) is essential for SEO-friendly initial page loads, ideally executed at the edge to minimize latency.
+I prefer using tools like Framer Motion to enhance user interfaces without significantly increasing the size of the client-side code. Server-side rendering (SSR) is vital for fast, SEO-friendly initial page loads, and it's best done close to the user to reduce delay. The challenge in web development is to increase functionality without adding too much complexity. This has led me to explore frameworks like SvelteKit and Remix, and more recently, Next.js's App Router. With the introduction of Server Actions, Next.js seems to offer a straightforward solution that meets the comprehensive needs of modern web applications.
+
+### What you will learn from this article
+
+- **Understanding of Next.js Server Actions:** Gain insights into how Server Actions in Next.js are revolutionizing web development by simplifying backend and frontend integration.
+- **Evolution of the fullstack solution and historical context:** Learn about the transition from traditional web frameworks to modern solutions like SvelteKit, Remix, and Next.js.
+- **Practical Application of Server Actions With Examples:** Explore a real-world example of how these technologies are applied, through the case study of my sideproject, _gymrat_.
 
 ## From 80/20 backend/frontend to 20/80 …
 
@@ -25,7 +31,7 @@ Remix reemphasized SSR and its associated data loading, transforming it from a m
 
 ## Server Actions
 
-The introduction of Server Actions in Next.js marks a significant move towards more straightforward, server-rendered pages, seamlessly integrated with modern web functionalities. As I recently expressed in a tweet, Server Actions are the final piece of the App Router puzzle. They revolutionize how mutations are handled, allowing for the use of real forms or manual useTransition. This innovation enables data to be fetched, written, and revalidated without the need for dedicated state libraries.
+The introduction of Server Actions in Next.js marks a significant move towards more straightforward, server-rendered pages, seamlessly integrated with modern web functionalities. As I recently expressed in a [tweet](https://twitter.com/jokull/status/1722563291405266990?s=61&t=4I0HdpWUQgkflOx4jq8FMg), Server Actions are the final piece of the App Router puzzle. They revolutionize how mutations are handled, allowing for the use of real forms or manually via the `useTransition` hook. This innovation enables data to be fetched, written, and revalidated without the need for dedicated state libraries.
 
 Forms can be progressively enhanced and embellished using form libraries for fancy client validation and input assistance. However, at their core, they are submitted using `FormData`, with validation being handled by conform, Zod, or manual methods inside Server Actions. This shift towards conducting all validation on the backend, especially with the speed offered by edge computing, presents a simple and efficient approach for form validation feedback in many scenarios.
 
