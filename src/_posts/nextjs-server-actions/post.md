@@ -318,11 +318,9 @@ export function CreateWorkout({
 }
 
 export function CreateWorkoutFieldset({
-  workoutDescriptions,
-  isPromo = false,
+  workoutDescriptions
 }: {
   workoutDescriptions: Item[];
-  isPromo?: boolean;
 }) {
   const { pending } = useFormStatus();
   const [description, setDescription] = useState("");
@@ -372,12 +370,6 @@ export function CreateWorkoutFieldset({
         </label>
       </div>
       <div className="relative grow-[1] basis-[80px]">
-        {isPromo ? (
-          <>
-            <div className="absolute -right-[5px] -top-[5px] z-10 h-2.5 w-2.5 animate-ping rounded-full bg-pink-500" />
-            <div className="absolute -right-1 -top-1 z-20 h-2 w-2 rounded-full bg-white" />
-          </>
-        ) : null}
         <Primary
           type="submit"
           className="z-30 w-full"
