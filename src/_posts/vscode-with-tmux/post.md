@@ -7,7 +7,7 @@ In large development projects, it's common to spin up various services. For inst
 I'm working with Next.js, an API backend, cloudflared tunnel, Stripe webhooks proxy, and a database.
 While solutions like `docker-compose up -d` offers an elegant solution with isolated docker instances per service and a UI to navigate logs, not all projects can or should use Docker.
 
-<img alt="Screenshot of my tmux setup" src="/blog/vscode-with-tmux.png" class="full-bleed" />
+<img alt="Screenshot of my tmux setup" src="/blog/vscode-with-tmux-2.png" class="full-bleed" />
 
 For projects not using Docker, a common practice involves process managers that multiplex logs into
 a single stream, as seen with Turbo Repo. However, I've found a more effective approach in my
@@ -25,6 +25,10 @@ This is the current iteration of my tmux `start-dev.sh` script (don't forget to 
 
 # Start a new tmux session and create the first window (tab)
 tmux new-session -d -s acme -n sqld 'sqld -l 127.0.0.1:3030 --disable-namespaces'
+
+# Set mouse support and increase scrollback buffer for this session
+tmux set -t acme mouse on
+tmux set -t acme history-limit 10000
 
 # Create additional windows (tabs) for other commands
 tmux new-window -t acme -n tunnel 'cloudflared tunnel --config ~/.cloudflared/acme.yaml run --protocol http2'
