@@ -3,12 +3,11 @@ title: 'Quick Tip: Use tmux as a Development Process Manager'
 date: 2023-11-15
 ---
 
-![Screenshot of my tmux setup](./screenshot.png)
-
 In large development projects, it's common to spin up various services. For instance, in my project,
 I'm working with Next.js, an API backend, cloudflared tunnel, Stripe webhooks proxy, and a database.
-While Docker Compose offers an elegant solution with isolated docker instances per service, complete
-with a UI for logs and process management, not all projects can or should use Docker.
+While solutions like `docker-compose up -d` offers an elegant solution with isolated docker instances per service and a UI to navigate logs, not all projects can or should use Docker.
+
+<img alt="Screenshot of my tmux setup" src="/blog/vscode-with-tmux.png" class="full-bleed" />
 
 For projects not using Docker, a common practice involves process managers that multiplex logs into
 a single stream, as seen with Turbo Repo. However, I've found a more effective approach in my
@@ -16,16 +15,19 @@ current project: a shell script that bootstraps a `tmux` session with named tabs
 neatly into a two-terminal layout in VSCode—one terminal for the `tmux` development processes and
 another for a standard shell, as shown in the screenshot above.
 
-This is the current iteration of my `start-dev.sh` script (don't forget to `chmod +x`!)
+Tmux wouldn't work well for production but in development it offers a light-touch and DX friendly
+approach to quickly spinning up and managing processes.
+
+This is the current iteration of my tmux `start-dev.sh` script (don't forget to `chmod +x`!)
 
 ```bash
 #!/bin/bash
 
 # Start a new tmux session and create the first window (tab)
-tmux new-session -d -s triptojapan -n tunnel 'pnpm run tunnel'
+tmux new-session -d -s triptojapan -n sqld 'sqld -l 127.0.0.1:3030 --disable-namespaces'
 
 # Create additional windows (tabs) for other commands
-tmux new-window -t triptojapan -n sqld 'pnpm run sqld'
+tmux new-window -t triptojapan -n tunnel 'cloudflared tunnel --config ~/.cloudflared/trip.yaml run --protocol http2'
 tmux new-window -t triptojapan -n next 'pnpm run --filter next dev'
 tmux new-window -t triptojapan -n api 'pnpm run --filter api dev'
 tmux new-window -t triptojapan -n stripe 'stripe listen --forward-to localhost:3090/stripe/webhook'
