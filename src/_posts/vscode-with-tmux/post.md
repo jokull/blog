@@ -24,19 +24,19 @@ This is the current iteration of my tmux `start-dev.sh` script (don't forget to 
 #!/bin/bash
 
 # Start a new tmux session and create the first window (tab)
-tmux new-session -d -s triptojapan -n sqld 'sqld -l 127.0.0.1:3030 --disable-namespaces'
+tmux new-session -d -s acme -n sqld 'sqld -l 127.0.0.1:3030 --disable-namespaces'
 
 # Create additional windows (tabs) for other commands
-tmux new-window -t triptojapan -n tunnel 'cloudflared tunnel --config ~/.cloudflared/trip.yaml run --protocol http2'
-tmux new-window -t triptojapan -n next 'pnpm run --filter next dev'
-tmux new-window -t triptojapan -n api 'pnpm run --filter api dev'
-tmux new-window -t triptojapan -n stripe 'stripe listen --forward-to localhost:3090/stripe/webhook'
+tmux new-window -t acme -n tunnel 'cloudflared tunnel --config ~/.cloudflared/acme.yaml run --protocol http2'
+tmux new-window -t acme -n next 'pnpm run --filter next dev'
+tmux new-window -t acme -n api 'pnpm run --filter api dev'
+tmux new-window -t acme -n stripe 'stripe listen --forward-to localhost:3090/stripe/webhook'
 
 # Select the 'next' tab as default
-tmux select-window -t triptojapan:next
+tmux select-window -t acme:next
 
 # Attach to the tmux session
-tmux attach-session -t triptojapan
+tmux attach-session -t acme
 ```
 
 I've named each tab for straightforward navigation. Simply hit `Ctrl-b` and use the arrow keys, `p`
