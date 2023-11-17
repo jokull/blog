@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '$lib/prism-theme.postcss';
 	import PostHeading from '../../components/PostHeading.svelte';
 	import type { PageData } from './$types';
 

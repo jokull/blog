@@ -41,6 +41,8 @@ This strategic realignment of the server-client boundary simplifies the overall 
 
 ## Testing The Waters
 
+<a href="https://www.gymrat.is/" target="_blank"><img src="/blog/gymrat.png" alt="iPhone device with Gymrat web UI" class="mx-auto max-w-sm" /></a>
+
 Recently, I refactored [gymrat](https://www.gymrat.is/), a side project I use to test new tools like Next.js Server Actions. The previous setup was a dual structure with Next.js App Router serving as both an SSR backend and a rich client frontend, coupled with a tRPC-based API on Cloudflare Workers using SQLite's D1 storage. It involved two types of tRPC clients: one for server component queries using async-await and another utilizing React Query for client-side queries and mutations. API requests going from the client would proxy via a `/trpc` catch-all route to consolidate the two projects to a singular domain and avoid CORS and cookie headaches.
 
 The reason tRPC was kept separate and not hosted as a Next.js route was that D1 bindings only work when developing and hosting with Cloudflare Workers tooling directly, and not on Vercel. And on the flip side, Next.js does not comfortably or easily host on Cloudflare Workers despite lots of community pressure and work towards that goal. So, the resulting split down the middle resulting in two hosting vendors and a proxy route to connect them on the same domain.
