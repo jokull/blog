@@ -32,7 +32,12 @@
 		<div class="sm:order-0 order-1 text-sm sm:text-base">
 			<div class="introduction">
 				<p class="mb-3">
-					Ég er sjálfstætt starfandi forritari og ráðgjafi. Ég kom að stofnun
+					Ég hef starfað í yfir 20 ár í sprotum og auglýsingastofum við forritun, vörustjórnun og í
+					stafrænum teymum. Í dag vinn ég í ferðatæknifyrirtækinu <a
+						href="https://www.tirptojapan.com/"
+						target="_blank"
+						>Trip To Japan
+					</a>. Ég kom að stofnun
 					<a href="https://www.planitor.io/" target="_blank">Planitor</a> og
 					<a href="https://takumi.com/">Takumi</a>. Ég hef unnið við vörustjórn og leitt
 					þróunarteymi hjá bæði
@@ -42,7 +47,7 @@
 				</p>
 				<p>
 					Ég hélt úti fréttabréfinu <a href="https://jokull.substack.com/">Reykjavík Mobility</a> þar
-					sem fjallað er um samgöngur og skipulag í Reykjavík.
+					sem fjallað var um samgöngur og skipulag í Reykjavík.
 				</p>
 			</div>
 		</div>

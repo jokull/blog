@@ -9,7 +9,7 @@
 
 <div class="text-center">
 	<div
-		class={`mx-auto max-w-5xl px-4 font-Clash text-3xl font-medium sm:text-4xl xl:text-5xl ${
+		class={`mx-auto max-w-5xl text-balance px-4 font-Clash text-3xl font-medium sm:text-4xl xl:text-5xl ${
 			darkMode && 'text-white'
 		}`}
 	>
