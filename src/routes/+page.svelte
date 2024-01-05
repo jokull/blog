@@ -34,7 +34,7 @@
 				<p class="mb-3">
 					Ég hef starfað í yfir 20 ár í sprotum og auglýsingastofum við forritun, vörustjórnun og í
 					stafrænum teymum. Í dag vinn ég í ferðatæknifyrirtækinu <a
-						href="https://www.tirptojapan.com/"
+						href="https://www.triptojapan.com/"
 						target="_blank"
 						>Trip To Japan
 					</a>. Ég kom að stofnun
