@@ -11,6 +11,8 @@ Glossary:
 
 - **Datetime**: A date object that includes time components, possibly offset or UTC timezone
   indication too
+- **Absolute**: A point in time usually represented by a "unix epoch" which is the number of seconds
+  since midnight Jan 1 1970
 - **Aware**: A datetime with timezone embedded
 - **Naive**: A datetime without timezone embedded
 - **Calendar Date**: A date object but without time components, therefore also without timezone
@@ -32,13 +34,31 @@ Glossary:
 
 Dates are `YYYY-MM-DD` formatted and datetimes append `Thh:mm:ss.sssZ` or `Thh:mm:ss.sss±hh:mm`.
 
-## Understand JavaScript native Date so you can avoid it
+## Store only absolutes in databases
 
-The JavaScript `Date` object famously does not have the concept of calendar dates. It always
-requires, or defaults, time and offset components. Ignoring or making wrong assumptions about this
-behavior is one of the most common source of bugs in JSON or JavaScript environment projects.
+Only in very niche situations should you store anything but the absolute in the database. Take for
+example the time of a meeting invite. Two users in two different timezones can only agree upon the
+absolute. For one person it can mean 1 PM and the other 2AM depending on the location. In other
+words: what database columns usually are, are not days, hours and offsets, but absolute points in
+time regardless of geography.
 
-Doing `new Date('2022-05-15')` fills in your current time and operating system offset. If the server
+## What exactly is `Date`, and what it isn't?
+
+`Date` is no more than an absolute with a bunch of methods. It does not store on its instances a
+timezone, therefore you cannot alter or provide the timezone. Where timezone comes into play is when
+various class methods depend on the system timezone identifier to represent human readable
+representation of the absolute (like YYYY-MM-DD or HH:MM). These are methods like `getDate`,
+`getYear`, and yes, `toString` and they only ever use a system timezone global for the offset,
+allowing it to derive years, months, dates, hours, minutes etc.
+
+Because whenever developers log `Date` instances to console it calls `toString` to log the value,
+many people assume that `Date` as a data type includes timezone information. But it does not! The
+methods depend on global values that are provided by the system or default to UTC.
+
+With this insight, what would be the logical way to pass values to the constructor? I say epochs.
+And sure enough, `Date` accepts an integer number representing milliseconds since UTC midnight Jan 1 1970. This global class should really be called `Epoch`!
+
+Doing `new Date('2022-05-15')` fills in your current time and operating system offset(!). If the server
 or part of the client codebase decides to shift this it could end up with a new date.
 
 It is also dangerous to store calendar date fields as datetime and assuming the time components will
@@ -80,7 +100,7 @@ current time):
 Frustratingly months are zero-indexed in JS Date! This renders both options to init calendar dates
 weird and confusing.
 
-A guideline might be to at least disallow allow string instantiation of dates. You can enforce it
+A guideline might be to at least disallow string instantiation of dates. You can enforce it
 with [this eslint rule](https://github.com/amzn/eslint-plugin-no-date-parsing).
 
 The [date-fns](https://npm.runkit.com/date-fns) library does it more consistently - filling in
@@ -92,32 +112,17 @@ parseISO('2022-05-15')
 > Sun May 15 2022 00:00:00 GMT-0700 (PDT)
 ```
 
-Or [luxon](https://npm.runkit.com/luxon)
+Or [@internationalized/date](https://www.npmjs.com/package/@internationalized/date) (my preferred option)
 
 ```js
-const { DateTime } = require("luxon");
-DateTime.fromISO("2022-05-15").toJSDate();
-> Sun May 15 2022 00:00:00 GMT-0700 (PDT)
+import { CalendarDate, parseDate } from '@internationalized/date';;
+parseDate("2022-05-15").toDate();
+> Sun May 15 2022 00:00:00 GMT-0700 (Pacific Daylight Time)
+new CalendarDate(2022, 5, 15).toDate();
+> Sun May 15 2022 00:00:00 GMT-0700 (Pacific Daylight Time)
 ```
 
-Interestingly, a [polyfill Temporal](), provides a special class for calendar dates:
-
-```js
-const { Temporal } = require("proposal-temporal")
-Temporal.PlainDate.from('2022-05-15')
-> Temporal.PlainDate <2022-05-15>
-```
-
-Temporal also fixes the zero-indexing oddity of JS Date:
-
-```js
-const { Temporal } = require("proposal-temporal")
-new Temporal.PlainDate(2022, 5, 15)
-> Temporal.PlainDate <2022-05-15>
-```
-
-I suggest never using the JS Date constructor directly in your project code. Rely on `date-fns`
-parsers and constructors.
+I suggest never using the JS Date constructor with strings.
 
 ## If possible let the browser or client environment determine the user timezone
 
@@ -146,17 +151,13 @@ Client > Server {parse, shift} > DB {make naive}
 DB > Server {make aware} > Client {parse} > UI {shift}
 ```
 
-In short: Servers shift on the way in, clients shift as they display in UI using functions like
-luxon's `DateTime.toLocaleString`.
+In short: Servers shift on the way in, clients shift as they display in UI.
 
 Backends might need to know user timezones for complex calculations, for sending smarter
 notifications and such, but in most scenarios the timezone is, and should be, consolidated to UTC
 and otherwise ignored. When timezone is really needed (example below) let the client provide it
-alongside other request parameters.
-
-In most scenarios you can trim off the offset from your ISO dates in your database, or choose naive
-column types in your db since you'll be shifting everything to UTC. Just be aware that you'll need
-to convert your fields to aware by applying UTC or appending `Z` to the end of your ISO datetimes.
+alongside other request parameters. If your backend needs to know user timezones, store them on the
+user, not alongside every time value.
 
 ## How to interpret values from clients
 
@@ -180,7 +181,7 @@ potentially problematic scenario is demonstrated here:
 Shifting results in another calendar date. This is very likely not what the API consumer meant.
 
 Therefore my recommendation is to accept datetime or calendar date ISO values for these fields, but
-if the API receives an aware datetime it should _not_ shift it, so the rules, different form above
+if the API receives an aware datetime it should _not_ shift it, so the rules, different from above
 become:
 
 ```
@@ -189,7 +190,8 @@ DB > Server > Client {parse} > UI
 ```
 
 SQL databases usually have a column type for calendar date values. If datetime is only support I
-recommend storing as midnight naive and then presenting in `YYYY-MM-DD` format in API responses.
+recommend storing an absolute timestamp where the value represents midnight of the date in the UTC
+timezone - and then presenting in `YYYY-MM-DD` format in API responses.
 
 Example 2: The client wants to filter orders by placement datetime
 
@@ -206,8 +208,9 @@ but which midnight-to-midnight windows to set for the order placement time in qu
 midnight might include or exclude orders that are actually in or out of the timezone midnight of the
 user.
 
-The API might therefore want to look up the users timezone if they have it on file in the DB or
-require it as a query arg:
+There is no way to convert a YYYY-MM-DD date to an absolute without assuming or providing the
+offset, but offsets can be derived from timezones. The API might therefore want to look up the users
+timezone if they have it on file in the DB or require it as a query arg:
 
 ```
 HTTP GET /orders?from=2022-15-09&to=2022-15-15&timezone=America/Los_Angeles
