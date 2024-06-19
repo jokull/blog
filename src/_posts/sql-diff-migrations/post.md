@@ -101,9 +101,13 @@ await $`rm -rf migrations/*`.quiet();
 
 Keep in mind we have three "schemas" to think about here. One is the drizzle _declarative schema_
 from which we want to derive everything, written in TypeScript, and allows us to work on new
-features while delaying actual migration steps. The middle schema is in-memory one maintained
-temporarily by Atlas to create it's internal "goal" schema structure. The final schema is the actual
-migrated on in your dev db (libsql local server in my case).
+features while delaying actual migration steps (I actually consider this the [coolest feature of
+Drizzle](https://medium.com/drizzle-stories/the-data-access-pattern-first-approach-with-drizzle-bca035bbdc63)
+and Kysely — you can work on features with a fair degree of confidence in your schema changes before
+actually running migrations, which would be noisy and painful as the schema goes through adjustments
+based on feature work). The middle schema is in-memory one maintained temporarily by Atlas to create
+it's internal "goal" schema structure. The final schema is the actual migrated on in your dev db
+(libsql local server in my case).
 
 Drizzle-Kit handles migrations but not complex ones. Atlas has a better feature set, so we use
 drizzle-kit to produce a clean initial migration. Since it's observing an empty migrations folder in
