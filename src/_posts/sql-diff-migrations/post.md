@@ -62,7 +62,7 @@ PRAGMA defer_foreign_keys=OFF;
 ```
 
 Atlas is a purpose built tool to manage different styles of migration. It has extensive support for
-databases and intelligently handles migration steps. In my opinion it's killer feature is to be able
+databases and intelligently handles migration steps. In my opinion its killer feature is to be able
 to introspect two SQL schemas, derive an internal abstraction, diff the two and produce the
 migration script - all in one go.
 
@@ -99,6 +99,12 @@ await $`atlas schema diff --dev-url "sqlite://dev?mode=memory" --from libsql+ws:
 await $`rm -rf migrations/*`.quiet();
 ```
 
+Drizzle-to-Atlas Gotcha: For some reason the `DEFAULT`'s' for many created/modified timestamps were
+`strftime ('%s', 'now')` with a space after the function name. This resulted in a mysteriour
+zero-effect migration for most of my tables. I decided not to dig deeper and just go ahead with the
+migration. You might encounter similar cases of hard-to-detect changes. Copying and renaming every
+table ended up being a good test drive of Atlas 😅.
+
 Keep in mind we have three "schemas" to think about here. One is the drizzle _declarative schema_
 from which we want to derive everything, written in TypeScript, and allows us to work on new
 features while delaying actual migration steps (I actually consider this the [coolest feature of
@@ -106,7 +112,7 @@ Drizzle](https://medium.com/drizzle-stories/the-data-access-pattern-first-approa
 and Kysely — you can work on features with a fair degree of confidence in your schema changes before
 actually running migrations, which would be noisy and painful as the schema goes through adjustments
 based on feature work). The middle schema is in-memory one maintained temporarily by Atlas to create
-it's internal "goal" schema structure. The final schema is the actual migrated on in your dev db
+its internal "goal" schema structure. The final schema is the actual migrated one in your dev db
 (libsql local server in my case).
 
 Drizzle-Kit handles migrations but not complex ones. Atlas has a better feature set, so we use
