@@ -35,7 +35,8 @@ SQL database migrations.
 
 My particular setup today uses Turso (hosted libsql with built in replication) with Drizzle for
 querying and declaring schemas in TypeScript. This is a fork of SQLite and one of the biggest
-gotchas with SQLite is that it has poor (although improving) support for `ALTER TABLE` / `ALTER COLUMN` commands. Since libsql is a fork there's efforts alongside the core SQLite developments to
+gotchas with SQLite is that it has poor (although improving) support for `ALTER TABLE` /
+`ALTER COLUMN` commands. Since libsql is a fork there's efforts alongside the core SQLite developments to
 improve the situation. But as of yet, many `ALTER COLUMN` scenarios are not supported, and for when
 libsql has added support for them, it does not add and enforce any new constraints on existing data,
 only for new data.
@@ -190,8 +191,9 @@ bun diff.ts | turso db shell http://localhost:8080
 
 Not only have we generated a migration based on schema changes, but we've ensured there isn't any
 accidental drift in the schema coming from other potential upstream migrations. Why would this
-happen? Because of concurrent and cancelled PR's! Let's say you start a feature, abandon it but
-forget to clean up the schema migrations. A diff function catches those instances.
+happen? Because of concurrent and cancelled PR's — and just generally non-linearity of how the
+schema involves! Let's say you start a feature, abandon it but forget to clean up the schema
+migrations. A diff function catches those instances.
 
 If this happens to your live database, Atlas can also be pointed at a live instance to report any
 drift there.
