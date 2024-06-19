@@ -11,7 +11,7 @@
 </svelte:head>
 <div>
 	<div
-		class="prose grid !max-w-none grid-cols-[minmax(10px,1fr)_min(72ch,100%)_minmax(10px,1fr)] [&>*]:col-[2] [&>.full-bleed]:col-[1/4]"
+		class="prose grid !max-w-none grid-cols-[minmax(10px,1fr)_min(72ch,90%)_minmax(10px,1fr)] [&>*]:col-[2] [&>.full-bleed]:col-[1/4]"
 	>
 		<div class="full-bleed">
 			{#if image}

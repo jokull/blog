@@ -51,10 +51,6 @@
 	font-display: swap;
 }
 
-html {
-	overflow-x: hidden;
-}
-
 :root {
 	/*
 	 * Specify sRGB colors, but for Safari, specify more vibrant versions in the p3 space
@@ -121,7 +117,7 @@ input[type='date'] {
 
 @layer base {
 	a {
-		@apply text-gray-900 hover:text-lime no-underline hover:underline hover:decoration-lime;
+		@apply text-gray-900 no-underline hover:text-lime hover:underline hover:decoration-lime;
 	}
 }
 
@@ -150,11 +146,7 @@ input[type='date'] {
 }
 
 .introduction a {
-	@apply font-medium underline underline-offset-1 decoration-lime transition-all hover:decoration-2 hover:underline-offset-2 hover:text-black;
-}
-
-.prose > * {
-	@apply px-4 sm:px-8;
+	@apply font-medium underline decoration-lime underline-offset-1 transition-all hover:text-black hover:decoration-2 hover:underline-offset-2;
 }
 
 .prose > hr {
@@ -162,19 +154,23 @@ input[type='date'] {
 }
 
 .prose > .full-bleed {
-	@apply p-0 mb-4;
+	@apply mb-4 p-0;
 }
 
 img.full-bleed {
-	@apply w-full mx-auto;
+	@apply mx-auto w-full;
 }
 
 .prose > pre,
 .prose > .wider {
 	@apply mx-auto;
-	min-width: min(50ch, 100%);
-	max-width: min(125ch, 100%);
+	max-width: calc(100% - 16px);
+	overflow-x: scroll;
 	grid-column: 1 / 4;
+}
+
+.prose > pre {
+	font-size: 12px;
 }
 
 @media only screen and (max-width: 414px) {
@@ -199,11 +195,11 @@ img.full-bleed {
 }
 
 .prose blockquote {
-	@apply relative border-0 ml-4 font-mono text-xs pr-4 leading-relaxed;
+	@apply relative ml-4 border-0 pr-4 font-mono text-xs leading-relaxed;
 }
 
 .prose blockquote {
-	@apply before:bg-slate-900 before:h-full before:w-0.5 before:absolute before:rounded before:-left-1.5;
+	@apply before:absolute before:-left-1.5 before:h-full before:w-0.5 before:rounded before:bg-slate-900;
 }
 
 .prose blockquote > * {
@@ -221,5 +217,5 @@ img.full-bleed {
 }
 
 .footnotes li {
-	@apply whitespace-pre-wrap max-w-full overflow-hidden;
+	@apply max-w-full overflow-hidden whitespace-pre-wrap;
 }
