@@ -29,27 +29,9 @@ date: 2021-10-25
 			like <code class="rounded-sm bg-slate-200">20 gbp in isk</code>.
 		</p>
 	</Tool>
-	<Tool url="https://eggerapps.at/postico/v1.php" name="Postico">
-		<svg
-			width="32px"
-			height="32px"
-			viewBox="0 0 32 32"
-			version="1.1"
-			xmlns="http://www.w3.org/2000/svg"
-			xmlns:xlink="http://www.w3.org/1999/xlink"
-		>
-			<g stroke="none" fill="none" fill-rule="evenodd">
-				<g>
-					<rect x="0" y="0" width="32" height="32" />
-					<path
-						d="M23.7085347,14.3334558 C23.1970234,14.3334558 22.7824698,13.9186323 22.7824698,13.4069051 C22.7824698,12.8951779 23.1970774,12.4803544 23.7085347,12.4803544 C24.219992,12.4803544 24.6345996,12.8951779 24.6345996,13.4069051 C24.6345996,13.9186323 24.219992,14.3334558 23.7085347,14.3334558 L23.7085347,14.3334558 Z M31.8583266,21.8386086 C31.6859514,21.7810602 30.3712999,21.1520768 28.9559657,20.306666 C28.9664928,20.2921979 28.977074,20.2776759 28.9873852,20.2634237 C29.3376422,19.7766917 30.7538401,18.2449651 27.8760425,10.8125846 C25.8849005,5.67015516 21.022763,5.90180634 21.022763,5.90180634 C21.022763,5.90180634 14.3547613,2.65885177 13.7065051,3.02951525 C13.0581949,3.40012475 12.96561,12.5729932 13.4286964,13.4069051 C13.8917288,14.240817 18.614908,16.6499137 18.8926627,16.7424985 C19.1705793,16.8351914 18.9853555,17.2058009 18.8000778,17.3910787 C18.614908,17.5764644 12.132076,14.8894511 11.6690436,14.5188416 C11.2060111,14.1481781 11.1133723,7.29165944 11.1133723,7.29165944 C6.76064064,8.12551731 0,13.7711443 0,16.4645279 C0,16.5282307 0.0010797072,16.5943087 0.00302318017,16.6623303 C0.00394093129,16.6985005 0.00534455066,16.7345627 0.00680215538,16.7706249 C0.00782787723,16.7955122 0.00901555515,16.8206154 0.0102032331,16.8459885 C0.0124706182,16.891984 0.014845974,16.9378176 0.0179231396,16.9834892 C0.252003661,20.69034 2.71670528,29.3435994 3.33402787,29.3435994 C3.61183654,29.3435994 7.68675949,29.3435994 7.96456816,29.3435994 C8.1860161,29.3435994 8.64284022,26.5770656 8.81910242,25.4541161 C9.53057549,25.5742335 10.2667738,25.6373964 11.0207874,25.6373964 C11.4125591,25.6373964 11.7994182,25.6201211 12.1806628,25.5868661 C12.30159,27.0046296 12.5409611,29.3435994 12.7803862,29.3435994 C13.0581949,29.3435994 17.2257567,29.3435994 17.5035654,29.3435994 C17.9665438,29.3435994 21.7636581,18.6882389 21.7636581,18.6882389 C22.5971381,18.9661555 23.1528094,19.7074285 23.1528094,21.1899205 C23.2453943,22.1165252 21.6710732,24.2475973 21.9488819,25.2667869 C22.2266905,26.2860845 25.1902169,28.6024883 25.6533033,28.6024883 C26.1163897,28.6024883 26.9498157,27.4904979 26.9498157,27.0271955 C26.9498157,26.5640011 24.9162952,25.6690318 25.1902169,24.9888163 C25.4424365,24.3625861 27.0100094,22.7023204 28.1960138,21.2725721 C29.9295377,21.9637466 31.6681362,22.5845783 31.7656877,22.4871347 C31.9509655,22.3019109 32.1361353,21.9311935 31.8583266,21.8386086 L31.8583266,21.8386086 Z"
-						id="Shape"
-						fill="#000000"
-					/>
-				</g>
-			</g>
-		</svg>
-		<p slot="description">An excellent Postgres GUI for macOS.</p>
+	<Tool url="https://tableplus.com" name="TablePlus">
+		<img src="/blog/tableplus.png" alt="TablePlus logo" width="32" class="w-8 max-w-none" />
+		<p slot="description">My SQL GUI of choice, has a very native and fast MacOS UI, supports libSQL.</p>
 	</Tool>
 	<Tool url="https://cleanshot.com/" name="Cleanshot">
 		<img
@@ -101,13 +83,6 @@ date: 2021-10-25
 			between displays etc.
 		</p>
 	</Tool>
-	<Tool url="https://www.craft.do/" name="Craft">
-		<img src="/blog/craft.png" width="32" class="w-8 max-w-none" alt="Craft app logo" />
-		<p slot="description">
-			Block based editor with collaboration features. Like Google Docs, but native to macOS with
-			great publishing and hosting options.
-		</p>
-	</Tool>
 	<Tool url="https://www.plex.tv/" name="Plex">
 		<img src="/blog/plex.png" width="32" class="w-8 max-w-none" alt="Plex app logo" />
 		<p slot="description">
@@ -116,15 +91,6 @@ date: 2021-10-25
 			href="https://github.com/klutchell/mediaserver"
 				>klutchell/mediaserver</a
 			>.
-		</p>
-	</Tool>
-	<Tool url="https://meetingbar.leits.me" name="MeetingBar">
-		<img src="/blog/meetingbar.png" width="32" class="w-8 max-w-none" alt="MeetingBar app logo" />
-		<p slot="description">
-			This app puts a prominent text about your next upcoming meeting with convenient links to join
-			calls. You can configure a lot of things like what browser to use for what kind of meeting
-			link. I prefer Chrome for Google Meet links for example and MeetingBar takes care of that.
-			Bonus feature: Quickly create a meeting link.
 		</p>
 	</Tool>
 	<Tool name="iCloud Passwords">

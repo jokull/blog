@@ -19,7 +19,7 @@
 	<div class="absolute left-4 top-0 overflow-visible opacity-40 dark:opacity-20">
 		<div class="circle-a absolute h-[900px] w-[700px] rounded-[40rem] mix-blend-multiply" />
 	</div>
-	<div class="absolute right-0 top-28 overflow-visible opacity-40 dark:opacity-20 lg:top-0">
+	<div class="absolute right-0 top-28 overflow-visible opacity-40 lg:top-0 dark:opacity-20">
 		<div class="circle-b absolute h-[600px] w-[600px] rounded-[40rem] mix-blend-multiply" />
 	</div>
 </div>
@@ -32,8 +32,8 @@
 		<div class="sm:order-0 order-1 text-sm sm:text-base">
 			<div class="introduction">
 				<p class="mb-3">
-					Ég hef starfað í yfir 20 ár í sprotum og auglýsingastofum við forritun, vörustjórnun og í
-					stafrænum teymum. Í dag vinn ég í ferðatæknifyrirtækinu <a
+					Ég hef starfað í yfir 20 ár í sprotum og á auglýsingastofum við forritun, vörustýringu og
+					í stafrænum teymum. Í dag vinn ég í ferðatæknifyrirtækinu <a
 						href="https://www.triptojapan.com/"
 						target="_blank"
 						>Trip To Japan
@@ -68,14 +68,16 @@
 				<div class="text-xs text-gray-500">{year}</div>
 			</div>
 
-			{#each posts as post}
-				<div>
+			<div class="flex flex-col gap-3 sm:gap-2">
+				{#each posts as post}
 					<a
 						href={`./${post.slug}`}
-						class="item group mb-4 block border-b border-gray-100 pb-4 last:mb-0 last:border-none hover:no-underline"
+						class="item group flex-col gap-1 pb-4 leading-tight hover:no-underline sm:flex sm:flex-row sm:items-start sm:justify-between sm:leading-normal"
 					>
-						<div class="title mb-1 font-Clash text-xl font-medium">{post.title}</div>
-						<div class="date text-sm font-light text-gray-400 group-hover:no-underline">
+						<div class="title font-Clash font-medium">{post.title}</div>
+						<div
+							class="date font-Clash text-sm text-gray-400 group-hover:no-underline sm:text-base"
+						>
 							{post.date.toLocaleDateString(undefined, {
 								year: undefined,
 								month: 'long',
@@ -83,8 +85,8 @@
 							})}
 						</div>
 					</a>
-				</div>
-			{/each}
+				{/each}
+			</div>
 		{/each}
 	</div>
 </div>
