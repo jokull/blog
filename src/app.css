@@ -4,7 +4,8 @@
 
 @font-face {
 	font-family: 'Clash';
-	src: url('/fonts/ClashGrotesk-Extralight.20c0ab5.woff2') format('woff2'),
+	src:
+		url('/fonts/ClashGrotesk-Extralight.20c0ab5.woff2') format('woff2'),
 		url('/fonts/ClashGrotesk-Extralight.22ce76c.woff') format('woff');
 	font-weight: 200;
 	font-style: normal;
@@ -12,7 +13,8 @@
 }
 @font-face {
 	font-family: 'Clash';
-	src: url('/fonts/ClashGrotesk-Light.4cc85df.woff2') format('woff2'),
+	src:
+		url('/fonts/ClashGrotesk-Light.4cc85df.woff2') format('woff2'),
 		url('/fonts/ClashGrotesk-Light.80a09e3.woff') format('woff');
 	font-weight: 300;
 	font-style: normal;
@@ -20,7 +22,8 @@
 }
 @font-face {
 	font-family: 'Clash';
-	src: url('/fonts/ClashGrotesk-Regular.55923d3.woff2') format('woff2'),
+	src:
+		url('/fonts/ClashGrotesk-Regular.55923d3.woff2') format('woff2'),
 		url('/fonts/ClashGrotesk-Regular.0ac733f.woff') format('woff');
 	font-weight: 400;
 	font-style: normal;
@@ -28,7 +31,8 @@
 }
 @font-face {
 	font-family: 'Clash';
-	src: url('/fonts/ClashGrotesk-Medium.70562d8.woff2') format('woff2'),
+	src:
+		url('/fonts/ClashGrotesk-Medium.70562d8.woff2') format('woff2'),
 		url('/fonts/ClashGrotesk-Medium.df74bc4.woff') format('woff');
 	font-weight: 500;
 	font-style: normal;
@@ -36,7 +40,8 @@
 }
 @font-face {
 	font-family: 'Clash';
-	src: url('/fonts/ClashGrotesk-Semibold.cbba0f2.woff2') format('woff2'),
+	src:
+		url('/fonts/ClashGrotesk-Semibold.cbba0f2.woff2') format('woff2'),
 		url('/fonts/ClashGrotesk-Semibold.4be5863.woff') format('woff');
 	font-weight: 600;
 	font-style: normal;
@@ -44,7 +49,8 @@
 }
 @font-face {
 	font-family: 'Clash';
-	src: url('/fonts/ClashGrotesk-Bold.b8dfad4.woff2') format('woff2'),
+	src:
+		url('/fonts/ClashGrotesk-Bold.b8dfad4.woff2') format('woff2'),
 		url('/fonts/ClashGrotesk-Bold.ce29d2b.woff') format('woff');
 	font-weight: 700;
 	font-style: normal;
@@ -149,71 +155,10 @@ input[type='date'] {
 	@apply font-medium underline decoration-lime underline-offset-1 transition-all hover:text-black hover:decoration-2 hover:underline-offset-2;
 }
 
-.prose > hr {
-	@apply mx-4;
-}
-
-.prose > .full-bleed {
-	@apply mb-4 p-0;
-}
-
-img.full-bleed {
-	@apply mx-auto w-full;
-}
-
-.prose > pre,
-.prose > .wider {
-	@apply mx-auto;
-	max-width: calc(100% - 16px);
-	overflow-x: scroll;
-	grid-column: 1 / 4;
-}
-
-.prose > pre {
-	font-size: 12px;
-}
-
-@media only screen and (max-width: 414px) {
-	/* iPhone 8 plus width */
-	.prose > pre {
-		min-width: 100%;
-		border-radius: 0 !important;
-	}
-}
-
-.prose > table {
-	@apply mx-auto;
-	max-width: min(125ch, calc(100% - 40px));
-	grid-column: 1 / 4;
-	overflow-x: auto;
-}
-
 @media only screen and (max-width: 600px) {
 	.full-bleed {
 		margin-bottom: 1em;
 	}
-}
-
-.prose blockquote {
-	@apply relative ml-4 border-0 pr-4 font-mono text-xs leading-relaxed;
-}
-
-.prose blockquote {
-	@apply before:absolute before:-left-1.5 before:h-full before:w-0.5 before:rounded before:bg-slate-900;
-}
-
-.prose blockquote > * {
-	@apply mt-0;
-}
-
-.prose blockquote > :last-child {
-	@apply mb-0;
-}
-
-.prose h2,
-.prose h3,
-.prose h4 {
-	@apply font-Clash;
 }
 
 .footnotes li {
