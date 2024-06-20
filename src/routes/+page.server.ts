@@ -1,5 +1,7 @@
 import { bookSchema, postSchema } from '$lib/schemas';
 
+export const prerender = true;
+
 export async function load() {
 	let mdModules = import.meta.glob('../_posts/**/post.md');
 	const posts = await Promise.all(
