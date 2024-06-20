@@ -202,7 +202,7 @@ bun diff.ts | turso db shell http://localhost:8080
 Not only have we generated a migration based on schema changes, but we've ensured there isn't any
 accidental drift in the schema coming from other potential upstream migrations. Why would this
 happen? Because of concurrent and cancelled PR's — and just generally non-linearity of how the
-schema involves! Let's say you start a feature, abandon it but forget to clean up the schema
+schema evolves! Let's say you start a feature, abandon it but forget to clean up the schema
 migrations. A diff function catches those instances.
 
 If this happens to your live database, Atlas can also be pointed at a live instance to report any
