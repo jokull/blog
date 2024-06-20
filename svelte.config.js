@@ -4,25 +4,23 @@ import remarkAutolinkHeadings from 'remark-autolink-headings';
 import remarkFootnotes from 'remark-footnotes';
 import remarkSlug from 'remark-slug';
 import remarkUnwrapImages from 'remark-unwrap-images';
-import shiki from 'shiki';
-import preprocess from 'svelte-preprocess';
+import { codeToHtml } from 'shiki';
+import { sveltePreprocess } from 'svelte-preprocess';
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
 	extensions: ['.svelte', '.md'],
 	preprocess: [
 		mdsvex({
-			extensions: ['.svelte.md', '.md', '.svx'],
+			extensions: ['.md'],
 			highlight: {
 				highlighter: async (code, lang = 'text') => {
-					const highlighter = await shiki.getHighlighter({ theme: 'github-dark-dimmed' });
-					const html = escapeSvelte(highlighter.codeToHtml(code, { lang }));
-					return `{@html \`${html}\` }`;
+					return escapeSvelte(await codeToHtml(code, { lang, theme: 'github-dark-dimmed' }));
 				}
 			},
 			remarkPlugins: [remarkFootnotes, remarkSlug, remarkAutolinkHeadings, remarkUnwrapImages]
 		}),
-		preprocess({
+		sveltePreprocess({
 			postcss: true
 		})
 	],

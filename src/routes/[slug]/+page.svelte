@@ -1,8 +1,8 @@
 <script lang="ts">
 	import PostHeading from '../../components/PostHeading.svelte';
-	import type { PageData } from './$types';
+	import type { PageServerData } from './$types';
 
-	export let data: PageData;
+	export let data: PageServerData;
 	let { date, title, image, locale } = data.metadata!;
 </script>
 
@@ -33,6 +33,6 @@
 			{/if}
 		</div>
 
-		<svelte:component this={data.page} />
+		{@html data.page}
 	</div>
 </div>

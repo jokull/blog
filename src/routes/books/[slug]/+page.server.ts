@@ -19,5 +19,5 @@ export async function load({ params }) {
 		return { status: 404 };
 	}
 
-	return { page, metadata: result.data };
+	return { metadata: result.data, page: page.render().html };
 }

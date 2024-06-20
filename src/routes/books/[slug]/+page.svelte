@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageServerData } from './$types';
 
-	export let data: PageData;
+	export let data: PageServerData;
 
 	const { author, imageUrl, link, title, subtitle } = data.metadata!;
 
@@ -29,5 +29,6 @@
 			<div class="text-xs uppercase"><a href={link} class="text-gray-500">{linkHost}</a></div>
 		</div>
 	</div>
-	<svelte:component this={data.page} />
+
+	{@html data.page}
 </div>

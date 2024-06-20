@@ -3,7 +3,7 @@ import { postSchema } from '$lib/schemas';
 export async function load({ params }) {
 	const { slug } = params;
 
-	const post = await import(/* @vite-ignore */ `../../_posts/${slug}/post.md`);
+	const post = await import(`../../_posts/${slug}/post.md`);
 
 	const { default: page, metadata } = post;
 
@@ -19,5 +19,5 @@ export async function load({ params }) {
 		return { status: 404 };
 	}
 
-	return { page, metadata: result.data };
+	return { metadata: result.data, page: page.render().html };
 }
