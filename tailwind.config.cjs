@@ -4,7 +4,16 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				Clash: ['Clash', 'sans-serif']
+				serif: [
+					'"Instrument Serif"',
+					'Garamond',
+					'ui-serif',
+					'Georgia',
+					'Cambria',
+					'Times New Roman',
+					'Times',
+					'serif'
+				]
 			},
 			boxShadow: {
 				sm: 'var(--shadow-elevation-low)',

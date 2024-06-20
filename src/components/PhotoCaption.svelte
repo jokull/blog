@@ -5,20 +5,20 @@
 	export let fancy = false;
 </script>
 
-<div class={`${wider ? 'wider' : ''} mb-4 relative`}>
-	<img class={`${fancy && 'shadow-lg rounded-lg'} !my-2`} src={url} alt={caption || ''} />
+<div class={`${wider ? 'wider' : ''} relative mb-4`}>
+	<img class={`${fancy && 'rounded-lg shadow-lg'} !my-2`} src={url} alt={caption || ''} />
 	{#if caption}
 		{#if fancy}
 			<div
 				class="
-					text-sm font-Clash text-center pb-3 pt-6 px-4 font-medium text-white absolute
-					bg-smooth rounded-lg inset-x-4 bottom-2
+					absolute inset-x-4 bottom-2 rounded-lg bg-smooth px-4 pb-3 pt-6 text-center
+					font-serif text-sm text-white
 				"
 			>
 				{caption}
 			</div>
 		{:else}
-			<div class="text-sm font-Clash text-center my-4">{caption}</div>
+			<div class="my-4 text-center font-serif text-sm">{caption}</div>
 		{/if}
 	{/if}
 </div>
