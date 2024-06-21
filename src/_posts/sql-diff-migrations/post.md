@@ -47,7 +47,7 @@ In Postgres it's a simple `ALTER COLUMN column SET NOT NULL`. In SQLite it's a m
 
 1. Creating a temporary table where the table schema has the column with a null constraint
 2. Copy data from the old table to new table
-3. Drop the new table (scary!)
+3. Drop the old table (scary!)
 4. Rename new table to old table
 
 When modifying columns with foreign key constraints it can also be important to switch foreign key
