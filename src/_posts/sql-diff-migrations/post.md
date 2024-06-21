@@ -75,7 +75,8 @@ atlas schema diff \
 ```
 
 This tells atlas to look at a local db and compare it to an sql file schema that is temporarily
-loaded into memory, then diff and produce a script — that format bit is just to add indentation.
+loaded into memory, then diff and produce a migration script bringing them in to sync. (That format
+bit is just to add indentation.)
 
 But where does that schema.sql come from? In my monorepo I've set up a package that is purpose made
 for migrations. It has drizzle and drizzle kit, imports the project schema from a sibling package
