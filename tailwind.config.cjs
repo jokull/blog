@@ -5,7 +5,7 @@ module.exports = {
 		extend: {
 			fontFamily: {
 				serif: [
-					'"Instrument Serif"',
+					'"Georgia Pro Cond"',
 					'Garamond',
 					'ui-serif',
 					'Georgia',
@@ -13,7 +13,9 @@ module.exports = {
 					'Times New Roman',
 					'Times',
 					'serif'
-				]
+				],
+				sans: ['Inter'],
+				mono: ['"JetBrains Mono"']
 			},
 			boxShadow: {
 				sm: 'var(--shadow-elevation-low)',
