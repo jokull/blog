@@ -17,7 +17,7 @@ impractical because many modern web features, such as service workers, geolocati
 authentication mechanisms, require a secure context that HTTP cannot provide.
 
 On top of these issues, developing with HTTPS offers additional benefits, such as enhanced security
-when using public WiFi and being able to share a link with a colleage to feature previews or visual
+when using public WiFi and being able to share a link with a colleague to feature previews or visual
 tests. Without HTTPS, any data transmitted between your development server and your browser is
 vulnerable to interception by malicious actors on the same network.
 
