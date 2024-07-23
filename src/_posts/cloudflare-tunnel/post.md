@@ -48,13 +48,14 @@ This should have generated a file like this on `.cloudflared/<uuid>.json`
 }
 ```
 
-Now point `my-project.my-domain.tld` to the tunnel ID:
+Now point `my-project.my-domain.tld` to the tunnel — just switch my-domain.tld to a domain on your
+Cloudflare account:
 
 ```bash
 cloudflared tunnel route dns my-project my-project.my-domain.tld
 ```
 
-Assuming you have a process on `http://localhost:3090`
+Assuming you have a local process running on port 3090, bound to `localhost`:
 
 ```bash
 cloudflared tunnel run --url http://localhost:3090 my-project
