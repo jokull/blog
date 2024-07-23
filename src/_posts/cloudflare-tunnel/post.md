@@ -40,11 +40,11 @@ cloudflared tunnel create my-project
 
 This should have generated a file like this on `.cloudflared/<uuid>.json`
 
-```
+```json
 {
-  "AccountTag": "<ACCOUNT_ID>",
-  "TunnelSecret": "<SECRET>",
-  "TunnelID": "<UUID>"
+	"AccountTag": "<ACCOUNT_ID>",
+	"TunnelSecret": "<SECRET>",
+	"TunnelID": "<UUID>"
 }
 ```
 
