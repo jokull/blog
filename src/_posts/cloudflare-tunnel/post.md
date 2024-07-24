@@ -31,7 +31,7 @@ Utilizing tools like Cloudflare Tunnels can simplify this process by securely ex
 development server to the internet. This allows you to test your applications in a real-world,
 HTTPS-enabled environment without the hassle of managing your own certificates and network
 configurations. Assuming the top-level domain DNS is managed by Cloudflare, here’s how you’d quickly
-set up a tunnel:
+set up a tunnel for free:
 
 ```bash
 cloudflared tunnel login
@@ -63,3 +63,12 @@ cloudflared tunnel run --url http://localhost:3090 my-project
 
 For environments with complex routing to separate backend services you run locally you can express
 more elaborate configuration with [ingress rules](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/configure-tunnels/local-management/configuration-file/) instead of just `--url`.
+
+### Other services worth considering
+
+- [Lokal.so](https://lokal.so) - local or global tunnels with lots of debugging tools
+- [zrok](https://zrok.io) - open source, self hostable tunnels, share publicly or amongst
+  whitelisted zrok users
+
+I would however not recommend ngrok. It's expensive and has been considerably slower than Cloudflare
+for me.
