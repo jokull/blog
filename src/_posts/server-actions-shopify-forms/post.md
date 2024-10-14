@@ -68,6 +68,9 @@ export function useActionForm<T extends FieldBag, R>({
 }
 ```
 
+Turn `neverthrow` results into serializable objects, so we can return in action responses. Otherwise
+Next.js will complain that complex objects cannot be serialized. This also explains `hydrateServerResult`.
+
 ```ts
 import { err, ok, type Result } from 'neverthrow';
 
@@ -117,6 +120,8 @@ export function hydrateServerResult<T, E>(result: ServerOk<T> | ServerErr<E>): R
 }
 ```
 
+Some helper utilities to turn zod validation into `@shopify/forms` field errors.
+
 ```ts
 import { type FormError } from '@shopify/react-form';
 import { type ZodError } from 'zod';
@@ -130,7 +135,11 @@ export function zodErrorToFormError<T>(zodError: ZodError<T>): FormError[] {
 }
 ```
 
-Here's how you would use the hook
+Here's how you would use the hook in a client component. Again, if the page JavaScript hasn't loaded
+a form submit will annoyingly reload the page since an undefined `action` attribute defaults to
+current page, and the method is GET. In theory, this can be remedied for "best of both worlds"
+approach by assigning the server action to the form, letting the server action detect if `formData`
+is being sent and then do its best to validate it against the zod schema.
 
 ```tsx
 'use client';
@@ -208,7 +217,8 @@ export function ContactForm() {
 }
 ```
 
-And here's the server action
+And here's the server action. Assigning the form type to `z.input` is a nice little touch
+to get static analysis of the schema and form output.
 
 ```ts
 'use server';
@@ -239,6 +249,6 @@ client validation in `useField({value: "", validate: () => ...})`, and an elegan
 have static inferrence mapping the form fields to the zod schema. If the form shape doesn't match
 the zod schema you'll get a type error.
 
-It comes down to being team bound or unbound form controls. Unbound means you leave more
-functionality to the browser. Bound gives you more control and full control over the final form
-shape since it's JSON and not FormData. Your mileage may vary.
+It comes down to being team-bound or team-unbound form controls. Unbound means you leave more
+functionality to the browser. Bound gives you more _drumroll_ control over the final form
+shape, realtime validation etc. Your mileage may vary.
