@@ -199,7 +199,8 @@ export async function GET(request: NextRequest) {
 ```
 
 The storefront code to [Somm.is](https://www.somm.is/), my own store using this code, is [open
-sourced](https://github.com/jokull/somm-next).
+sourced](https://github.com/jokull/somm-next). Feel free to use it as a reference for your own
+storefront or Dokobit integration.
 
 **Key Takeaways**
 
