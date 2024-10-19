@@ -12,6 +12,8 @@ checkout using **Next.js**, **TypeScript**, and **Zod schemas**. We'll leverage 
 redirect users to Dokobit for authentication and then enrich Shopify customer data with verified
 details, such as the Icelandic kennitala or phone number.
 
+<img src="https://ss.solberg.is/8f4XSPRn+" alt="Circle combining Dokobit, Shopify and Next.js into an illustration">
+
 Here’s how it works: we'll create a `/checkout` route in Next.js that kicks off the Dokobit
 verification flow, manages the response, and updates the Shopify cart with verified user data—all in
 TypeScript, ensuring type safety throughout.
