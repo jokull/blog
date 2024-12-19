@@ -1,7 +1,7 @@
 ---
 title: Integrating Dokobit eID with Shopify Checkout in Next.js
 date: 2024-10-19
-isDraft: true
+isDraft: false
 ---
 
 Handling verified user data in e-commerce can be tricky—especially when it comes to age verification
