@@ -3,7 +3,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { clearToken, getStoredToken, login } from "./auth";
+import { clearToken, getValidToken, login } from "./auth";
 import { API_BASE, createClient } from "./client";
 
 function parseLocale(value: string | undefined): "en" | "is" | undefined {
@@ -81,8 +81,8 @@ Examples:
 `);
 }
 
-function requireAuth(): string {
-	const token = getStoredToken();
+async function requireAuth(): Promise<string> {
+	const token = await getValidToken(API_BASE);
 	if (!token) {
 		console.error("Not authenticated. Run 'bun run blog login' first.");
 		process.exit(1);
@@ -107,7 +107,7 @@ function handleLogout() {
 }
 
 async function handleList() {
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	const res = await client.api.posts.$get();
@@ -138,7 +138,7 @@ async function handleList() {
 }
 
 async function handleGet(slug: string) {
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	const res = await client.api.posts[":slug"].$get({
@@ -178,7 +178,7 @@ ${post.markdown}
 }
 
 async function handleCreate() {
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	const slug = values.slug;
@@ -233,7 +233,7 @@ async function handleCreate() {
 }
 
 async function handleUpdate(slug: string) {
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	const title = values.title;
@@ -294,7 +294,7 @@ async function handleUpdate(slug: string) {
 }
 
 async function handleDelete(slug: string) {
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	const res = await client.api.posts[":slug"].$delete({
@@ -314,7 +314,7 @@ async function handleDelete(slug: string) {
 }
 
 async function handleCategories() {
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	const res = await client.api.categories.$get();
@@ -349,7 +349,7 @@ async function handleBackup() {
 		process.exit(1);
 	}
 
-	const token = requireAuth();
+	const token = await requireAuth();
 	const client = createClient(token);
 
 	console.log("Fetching posts...");
