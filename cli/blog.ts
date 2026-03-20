@@ -3,6 +3,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+import { z } from "zod";
+import { safeFetchJson, safeZodParse } from "../lib/safe-utils";
 import { clearToken, getValidToken, login } from "./auth";
 import { API_BASE, createClient } from "./client";
 
@@ -42,6 +44,7 @@ Usage: bun run blog <command> [options]
 Commands:
   login              Authenticate via browser
   logout             Clear stored authentication
+  whoami             Show authenticated user
   list               List all posts
   get <slug>         View post details
   create             Create a new post
@@ -104,6 +107,20 @@ async function handleLogin() {
 function handleLogout() {
 	clearToken();
 	console.log("Logged out successfully.");
+}
+
+const githubUserSchema = z.object({
+	login: z.string(),
+	name: z.string().nullable(),
+});
+
+async function handleWhoami() {
+	const token = await requireAuth();
+	const result = await safeFetchJson("https://api.github.com/user", {
+		headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+	});
+	const user = result.andThen(safeZodParse(githubUserSchema)).unwrap("Failed to fetch user");
+	console.log(`Logged in as ${user.login}${user.name ? ` (${user.name})` : ""}`);
 }
 
 async function handleList() {
@@ -428,6 +445,9 @@ async function main() {
 			break;
 		case "logout":
 			handleLogout();
+			break;
+		case "whoami":
+			await handleWhoami();
 			break;
 		case "list":
 			await handleList();
