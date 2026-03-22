@@ -68,7 +68,6 @@
 		"drizzle-kit": "^0.31.10",
 		"knip": "^5.88.1",
 		"lefthook": "^2.1.4",
-		"next": "^16.2.1",
 		"oxfmt": "^0.40.0",
 		"oxlint": "^1.56.0",
 		"oxlint-tsgolint": "^0.16.0",
