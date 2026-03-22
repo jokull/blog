@@ -29,6 +29,10 @@ const { positionals, values } = parseArgs({
 		"hero-image": { type: "string" },
 		publish: { type: "boolean" },
 		unpublish: { type: "boolean" },
+		url: { type: "string", short: "u" },
+		description: { type: "string", short: "d" },
+		"source-url": { type: "string" },
+		"source-author": { type: "string" },
 		help: { type: "boolean", short: "h" },
 	},
 });
@@ -52,6 +56,21 @@ Commands:
   delete <slug>      Delete a post
   categories         List available categories
   backup             Backup all posts to iCloud Documents
+
+Note Commands:
+  note list          List all notes
+  note add <id>      Add a note
+  note update <id>   Update a note
+  note delete <id>   Delete a note
+
+Options for note add/update:
+  -u, --url          Link URL (required for add)
+  -t, --title        Note title (required for add)
+  -d, --description  Description (markdown)
+      --source-url   Original tweet URL
+      --source-author Source @username
+      --publish      Publish the note
+      --unpublish    Unpublish the note
 
 Options for create:
   -s, --slug         Post slug (required)
@@ -433,6 +452,152 @@ async function handleBackup() {
 	console.log(`\nBackup complete: ${posts.length} posts saved.`);
 }
 
+async function handleNoteList() {
+	const token = await requireAuth();
+	const client = createClient(token);
+
+	const res = await client.api.notes.all.$get();
+	if (!res.ok) {
+		console.error("Failed to fetch notes:", res.status);
+		process.exit(1);
+	}
+
+	const data = await res.json();
+	if ("error" in data) {
+		console.error("Error:", data.error);
+		process.exit(1);
+	}
+
+	console.log("\nNotes:");
+	console.log("─".repeat(80));
+
+	for (const note of data.notes) {
+		const status = note.publishedAt ? "published" : "draft";
+		const author = note.sourceAuthor ? `@${note.sourceAuthor}` : "";
+		console.log(
+			`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${note.title.slice(0, 35).padEnd(35)} ${author}`,
+		);
+	}
+
+	console.log("─".repeat(80));
+	console.log(`Total: ${data.notes.length} notes`);
+}
+
+async function handleNoteAdd(id: string) {
+	const token = await requireAuth();
+	const client = createClient(token);
+
+	const url = values.url;
+	const title = values.title;
+	const description = values.description;
+	const sourceUrl = values["source-url"];
+	const sourceAuthor = values["source-author"];
+	const shouldPublish = values.publish;
+
+	if (!url) {
+		console.error("Missing required option: --url");
+		process.exit(1);
+	}
+	if (!title) {
+		console.error("Missing required option: --title");
+		process.exit(1);
+	}
+
+	const res = await client.api.notes.$post({
+		json: {
+			id,
+			url,
+			title,
+			description,
+			sourceUrl,
+			sourceAuthor,
+			publish: shouldPublish,
+		},
+	});
+
+	if (!res.ok) {
+		console.error("Failed to add note:", res.status);
+		const data = await res.json();
+		if ("error" in data) {
+			console.error("Error:", data.error);
+		}
+		process.exit(1);
+	}
+
+	console.log(`Note added: ${id}`);
+}
+
+async function handleNoteUpdate(id: string) {
+	const token = await requireAuth();
+	const client = createClient(token);
+
+	const url = values.url;
+	const title = values.title;
+	const description = values.description;
+	const sourceUrl = values["source-url"];
+	const sourceAuthor = values["source-author"];
+	const shouldPublish = values.publish;
+	const shouldUnpublish = values.unpublish;
+
+	const updateData: {
+		url?: string;
+		title?: string;
+		description?: string;
+		sourceUrl?: string;
+		sourceAuthor?: string;
+		publish?: boolean;
+	} = {};
+
+	if (url !== undefined) updateData.url = url;
+	if (title !== undefined) updateData.title = title;
+	if (description !== undefined) updateData.description = description;
+	if (sourceUrl !== undefined) updateData.sourceUrl = sourceUrl;
+	if (sourceAuthor !== undefined) updateData.sourceAuthor = sourceAuthor;
+	if (shouldPublish) updateData.publish = true;
+	if (shouldUnpublish) updateData.publish = false;
+
+	if (Object.keys(updateData).length === 0) {
+		console.error("No updates specified. Use --help to see available options.");
+		process.exit(1);
+	}
+
+	const res = await client.api.notes[":id"].$patch({
+		param: { id },
+		json: updateData,
+	});
+
+	if (!res.ok) {
+		console.error("Failed to update note:", res.status);
+		const data = await res.json();
+		if ("error" in data) {
+			console.error("Error:", data.error);
+		}
+		process.exit(1);
+	}
+
+	console.log(`Note updated: ${id}`);
+}
+
+async function handleNoteDelete(id: string) {
+	const token = await requireAuth();
+	const client = createClient(token);
+
+	const res = await client.api.notes[":id"].$delete({
+		param: { id },
+	});
+
+	if (!res.ok) {
+		console.error("Failed to delete note:", res.status);
+		const data = await res.json();
+		if ("error" in data) {
+			console.error("Error:", data.error);
+		}
+		process.exit(1);
+	}
+
+	console.log(`Note deleted: ${id}`);
+}
+
 async function main() {
 	if (values.help || !command) {
 		printHelp();
@@ -482,6 +647,40 @@ async function main() {
 		case "backup":
 			await handleBackup();
 			break;
+		case "note": {
+			const noteCommand = args[0];
+			switch (noteCommand) {
+				case "list":
+					await handleNoteList();
+					break;
+				case "add":
+					if (!args[1]) {
+						console.error("Missing id. Usage: bun run blog note add <id> [options]");
+						process.exit(1);
+					}
+					await handleNoteAdd(args[1]);
+					break;
+				case "update":
+					if (!args[1]) {
+						console.error("Missing id. Usage: bun run blog note update <id> [options]");
+						process.exit(1);
+					}
+					await handleNoteUpdate(args[1]);
+					break;
+				case "delete":
+					if (!args[1]) {
+						console.error("Missing id. Usage: bun run blog note delete <id>");
+						process.exit(1);
+					}
+					await handleNoteDelete(args[1]);
+					break;
+				default:
+					console.error(`Unknown note command: ${noteCommand}`);
+					console.error("Available: list, add, update, delete");
+					process.exit(1);
+			}
+			break;
+		}
 		default:
 			console.error(`Unknown command: ${command}`);
 			printHelp();

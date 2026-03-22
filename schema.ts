@@ -47,6 +47,19 @@ interface OklchColor {
 	h: number; // Hue (0-360)
 }
 
+export const Note = sqliteTable("note", {
+	id: text("id").notNull().primaryKey(),
+	url: text("url").notNull(),
+	title: text("title").notNull(),
+	description: text("description"),
+	sourceUrl: text("source_url"),
+	sourceAuthor: text("source_author"),
+	publishedAt: integer("published_at", { mode: "timestamp" }),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$default(() => new Date()),
+});
+
 export const KittyTheme = sqliteTable("kitty_theme", {
 	id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
 	slug: text("slug").notNull().unique(),
