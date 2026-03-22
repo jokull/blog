@@ -5,31 +5,22 @@ import { safeFetchJson, safeZodParse } from "../lib/safe-utils";
 
 const SESSION_FILE = `${process.env.HOME}/.blog-cli-session`;
 
-const storedSessionSchema = z.object({
-	access_token: z.string(),
-	refresh_token: z.string().default(""),
-	expires_at: z.number(),
-});
-
-type StoredSession = z.infer<typeof storedSessionSchema>;
-
-function readSession(): StoredSession | null {
+function readToken(): string | null {
 	if (!existsSync(SESSION_FILE)) return null;
 	const content = readFileSync(SESSION_FILE, "utf-8").trim();
 	if (!content) return null;
 
-	// Migrate plain token string from old format
-	try {
-		const result = storedSessionSchema.safeParse(JSON.parse(content));
-		if (result.success) return result.data;
-	} catch {
-		// Old format: plain access token string without refresh support
+	// Try new format (plain app token)
+	if (content.includes(".") && !content.startsWith("{")) {
+		return content;
 	}
+
+	// Old JSON format — discard, user needs to re-login
 	return null;
 }
 
-function writeSession(session: StoredSession) {
-	writeFileSync(SESSION_FILE, JSON.stringify(session), "utf-8");
+function writeToken(token: string) {
+	writeFileSync(SESSION_FILE, token, "utf-8");
 }
 
 export function clearToken() {
@@ -52,14 +43,15 @@ const deviceCodeSchema = z.object({
 
 const tokenResponseSchema = z.object({
 	access_token: z.string().optional(),
-	refresh_token: z.string().optional(),
-	refresh_token_expires_in: z.number().optional(),
 	token_type: z.string().optional(),
 	scope: z.string().optional(),
-	expires_in: z.number().optional(),
 	error: z.string().optional(),
 	error_description: z.string().optional(),
 	interval: z.number().optional(),
+});
+
+const cliTokenResponseSchema = z.object({
+	token: z.string(),
 });
 
 async function fetchClientId(apiBase: string): Promise<string> {
@@ -85,20 +77,7 @@ async function requestDeviceCode(clientId: string) {
 	return result.andThen(safeZodParse(deviceCodeSchema)).unwrap("Failed to request device code");
 }
 
-function sessionFromTokenResponse(data: z.infer<typeof tokenResponseSchema>): StoredSession {
-	const expiresIn = data.expires_in ?? 28800; // Default 8 hours
-	return {
-		access_token: data.access_token!,
-		refresh_token: data.refresh_token!,
-		expires_at: Date.now() + expiresIn * 1000,
-	};
-}
-
-async function pollForToken(
-	clientId: string,
-	deviceCode: string,
-	interval: number,
-): Promise<StoredSession> {
+async function pollForGitHubToken(clientId: string, deviceCode: string, interval: number) {
 	const pollInterval = interval * 1000;
 
 	for (;;) {
@@ -121,17 +100,7 @@ async function pollForToken(
 			.andThen(safeZodParse(tokenResponseSchema))
 			.unwrap("OAuth token poll failed");
 
-		if (data.access_token) {
-			if (!data.refresh_token) {
-				// GitHub OAuth app doesn't have token expiration enabled — no refresh token
-				return {
-					access_token: data.access_token,
-					refresh_token: "",
-					expires_at: Date.now() + (data.expires_in ?? 365 * 24 * 3600) * 1000,
-				};
-			}
-			return sessionFromTokenResponse(data);
-		}
+		if (data.access_token) return data.access_token;
 
 		if (data.error === "authorization_pending") continue;
 
@@ -154,54 +123,22 @@ async function pollForToken(
 	}
 }
 
-async function refreshAccessToken(apiBase: string, refreshToken: string): Promise<StoredSession> {
-	const clientId = await fetchClientId(apiBase);
-
-	const result = await safeFetchJson("https://github.com/login/oauth/access_token", {
+async function exchangeForAppToken(apiBase: string, githubToken: string): Promise<string> {
+	const result = await safeFetchJson(`${apiBase}/api/cli-token`, {
 		method: "POST",
 		headers: {
-			Accept: "application/json",
-			"Content-Type": "application/x-www-form-urlencoded",
+			Authorization: `Bearer ${githubToken}`,
 		},
-		body: new URLSearchParams({
-			client_id: clientId,
-			grant_type: "refresh_token",
-			refresh_token: refreshToken,
-		}),
 	});
-
 	const data = result
-		.andThen(safeZodParse(tokenResponseSchema))
-		.unwrap("Failed to refresh token");
-
-	if (data.access_token && data.refresh_token) {
-		return sessionFromTokenResponse(data);
-	}
-
-	throw new Error(
-		`Token refresh failed: ${data.error ?? "unknown"} - ${data.error_description ?? ""}`,
-	);
+		.andThen(safeZodParse(cliTokenResponseSchema))
+		.unwrap("Failed to exchange token");
+	return data.token;
 }
 
-/** Get a valid access token, refreshing automatically if expired. Returns null if not logged in. */
-export async function getValidToken(apiBase: string): Promise<string | null> {
-	const session = readSession();
-	if (!session) return null;
-
-	// Refresh if token expires within 5 minutes (skip if no refresh token)
-	if (session.refresh_token && session.expires_at - Date.now() < 5 * 60 * 1000) {
-		try {
-			const refreshed = await refreshAccessToken(apiBase, session.refresh_token);
-			writeSession(refreshed);
-			return refreshed.access_token;
-		} catch (error) {
-			console.error("Token refresh failed — please run 'bun run blog login' again.");
-			console.error(error instanceof Error ? error.message : error);
-			return null;
-		}
-	}
-
-	return session.access_token;
+/** Get the stored app token, or null if not logged in. */
+export async function getValidToken(_apiBase: string): Promise<string | null> {
+	return readToken();
 }
 
 export async function login(apiBase: string): Promise<string> {
@@ -219,8 +156,15 @@ export async function login(apiBase: string): Promise<string> {
 	console.log("─".repeat(50) + "\n");
 	console.log("Waiting for authorization...");
 
-	const session = await pollForToken(clientId, deviceCode.device_code, deviceCode.interval);
-	writeSession(session);
+	const githubToken = await pollForGitHubToken(
+		clientId,
+		deviceCode.device_code,
+		deviceCode.interval,
+	);
 
-	return session.access_token;
+	console.log("Exchanging for app token...");
+	const appToken = await exchangeForAppToken(apiBase, githubToken);
+	writeToken(appToken);
+
+	return appToken;
 }

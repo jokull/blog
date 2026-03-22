@@ -4,33 +4,39 @@ import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { z } from "zod/v4";
 import { getSession, whoami } from "@/auth";
+import { createCliToken, verifyCliToken } from "@/lib/cli-token";
 import { db } from "@/db";
 import { env } from "@/env";
 import { Note, Post } from "@/schema";
 
 const app = new Hono().basePath("/api");
 
-// Verify GitHub access token by calling GitHub API
-async function verifyGitHubToken(token: string): Promise<string | null> {
-	try {
-		const user = await whoami(token);
-		return user.login;
-	} catch {
-		return null;
-	}
-}
-
-// Auth middleware - checks for admin access via session or GitHub token
+// Auth middleware - checks for admin access via app token, GitHub token, or session
 async function authMiddleware(c: Context, next: Next) {
-	// First, check for Authorization header (GitHub access token)
 	const authHeader = c.req.header("Authorization");
 	if (authHeader?.startsWith("Bearer ")) {
 		const token = authHeader.slice(7);
-		const username = await verifyGitHubToken(token);
-		if (username === "jokull") {
-			await next();
-			return;
+
+		// Try app token first (contains a dot separator)
+		if (token.includes(".")) {
+			const username = await verifyCliToken(token);
+			if (username === "jokull") {
+				await next();
+				return;
+			}
 		}
+
+		// Fall back to GitHub token
+		try {
+			const user = await whoami(token);
+			if (user.login === "jokull") {
+				await next();
+				return;
+			}
+		} catch {
+			// Not a valid GitHub token either
+		}
+
 		return c.json({ error: "Unauthorized" }, 401);
 	}
 
@@ -84,6 +90,23 @@ const UpdateNoteSchema = z.object({
 const route = app
 	// Public endpoint for CLI to get OAuth client ID
 	.get("/oauth-config", (c) => c.json({ clientId: env.GITHUB_CLIENT_ID }))
+	.post("/cli-token", async (c) => {
+		const authHeader = c.req.header("Authorization");
+		if (!authHeader?.startsWith("Bearer ")) {
+			return c.json({ error: "Missing Authorization header" }, 401);
+		}
+		const githubToken = authHeader.slice(7);
+		try {
+			const user = await whoami(githubToken);
+			if (user.login !== "jokull") {
+				return c.json({ error: "Unauthorized" }, 403);
+			}
+			const token = await createCliToken(user.login);
+			return c.json({ token });
+		} catch {
+			return c.json({ error: "Invalid GitHub token" }, 401);
+		}
+	})
 	.get("/posts", authMiddleware, async (c) => {
 		const posts = await db.query.Post.findMany({
 			orderBy: [desc(Post.publishedAt)],
