@@ -64,6 +64,13 @@
 			"when": 1774210968365,
 			"tag": "0008_real_red_hulk",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "6",
+			"when": 1774212129569,
+			"tag": "0009_dry_sabretooth",
+			"breakpoints": true
 		}
 	]
 }

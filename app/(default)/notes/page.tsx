@@ -86,24 +86,17 @@ export default async function NotesPage({
 									)
 								) : null}
 							</div>
-							<div className="prose prose-stone prose-sm">
-								<p>
-									<a
-										href={note.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="font-medium no-underline hover:underline"
-									>
-										{note.title}
-									</a>
-									{rendered ? (
-										<>
-											{" — "}
-											<span className="*:inline">{rendered}</span>
-										</>
-									) : null}
-								</p>
-							</div>
+							{rendered ? (
+								<div className="prose prose-stone prose-sm">{rendered}</div>
+							) : null}
+							<a
+								href={note.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-blue-500 hover:text-blue-600 text-sm"
+							>
+								{note.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+							</a>
 						</article>
 					);
 				})}

@@ -65,7 +65,6 @@ Note Commands:
 
 Options for note add/update:
   -u, --url          Link URL (required for add)
-  -t, --title        Note title (required for add)
   -d, --description  Description (markdown)
       --source-url   Original tweet URL
       --source-author Source @username
@@ -474,9 +473,8 @@ async function handleNoteList() {
 	for (const note of data.notes) {
 		const status = note.publishedAt ? "published" : "draft";
 		const author = note.sourceAuthor ? `@${note.sourceAuthor}` : "";
-		console.log(
-			`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${note.title.slice(0, 35).padEnd(35)} ${author}`,
-		);
+		const desc = (note.description ?? "").slice(0, 40);
+		console.log(`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${desc.padEnd(40)} ${author}`);
 	}
 
 	console.log("─".repeat(80));
@@ -488,7 +486,6 @@ async function handleNoteAdd(id: string) {
 	const client = createClient(token);
 
 	const url = values.url;
-	const title = values.title;
 	const description = values.description;
 	const sourceUrl = values["source-url"];
 	const sourceAuthor = values["source-author"];
@@ -498,16 +495,11 @@ async function handleNoteAdd(id: string) {
 		console.error("Missing required option: --url");
 		process.exit(1);
 	}
-	if (!title) {
-		console.error("Missing required option: --title");
-		process.exit(1);
-	}
 
 	const res = await client.api.notes.$post({
 		json: {
 			id,
 			url,
-			title,
 			description,
 			sourceUrl,
 			sourceAuthor,
@@ -532,7 +524,6 @@ async function handleNoteUpdate(id: string) {
 	const client = createClient(token);
 
 	const url = values.url;
-	const title = values.title;
 	const description = values.description;
 	const sourceUrl = values["source-url"];
 	const sourceAuthor = values["source-author"];
@@ -541,7 +532,6 @@ async function handleNoteUpdate(id: string) {
 
 	const updateData: {
 		url?: string;
-		title?: string;
 		description?: string;
 		sourceUrl?: string;
 		sourceAuthor?: string;
@@ -549,7 +539,6 @@ async function handleNoteUpdate(id: string) {
 	} = {};
 
 	if (url !== undefined) updateData.url = url;
-	if (title !== undefined) updateData.title = title;
 	if (description !== undefined) updateData.description = description;
 	if (sourceUrl !== undefined) updateData.sourceUrl = sourceUrl;
 	if (sourceAuthor !== undefined) updateData.sourceAuthor = sourceAuthor;
