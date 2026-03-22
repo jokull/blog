@@ -52,7 +52,7 @@ export default function Navbar() {
 						email
 					</a>
 					<Item href="https://x.com/jokull">x.com/jokull</Item>
-					<Item href="https://github.com/jokull/blog-next">source</Item>
+					<Item href="https://github.com/jokull/blog">source</Item>
 					<a
 						href="https://calendar.app.google/CbGee9NZCYu7gKhLA"
 						target="_blank"
