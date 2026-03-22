@@ -71,7 +71,16 @@ export default async function NotesPage({
 							{rendered ? (
 								<div className="prose prose-stone prose-sm">{rendered}</div>
 							) : null}
-							{date ? <time className="text-sm text-stone-400">{date}</time> : null}
+							{date ? (
+								<a
+									href={`https://x.com/i/status/${note.id}`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-sm text-stone-400 hover:text-stone-600"
+								>
+									<time>{date}</time>
+								</a>
+							) : null}
 						</article>
 					);
 				})}
