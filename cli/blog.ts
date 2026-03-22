@@ -29,10 +29,7 @@ const { positionals, values } = parseArgs({
 		"hero-image": { type: "string" },
 		publish: { type: "boolean" },
 		unpublish: { type: "boolean" },
-		url: { type: "string", short: "u" },
 		description: { type: "string", short: "d" },
-		"source-url": { type: "string" },
-		"source-author": { type: "string" },
 		help: { type: "boolean", short: "h" },
 	},
 });
@@ -64,10 +61,7 @@ Note Commands:
   note delete <id>   Delete a note
 
 Options for note add/update:
-  -u, --url          Link URL (required for add)
   -d, --description  Description (markdown)
-      --source-url   Original tweet URL
-      --source-author Source @username
       --publish      Publish the note
       --unpublish    Unpublish the note
 
@@ -472,9 +466,8 @@ async function handleNoteList() {
 
 	for (const note of data.notes) {
 		const status = note.publishedAt ? "published" : "draft";
-		const author = note.sourceAuthor ? `@${note.sourceAuthor}` : "";
-		const desc = (note.description ?? "").slice(0, 40);
-		console.log(`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${desc.padEnd(40)} ${author}`);
+		const desc = (note.description ?? "").slice(0, 50);
+		console.log(`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${desc}`);
 	}
 
 	console.log("─".repeat(80));
@@ -485,24 +478,13 @@ async function handleNoteAdd(id: string) {
 	const token = await requireAuth();
 	const client = createClient(token);
 
-	const url = values.url;
 	const description = values.description;
-	const sourceUrl = values["source-url"];
-	const sourceAuthor = values["source-author"];
 	const shouldPublish = values.publish;
-
-	if (!url) {
-		console.error("Missing required option: --url");
-		process.exit(1);
-	}
 
 	const res = await client.api.notes.$post({
 		json: {
 			id,
-			url,
 			description,
-			sourceUrl,
-			sourceAuthor,
 			publish: shouldPublish,
 		},
 	});
@@ -523,25 +505,16 @@ async function handleNoteUpdate(id: string) {
 	const token = await requireAuth();
 	const client = createClient(token);
 
-	const url = values.url;
 	const description = values.description;
-	const sourceUrl = values["source-url"];
-	const sourceAuthor = values["source-author"];
 	const shouldPublish = values.publish;
 	const shouldUnpublish = values.unpublish;
 
 	const updateData: {
-		url?: string;
 		description?: string;
-		sourceUrl?: string;
-		sourceAuthor?: string;
 		publish?: boolean;
 	} = {};
 
-	if (url !== undefined) updateData.url = url;
 	if (description !== undefined) updateData.description = description;
-	if (sourceUrl !== undefined) updateData.sourceUrl = sourceUrl;
-	if (sourceAuthor !== undefined) updateData.sourceAuthor = sourceAuthor;
 	if (shouldPublish) updateData.publish = true;
 	if (shouldUnpublish) updateData.publish = false;
 

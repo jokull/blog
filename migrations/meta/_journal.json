@@ -71,6 +71,13 @@
 			"when": 1774212129569,
 			"tag": "0009_dry_sabretooth",
 			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "6",
+			"when": 1774214108855,
+			"tag": "0010_handy_klaw",
+			"breakpoints": true
 		}
 	]
 }

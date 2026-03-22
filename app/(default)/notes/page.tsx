@@ -68,35 +68,10 @@ export default async function NotesPage({
 
 					return (
 						<article key={note.id} className="flex flex-col gap-1">
-							<div className="flex items-baseline gap-2 text-sm text-stone-500">
-								{date ? <time>{date}</time> : null}
-								{date && note.sourceAuthor ? <span>·</span> : null}
-								{note.sourceAuthor ? (
-									note.sourceUrl ? (
-										<a
-											href={note.sourceUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="hover:text-stone-700"
-										>
-											@{note.sourceAuthor}
-										</a>
-									) : (
-										<span>@{note.sourceAuthor}</span>
-									)
-								) : null}
-							</div>
 							{rendered ? (
 								<div className="prose prose-stone prose-sm">{rendered}</div>
 							) : null}
-							<a
-								href={note.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-blue-500 hover:text-blue-600 text-sm"
-							>
-								{note.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-							</a>
+							{date ? <time className="text-sm text-stone-400">{date}</time> : null}
 						</article>
 					);
 				})}

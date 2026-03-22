@@ -49,10 +49,7 @@ interface OklchColor {
 
 export const Note = sqliteTable("note", {
 	id: text("id").notNull().primaryKey(),
-	url: text("url").notNull(),
 	description: text("description"),
-	sourceUrl: text("source_url"),
-	sourceAuthor: text("source_author"),
 	publishedAt: integer("published_at", { mode: "timestamp" }),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()

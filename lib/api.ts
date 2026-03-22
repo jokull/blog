@@ -69,18 +69,12 @@ const UpdatePostSchema = z.object({
 
 const CreateNoteSchema = z.object({
 	id: z.string(),
-	url: z.string(),
 	description: z.string().optional(),
-	sourceUrl: z.string().optional(),
-	sourceAuthor: z.string().optional(),
 	publish: z.boolean().optional(),
 });
 
 const UpdateNoteSchema = z.object({
-	url: z.string().optional(),
 	description: z.string().optional(),
-	sourceUrl: z.string().optional(),
-	sourceAuthor: z.string().optional(),
 	publish: z.boolean().optional(),
 });
 
@@ -187,10 +181,7 @@ const route = app
 		const data = c.req.valid("json");
 		await db.insert(Note).values({
 			id: data.id,
-			url: data.url,
 			description: data.description ?? null,
-			sourceUrl: data.sourceUrl ?? null,
-			sourceAuthor: data.sourceAuthor?.replace(/^@/, "") ?? null,
 			publishedAt: data.publish ? new Date() : null,
 		});
 		return c.json({ success: true, id: data.id });
@@ -199,11 +190,7 @@ const route = app
 		const id = c.req.param("id");
 		const data = c.req.valid("json");
 		const updateData: Record<string, unknown> = {};
-		if (data.url !== undefined) updateData.url = data.url;
 		if (data.description !== undefined) updateData.description = data.description;
-		if (data.sourceUrl !== undefined) updateData.sourceUrl = data.sourceUrl;
-		if (data.sourceAuthor !== undefined)
-			updateData.sourceAuthor = data.sourceAuthor.replace(/^@/, "");
 		if (data.publish === true) updateData.publishedAt = new Date();
 		if (data.publish === false) updateData.publishedAt = null;
 		await db.update(Note).set(updateData).where(eq(Note.id, id));

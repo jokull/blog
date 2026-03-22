@@ -45,7 +45,7 @@ export default function Navbar() {
 					</div>
 				</a>
 				<div className="flex flex-col gap-2 text-right">
-					<Item href="/notes">Notes</Item>
+					<Item href="/notes">notes</Item>
 					<a
 						href="mailto:jokull@solberg.is"
 						className="text-blue-500 hover:text-blue-600 leading-tight block w-full"
