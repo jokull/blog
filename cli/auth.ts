@@ -7,7 +7,7 @@ const SESSION_FILE = `${process.env.HOME}/.blog-cli-session`;
 
 const storedSessionSchema = z.object({
 	access_token: z.string(),
-	refresh_token: z.string(),
+	refresh_token: z.string().default(""),
 	expires_at: z.number(),
 });
 
@@ -121,7 +121,15 @@ async function pollForToken(
 			.andThen(safeZodParse(tokenResponseSchema))
 			.unwrap("OAuth token poll failed");
 
-		if (data.access_token && data.refresh_token) {
+		if (data.access_token) {
+			if (!data.refresh_token) {
+				// GitHub OAuth app doesn't have token expiration enabled — no refresh token
+				return {
+					access_token: data.access_token,
+					refresh_token: "",
+					expires_at: Date.now() + (data.expires_in ?? 365 * 24 * 3600) * 1000,
+				};
+			}
 			return sessionFromTokenResponse(data);
 		}
 
@@ -180,8 +188,8 @@ export async function getValidToken(apiBase: string): Promise<string | null> {
 	const session = readSession();
 	if (!session) return null;
 
-	// Refresh if token expires within 5 minutes
-	if (session.expires_at - Date.now() < 5 * 60 * 1000) {
+	// Refresh if token expires within 5 minutes (skip if no refresh token)
+	if (session.refresh_token && session.expires_at - Date.now() < 5 * 60 * 1000) {
 		try {
 			const refreshed = await refreshAccessToken(apiBase, session.refresh_token);
 			writeSession(refreshed);

@@ -32,11 +32,15 @@ BLOG_API_URL="https://www.solberg.is" bun run blog <command>
 bun run blog:prod <command>
 ```
 
-**Commands:** `login`, `logout`, `list`, `get <slug>`, `create`, `update <slug>`, `delete <slug>`, `categories`, `backup`
+**Commands:** `login`, `logout`, `whoami`, `list`, `get <slug>`, `create`, `update <slug>`, `delete <slug>`, `categories`, `backup`
 
 **Common options:** `-s/--slug`, `-t/--title`, `-b/--body`, `-f/--body-file`, `-c/--category`, `-l/--locale` (`en`/`is`), `--hero-image`, `--publish`/`--unpublish`
 
 Authentication uses GitHub OAuth — run `bun run blog login` first. Token stored in `~/.blog-cli-session`.
+
+## Code Conventions
+
+- Use `safeFetchJson` + `safeZodParse` from `lib/safe-utils` for external API calls — avoids `any` type assertions that oxlint flags (`no-unsafe-type-assertion`).
 
 ## Auth
 
