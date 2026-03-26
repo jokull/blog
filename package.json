@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"blog": "bun run cli/blog.ts",
-		"blog:prod": "BLOG_API_URL=https://solberg.is bun run cli/blog.ts",
+		"blog:prod": "BLOG_API_URL=https://www.solberg.is bun run cli/blog.ts",
 		"atlas": "./scripts/atlas-diff.sh",
 		"dev": "vinext dev",
 		"build": "vite build",
