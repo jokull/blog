@@ -4,6 +4,7 @@
 	"compatibility_date": "2026-02-28",
 	"compatibility_flags": ["nodejs_compat"],
 	"main": "./worker/index.ts",
+	"placement": { "mode": "targeted", "region": "aws:eu-west-1" },
 	"vars": {
 		"SITE_URL": "https://www.solberg.is",
 		"GITHUB_CLIENT_ID": "Ov23licJONCc4hbUWRuK",
