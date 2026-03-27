@@ -81,7 +81,7 @@ export const components: MDXComponents = {
 			{...props}
 		/>
 	),
-	li: (props) => <li className="pl-1.5" {...props} />,
+	li: (props) => <li className="pl-1.5 [&>p:first-child]:mt-0" {...props} />,
 	a: ({ href, ...props }: AnchorProps) => (
 		<Link
 			className="break-words underline decoration-blue-300 decoration-from-font underline-offset-2 hover:decoration-blue-600 focus:outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-opacity-50 focus-visible:ring-offset-2"
