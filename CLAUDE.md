@@ -38,6 +38,12 @@ bun run blog:prod <command>
 
 Authentication uses GitHub OAuth — run `bun run blog login` first. Token stored in `~/.blog-cli-session`.
 
+## Writing Style / Typography
+
+- **Flat heading structure**: Only `h1` (title) and `h2` (sections) are styled distinctly. `h3`/`h4`/`h5` render identically to `h2` — deep nesting is not supported by design.
+- Avoid faux-headers (bold text used as headers). If you need hierarchy beyond `h2`, restructure the content or split into multiple posts.
+- Lists, blockquotes, and code blocks provide sufficient visual variety without nested headings.
+
 ## Code Conventions
 
 - Use `safeFetchJson` + `safeZodParse` from `lib/safe-utils` for external API calls — avoids `any` type assertions that oxlint flags (`no-unsafe-type-assertion`).
