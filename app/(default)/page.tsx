@@ -1,18 +1,37 @@
 import { Theater } from "@/components/theater";
 import { db } from "@/db";
-import { Comment, Post } from "@/schema";
+import { Category, Comment, Post } from "@/schema";
 import { desc, eq, isNotNull, sql } from "drizzle-orm";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
 import { PostList } from "./_components/post-list";
 import { RecentShows } from "./_components/shows";
 
-export const metadata = {
-	title: "Jökull Sólberg",
-	alternates: {
-		canonical: "/",
-	},
-};
+export async function generateMetadata({
+	searchParams,
+}: {
+	searchParams: Promise<{ category?: string }>;
+}): Promise<Metadata> {
+	const { category } = await searchParams;
+
+	if (category) {
+		const cat = await db.query.Category.findFirst({
+			where: eq(Category.slug, category),
+		});
+		if (cat) {
+			return {
+				title: `${cat.label} — Jökull Sólberg`,
+				alternates: { canonical: `/?category=${category}` },
+			};
+		}
+	}
+
+	return {
+		title: "Jökull Sólberg",
+		alternates: { canonical: "/" },
+	};
+}
 
 function AlbumsSkeleton() {
 	return (
