@@ -121,7 +121,10 @@ const getColorValue = (color?: string): string => {
 		return "var(--chart-1)";
 	}
 
-	return CHART_COLORS[color as "chart-1"] ?? color;
+	if (color in CHART_COLORS) {
+		return CHART_COLORS[color as keyof typeof CHART_COLORS];
+	}
+	return color;
 };
 
 function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
