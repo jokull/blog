@@ -1,4 +1,4 @@
-import type { Result } from "better-result";
+import { Result } from "better-result";
 import { z } from "zod";
 import { env } from "@/env";
 import { safeFetchJson, safeZodParse, type FetchJsonError, type ZodParseError } from "./safe-utils";
@@ -106,7 +106,7 @@ export class OneDollarStatsClient {
 				site_id: this.siteId,
 			}),
 		});
-		if (fetchResult.isErr()) return fetchResult;
+		if (fetchResult.isErr()) return Result.err(fetchResult.error);
 		return safeZodParse(oneDollarStatsResponseSchema)(fetchResult.value);
 	}
 
