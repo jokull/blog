@@ -7,7 +7,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<div className="w-full p-6 sm:p-10 md:p-14">
+		<div className="w-full overflow-x-clip p-6 sm:p-10 md:p-14">
 			<div className="pointer-events-none fixed top-0 left-0 z-30 h-6 w-full content-fade-out sm:hidden sm:h-10 md:h-14" />
 			<div className="flex mobile:flex-row flex-col mobile:items-stretch">
 				<Navbar />

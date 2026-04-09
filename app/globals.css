@@ -521,6 +521,45 @@ article {
 	}
 }
 
+.hero-orb {
+	will-change: transform;
+}
+
+@keyframes hero-orb-drift-1 {
+	0%,
+	100% {
+		transform: translate3d(0, 0, 0);
+	}
+	50% {
+		transform: translate3d(9%, -7%, 0);
+	}
+}
+
+@keyframes hero-orb-drift-2 {
+	0%,
+	100% {
+		transform: translate3d(0, 0, 0);
+	}
+	50% {
+		transform: translate3d(-8%, 6%, 0);
+	}
+}
+
+.hero-orb-1 {
+	animation: hero-orb-drift-1 12s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+.hero-orb-2 {
+	animation: hero-orb-drift-2 15s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-orb-1,
+	.hero-orb-2 {
+		animation: none;
+	}
+}
+
 .dark {
 	--bg: oklch(0.181 0.005 285.823);
 	--fg: oklch(0.985 0 0);

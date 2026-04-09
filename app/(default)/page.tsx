@@ -5,6 +5,7 @@ import { desc, eq, isNotNull, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
+import { Hero } from "./_components/hero";
 import { PostList } from "./_components/post-list";
 import { RecentShows } from "./_components/shows";
 
@@ -91,8 +92,19 @@ export default async function Page() {
 	);
 
 	return (
-		<div className="max-w-xl">
-			<Suspense fallback={<div>Loading posts...</div>}>
+		<div className="relative isolate">
+			<div
+				aria-hidden="true"
+				className="hero-orb hero-orb-1 -top-48 -left-28 -z-10 pointer-events-none absolute h-[27rem] w-[27rem] rounded-full bg-sky-200/35 blur-[100px]"
+			/>
+			<div
+				aria-hidden="true"
+				className="hero-orb hero-orb-2 -top-40 -z-10 pointer-events-none absolute left-[25rem] h-[24rem] w-[24rem] rounded-full bg-blue-400/30 blur-[110px]"
+			/>
+
+			<Hero />
+
+			<Suspense fallback={null}>
 				<PostList
 					posts={posts.map((post) => ({
 						...post,
@@ -108,7 +120,7 @@ export default async function Page() {
 				/>
 			</Suspense>
 
-			<div className="mb-7">
+			<div className="mb-7 max-w-xl">
 				<Theater>
 					<Suspense fallback={<AlbumsSkeleton />}>
 						<Albums />
@@ -116,7 +128,7 @@ export default async function Page() {
 				</Theater>
 			</div>
 
-			<div className="mb-7">
+			<div className="mb-7 max-w-xl">
 				<Theater>
 					<Suspense fallback={<ShowsSkeleton />}>
 						<RecentShows />
