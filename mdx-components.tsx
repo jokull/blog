@@ -226,6 +226,23 @@ export const components: MDXComponents = {
 
 		return img;
 	},
+	table: (props) => (
+		<div className="mt-7 max-w-3xl overflow-x-auto">
+			<table className="w-full border-collapse text-[0.9375rem]" {...props} />
+		</div>
+	),
+	th: (props) => (
+		<th
+			className="border-b border-neutral-300 px-4 py-2 text-left font-semibold whitespace-nowrap text-neutral-600 first:pl-0 last:pr-0"
+			{...props}
+		/>
+	),
+	td: (props) => (
+		<td
+			className="border-b border-neutral-200 px-4 py-2 text-left first:pl-0 last:pr-0"
+			{...props}
+		/>
+	),
 	hr: (props) => <hr className="my-14 w-24 max-w-xl border-blue-border" {...props} />,
 	BlockSideTitle,
 	Tool,
