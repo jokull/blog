@@ -233,8 +233,8 @@ export const components: MDXComponents = {
 		return img;
 	},
 	table: (props) => (
-		<div className="mt-7 overflow-x-auto">
-			<table className="border-collapse" {...props} />
+		<div className="-ml-3 mt-7 overflow-x-auto">
+			<table className="border-separate border-spacing-x-3 border-spacing-y-0" {...props} />
 		</div>
 	),
 	thead: (props) => (
@@ -245,16 +245,11 @@ export const components: MDXComponents = {
 	),
 	th: (props) => (
 		<th
-			className="border-b border-neutral-300 px-4 py-2 text-left font-semibold whitespace-nowrap text-neutral-600 first:pl-0 last:pr-0"
+			className="border-b border-neutral-300 py-2 text-left font-semibold whitespace-nowrap text-neutral-600"
 			{...props}
 		/>
 	),
-	td: (props) => (
-		<td
-			className="border-b border-neutral-200 px-4 py-2 text-left first:pl-0 last:pr-0"
-			{...props}
-		/>
-	),
+	td: (props) => <td className="border-b border-neutral-200 py-2 text-left" {...props} />,
 	hr: (props) => <hr className="my-14 w-24 max-w-xl border-blue-border" {...props} />,
 	BlockSideTitle,
 	Tool,
