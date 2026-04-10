@@ -63,11 +63,17 @@ export const components: MDXComponents = {
 	h1: (props) => <h1 className="mb-7 text-balance font-semibold text-neutral-600" {...props} />,
 	h2: (props) => (
 		// eslint-disable-next-line jsx-a11y/heading-has-content -- content is passed via props spread
-		<h2 className="mt-14 mb-7 text-balance font-semibold text-neutral-600" {...props} />
+		<h2
+			className="mt-14 mb-7 max-w-xl text-balance font-semibold text-neutral-600"
+			{...props}
+		/>
 	),
 	h3: (props) => (
 		// eslint-disable-next-line jsx-a11y/heading-has-content -- content is passed via props spread
-		<h3 className="mt-14 mb-7 text-balance font-semibold text-neutral-600" {...props} />
+		<h3
+			className="mt-14 mb-7 max-w-xl text-balance font-semibold text-neutral-600"
+			{...props}
+		/>
 	),
 	ul: (props) => (
 		<ul
@@ -227,9 +233,15 @@ export const components: MDXComponents = {
 		return img;
 	},
 	table: (props) => (
-		<div className="mt-7 max-w-3xl overflow-x-auto">
-			<table className="w-full border-collapse text-[0.9375rem]" {...props} />
+		<div className="mt-7 overflow-x-auto">
+			<table className="border-collapse" {...props} />
 		</div>
+	),
+	thead: (props) => (
+		<thead
+			className="[&_td]:border-b [&_td]:border-neutral-300 [&_td]:font-semibold [&_td]:whitespace-nowrap [&_td]:text-neutral-600"
+			{...props}
+		/>
 	),
 	th: (props) => (
 		<th
