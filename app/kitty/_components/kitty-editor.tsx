@@ -37,8 +37,8 @@ export function KittyEditor({
 
 	// Editor state
 	const [mode, setMode] = useState<EditorMode>(initialMode);
-	const [currentTheme, setCurrentTheme] = useState<KittyTheme>(initialTheme);
-	const [savedTheme, setSavedTheme] = useState<KittyTheme>(initialTheme);
+	const [currentTheme, setCurrentTheme] = useState(initialTheme);
+	const [savedTheme, setSavedTheme] = useState(initialTheme);
 	const [selectedColor, setSelectedColor] = useState<ColorKey>("color1");
 	const [forkedFrom, setForkedFrom] = useState<KittyTheme | null>(null);
 
