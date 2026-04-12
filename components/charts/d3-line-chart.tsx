@@ -13,6 +13,8 @@ interface Series {
 	key: string;
 	label: string;
 	color?: string;
+	axis?: "left" | "right";
+	dashed?: boolean;
 }
 
 interface D3LineChartProps {
@@ -24,7 +26,10 @@ interface D3LineChartProps {
 	yLabel?: string;
 	xLabel?: string;
 	yFormat?: string; // "percent" | "number"
+	yFormatRight?: string;
 	yDomain?: [number, number];
+	yDomainRight?: [number, number];
+	yLabelRight?: string;
 	annotations?: Array<{ x: number | string; label: string }>;
 }
 
@@ -43,10 +48,19 @@ export function D3LineChart({
 	yLabel,
 	xLabel,
 	yFormat,
+	yFormatRight,
 	yDomain,
+	yDomainRight,
+	yLabelRight,
 	annotations,
 }: D3LineChartProps) {
-	const margin = { top: 16, right: 16, bottom: xLabel ? 48 : 32, left: yLabel ? 56 : 48 };
+	const hasRightAxis = series.some((s) => s.axis === "right");
+	const margin = {
+		top: 16,
+		right: hasRightAxis ? 48 : 16,
+		bottom: xLabel ? 48 : 32,
+		left: yLabel ? 56 : 48,
+	};
 	const { ref, innerWidth, innerHeight } = useChartDimensions(margin);
 
 	if (innerWidth === 0) {
@@ -66,25 +80,52 @@ export function D3LineChart({
 		.domain(d3Array.extent(xValues) as [number, number])
 		.range([0, innerWidth]);
 
-	const allYValues = series.flatMap((s) =>
+	const leftSeries = series.filter((s) => s.axis !== "right");
+	const rightSeries = series.filter((s) => s.axis === "right");
+
+	const leftYValues = leftSeries.flatMap((s) =>
 		data.map((d) => d[s.key]).filter((v): v is number => v != null),
 	);
-	const yExtent = yDomain ?? (d3Array.extent(allYValues) as [number, number]);
-	const yPadding = (yExtent[1] - yExtent[0]) * 0.08;
+	const leftExtent = yDomain ?? (d3Array.extent(leftYValues) as [number, number]);
+	const leftPadding = (leftExtent[1] - leftExtent[0]) * 0.08;
 	const yScale = d3Scale
 		.scaleLinear()
-		.domain([yDomain ? yExtent[0] : yExtent[0] - yPadding, yExtent[1] + yPadding])
+		.domain([
+			yDomain ? leftExtent[0] : leftExtent[0] - leftPadding,
+			leftExtent[1] + leftPadding,
+		])
 		.range([innerHeight, 0])
 		.nice();
 
-	const line = d3Shape
+	const rightYValues = rightSeries.flatMap((s) =>
+		data.map((d) => d[s.key]).filter((v): v is number => v != null),
+	);
+	const rightExtentRaw =
+		yDomainRight ??
+		(rightYValues.length > 0
+			? (d3Array.extent(rightYValues) as [number, number])
+			: ([0, 1] as [number, number]));
+	const rightExtent: [number, number] = yDomainRight
+		? rightExtentRaw
+		: [Math.min(0, rightExtentRaw[0]), rightExtentRaw[1]];
+	const y2Scale = d3Scale.scaleLinear().domain(rightExtent).range([innerHeight, 0]).nice();
+
+	const lineLeft = d3Shape
 		.line<DataPoint>()
 		.defined((d) => d !== null && d !== undefined)
 		.x((d) => xScale(d[xKey] as number))
 		.y((d) => yScale(d._y as number))
 		.curve(d3Shape.curveMonotoneX);
 
+	const lineRight = d3Shape
+		.line<DataPoint>()
+		.defined((d) => d !== null && d !== undefined)
+		.x((d) => xScale(d[xKey] as number))
+		.y((d) => y2Scale(d._y as number))
+		.curve(d3Shape.curveStepAfter);
+
 	const yTicks = yScale.ticks(5);
+	const y2Ticks = y2Scale.ticks(5);
 	const xTicks = xScale.ticks(Math.min(data.length, 8));
 
 	return (
@@ -112,7 +153,7 @@ export function D3LineChart({
 							/>
 						))}
 
-						{/* Y axis labels */}
+						{/* Y axis labels (left) */}
 						{yTicks.map((tick) => (
 							<text
 								key={tick}
@@ -127,6 +168,38 @@ export function D3LineChart({
 								{formatTick(tick, yFormat)}
 							</text>
 						))}
+
+						{/* Y2 axis labels (right) */}
+						{hasRightAxis &&
+							y2Ticks.map((tick) => {
+								const rightColor = rightSeries[0]?.color ?? TEXT_COLOR;
+								return (
+									<text
+										key={`r-${tick}`}
+										x={innerWidth + 8}
+										y={y2Scale(tick)}
+										textAnchor="start"
+										dominantBaseline="middle"
+										fill={rightColor}
+										fontSize={12}
+										fontFamily="var(--font-sans)"
+									>
+										{formatTick(tick, yFormatRight)}
+									</text>
+								);
+							})}
+						{hasRightAxis && yLabelRight && (
+							<text
+								x={innerWidth + margin.right - 4}
+								y={-4}
+								textAnchor="end"
+								fill={rightSeries[0]?.color ?? TEXT_COLOR}
+								fontSize={11}
+								fontFamily="var(--font-sans)"
+							>
+								{yLabelRight}
+							</text>
+						)}
 
 						{/* X axis labels */}
 						{xTicks.map((tick) => (
@@ -175,9 +248,11 @@ export function D3LineChart({
 								...d,
 								_y: d[s.key],
 							}));
-							const pathD = line(lineData);
+							const isRight = s.axis === "right";
+							const pathD = (isRight ? lineRight : lineLeft)(lineData);
 							const color = s.color ?? PALETTE[i % PALETTE.length];
 							const last = validData[validData.length - 1];
+							const scale = isRight ? y2Scale : yScale;
 
 							return (
 								<g key={s.key}>
@@ -188,12 +263,13 @@ export function D3LineChart({
 										strokeWidth={2.5}
 										strokeLinecap="round"
 										strokeLinejoin="round"
+										strokeDasharray={s.dashed ? "4 3" : undefined}
 									/>
 									{/* End dot */}
 									{last && (
 										<circle
 											cx={xScale(last[xKey] as number)}
-											cy={yScale(last[s.key] as number)}
+											cy={scale(last[s.key] as number)}
 											r={3.5}
 											fill={color}
 										/>
