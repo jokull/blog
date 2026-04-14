@@ -23,6 +23,7 @@ import {
 	D3BarChart,
 	D3LineChart,
 	D3MortgageChart,
+	D3StockFlowChart,
 } from "./components/charts";
 import { PhotoCaption } from "./components/photo-caption";
 import { Tool } from "./components/tool";
@@ -266,6 +267,7 @@ export const components: MDXComponents = {
 	D3AreaChart,
 	D3MortgageChart,
 	D3BalanceChart,
+	D3StockFlowChart,
 };
 
 export function useMDXComponents(inherited: MDXComponents): MDXComponents {

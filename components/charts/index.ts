@@ -3,3 +3,4 @@ export { D3BarChart } from "./d3-bar-chart";
 export { D3AreaChart } from "./d3-area-chart";
 export { D3MortgageChart } from "./d3-mortgage-chart";
 export { D3BalanceChart } from "./d3-balance-chart";
+export { D3StockFlowChart } from "./d3-stock-flow-chart";
