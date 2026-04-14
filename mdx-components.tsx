@@ -17,7 +17,13 @@ import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
 import { ClipboardCopyButton } from "./app/(default)/[slug]/_components/clipboard-copy-button";
 import { BlockSideTitle } from "./components/block-sidetitle";
-import { D3AreaChart, D3BarChart, D3LineChart, D3MortgageChart } from "./components/charts";
+import {
+	D3AreaChart,
+	D3BalanceChart,
+	D3BarChart,
+	D3LineChart,
+	D3MortgageChart,
+} from "./components/charts";
 import { PhotoCaption } from "./components/photo-caption";
 import { Tool } from "./components/tool";
 import { Card } from "./components/tweet-card";
@@ -259,6 +265,7 @@ export const components: MDXComponents = {
 	D3BarChart,
 	D3AreaChart,
 	D3MortgageChart,
+	D3BalanceChart,
 };
 
 export function useMDXComponents(inherited: MDXComponents): MDXComponents {
