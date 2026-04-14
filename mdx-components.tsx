@@ -18,6 +18,7 @@ import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { ClipboardCopyButton } from "./app/(default)/[slug]/_components/clipboard-copy-button";
 import { BlockSideTitle } from "./components/block-sidetitle";
 import {
+	D3AlluvialChart,
 	D3AreaChart,
 	D3BalanceChart,
 	D3BarChart,
@@ -268,6 +269,7 @@ export const components: MDXComponents = {
 	D3MortgageChart,
 	D3BalanceChart,
 	D3StockFlowChart,
+	D3AlluvialChart,
 };
 
 export function useMDXComponents(inherited: MDXComponents): MDXComponents {
