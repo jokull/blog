@@ -55,10 +55,13 @@ export function D3LineChart({
 	annotations,
 }: D3LineChartProps) {
 	const hasRightAxis = series.some((s) => s.axis === "right");
+	const itemsPerRow = series.length >= 4 ? 2 : series.length;
+	const legendRows = series.length > 1 ? Math.ceil(series.length / itemsPerRow) : 0;
+	const legendHeight = legendRows * 18;
 	const margin = {
-		top: 16,
+		top: annotations?.length ? 36 : 16,
 		right: hasRightAxis ? 48 : 16,
-		bottom: xLabel ? 48 : 32,
+		bottom: (xLabel ? 52 : 32) + legendHeight + 8,
 		left: yLabel ? 56 : 48,
 	};
 	const { ref, innerWidth, innerHeight } = useChartDimensions(margin);
@@ -67,7 +70,9 @@ export function D3LineChart({
 		return (
 			<div className="my-10 w-full max-w-xl">
 				{title && (
-					<p className="mb-3 text-center text-sm font-medium text-neutral-500">{title}</p>
+					<p className="mb-3 text-center text-sm font-semibold text-neutral-900">
+						{title}
+					</p>
 				)}
 				<div ref={ref} style={{ height }} />
 			</div>
@@ -131,7 +136,7 @@ export function D3LineChart({
 	return (
 		<div className="my-10 w-full max-w-xl">
 			{title && (
-				<p className="mb-3 text-center text-sm font-medium text-neutral-500">{title}</p>
+				<p className="mb-3 text-center text-sm font-semibold text-neutral-900">{title}</p>
 			)}
 			<div ref={ref} style={{ height }}>
 				<svg
@@ -295,7 +300,7 @@ export function D3LineChart({
 									/>
 									<text
 										x={x}
-										y={-4}
+										y={-20}
 										textAnchor="middle"
 										fill={BLUE[900]}
 										fontSize={10}
@@ -309,12 +314,19 @@ export function D3LineChart({
 
 						{/* Legend */}
 						{series.length > 1 && (
-							<g transform={`translate(0, ${innerHeight + (xLabel ? 36 : 30)})`}>
+							<g transform={`translate(0, ${innerHeight + (xLabel ? 56 : 36)})`}>
 								{series.map((s, i) => {
 									const color = s.color ?? PALETTE[i % PALETTE.length];
-									const xOffset = i * 120;
+									const col = i % itemsPerRow;
+									const row = Math.floor(i / itemsPerRow);
+									const colWidth = innerWidth / itemsPerRow;
+									const xOffset = col * colWidth;
+									const yOffset = row * 18;
 									return (
-										<g key={s.key} transform={`translate(${xOffset}, 0)`}>
+										<g
+											key={s.key}
+											transform={`translate(${xOffset}, ${yOffset})`}
+										>
 											<line
 												x1={0}
 												x2={16}

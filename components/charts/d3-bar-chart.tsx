@@ -48,7 +48,9 @@ export function D3BarChart({
 		return (
 			<div className="my-10 w-full max-w-xl">
 				{title && (
-					<p className="mb-3 text-center text-sm font-medium text-neutral-500">{title}</p>
+					<p className="mb-3 text-center text-sm font-semibold text-neutral-900">
+						{title}
+					</p>
 				)}
 				<div ref={ref} style={{ height }} />
 			</div>
@@ -72,7 +74,9 @@ export function D3BarChart({
 		return (
 			<div className="my-10 w-full max-w-xl">
 				{title && (
-					<p className="mb-3 text-center text-sm font-medium text-neutral-500">{title}</p>
+					<p className="mb-3 text-center text-sm font-semibold text-neutral-900">
+						{title}
+					</p>
 				)}
 				<div ref={ref} style={{ height }}>
 					<svg
@@ -172,7 +176,7 @@ export function D3BarChart({
 	return (
 		<div className="my-10 w-full max-w-xl">
 			{title && (
-				<p className="mb-3 text-center text-sm font-medium text-neutral-500">{title}</p>
+				<p className="mb-3 text-center text-sm font-semibold text-neutral-900">{title}</p>
 			)}
 			<div ref={ref} style={{ height }}>
 				<svg
