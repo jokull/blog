@@ -17,6 +17,15 @@ import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
 import { ClipboardCopyButton } from "./app/(default)/[slug]/_components/clipboard-copy-button";
 import { BlockSideTitle } from "./components/block-sidetitle";
+import {
+	D3AlluvialChart,
+	D3AreaChart,
+	D3BalanceChart,
+	D3BarChart,
+	D3LineChart,
+	D3MortgageChart,
+	D3StockFlowChart,
+} from "./components/charts";
 import { PhotoCaption } from "./components/photo-caption";
 import { Tool } from "./components/tool";
 import { Card } from "./components/tweet-card";
@@ -63,11 +72,17 @@ export const components: MDXComponents = {
 	h1: (props) => <h1 className="mb-7 text-balance font-semibold text-neutral-600" {...props} />,
 	h2: (props) => (
 		// eslint-disable-next-line jsx-a11y/heading-has-content -- content is passed via props spread
-		<h2 className="mt-14 mb-7 text-balance font-semibold text-neutral-600" {...props} />
+		<h2
+			className="mt-14 mb-7 max-w-xl text-balance font-semibold text-neutral-600"
+			{...props}
+		/>
 	),
 	h3: (props) => (
 		// eslint-disable-next-line jsx-a11y/heading-has-content -- content is passed via props spread
-		<h3 className="mt-14 mb-7 text-balance font-semibold text-neutral-600" {...props} />
+		<h3
+			className="mt-14 mb-7 max-w-xl text-balance font-semibold text-neutral-600"
+			{...props}
+		/>
 	),
 	ul: (props) => (
 		<ul
@@ -226,10 +241,35 @@ export const components: MDXComponents = {
 
 		return img;
 	},
+	table: (props) => (
+		<div className="-ml-3 mt-7 overflow-x-auto">
+			<table className="border-separate border-spacing-x-3 border-spacing-y-0" {...props} />
+		</div>
+	),
+	thead: (props) => (
+		<thead
+			className="[&_td]:border-b [&_td]:border-neutral-300 [&_td]:font-semibold [&_td]:whitespace-nowrap [&_td]:text-neutral-600"
+			{...props}
+		/>
+	),
+	th: (props) => (
+		<th
+			className="border-b border-neutral-300 py-2 text-left font-semibold whitespace-nowrap text-neutral-600"
+			{...props}
+		/>
+	),
+	td: (props) => <td className="border-b border-neutral-200 py-2 text-left" {...props} />,
 	hr: (props) => <hr className="my-14 w-24 max-w-xl border-blue-border" {...props} />,
 	BlockSideTitle,
 	Tool,
 	PhotoCaption,
+	D3LineChart,
+	D3BarChart,
+	D3AreaChart,
+	D3MortgageChart,
+	D3BalanceChart,
+	D3StockFlowChart,
+	D3AlluvialChart,
 };
 
 export function useMDXComponents(inherited: MDXComponents): MDXComponents {
