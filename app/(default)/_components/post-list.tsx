@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { groupBy, pipe } from "remeda";
 import { twMerge } from "tailwind-merge";
 
@@ -93,9 +93,10 @@ function groupByYear(posts: Post[]) {
 }
 
 export function PostList({ posts, commentCounts, categories }: PostListProps) {
-	const router = useRouter();
 	const searchParams = useSearchParams();
-	const categorySlug = searchParams.get("category") ?? DEFAULT_CATEGORY;
+	const [categorySlug, setCategorySlug] = useState(
+		() => searchParams.get("category") ?? DEFAULT_CATEGORY,
+	);
 	const currentYear = String(new Date().getFullYear());
 
 	const sortedCategories = useMemo(
@@ -123,6 +124,7 @@ export function PostList({ posts, commentCounts, categories }: PostListProps) {
 	);
 
 	const handleCategoryChange = (value: string) => {
+		setCategorySlug(value);
 		const params = new URLSearchParams(searchParams.toString());
 		if (value === DEFAULT_CATEGORY) {
 			params.delete("category");
@@ -130,7 +132,7 @@ export function PostList({ posts, commentCounts, categories }: PostListProps) {
 			params.set("category", value);
 		}
 		const newUrl = params.toString() ? `/?${params.toString()}` : "/";
-		router.replace(newUrl, { scroll: false });
+		window.history.replaceState(null, "", newUrl);
 	};
 
 	return (
