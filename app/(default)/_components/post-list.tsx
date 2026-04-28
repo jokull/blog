@@ -1,10 +1,10 @@
 "use client";
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { groupBy, pipe } from "remeda";
+import { twMerge } from "tailwind-merge";
 
 const DEFAULT_CATEGORY = "coding";
 
@@ -136,23 +136,27 @@ export function PostList({ posts, commentCounts, categories }: PostListProps) {
 	return (
 		<>
 			<div className="md:hidden">
-				<div className="mb-7">
-					<ToggleGroup
-						selectionMode="single"
-						selectedKeys={[categorySlug]}
-						onSelectionChange={(keys) => {
-							const selected = Array.from(keys)[0];
-							if (selected) {
-								handleCategoryChange(String(selected));
-							}
-						}}
-					>
-						{sortedCategories.map((category) => (
-							<ToggleGroupItem key={category.slug} id={category.slug}>
+				<div className="mb-7 inline-flex gap-0.5 rounded-lg p-0.5 inset-ring inset-ring-border">
+					{sortedCategories.map((category) => {
+						const isSelected = category.slug === categorySlug;
+						return (
+							<button
+								key={category.slug}
+								type="button"
+								onClick={() => {
+									handleCategoryChange(category.slug);
+								}}
+								className={twMerge(
+									"rounded-md px-3 py-1.5 font-medium text-sm transition-colors",
+									isSelected
+										? "bg-primary text-primary-fg"
+										: "text-fg hover:bg-secondary hover:text-secondary-fg",
+								)}
+							>
 								{category.label}
-							</ToggleGroupItem>
-						))}
-					</ToggleGroup>
+							</button>
+						);
+					})}
 				</div>
 
 				{mobileView.sortedYears.map((year) => (
