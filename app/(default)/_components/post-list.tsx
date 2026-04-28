@@ -141,11 +141,17 @@ export function PostList({ posts, commentCounts, categories }: PostListProps) {
 				<div className="mb-7 inline-flex gap-0.5 rounded-lg p-0.5 inset-ring inset-ring-border">
 					{sortedCategories.map((category) => {
 						const isSelected = category.slug === categorySlug;
+						const href =
+							category.slug === DEFAULT_CATEGORY
+								? "/"
+								: `/?category=${category.slug}`;
 						return (
-							<button
+							<Link
 								key={category.slug}
-								type="button"
-								onClick={() => {
+								href={href}
+								onClick={(e) => {
+									if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+									e.preventDefault();
 									handleCategoryChange(category.slug);
 								}}
 								className={twMerge(
@@ -156,7 +162,7 @@ export function PostList({ posts, commentCounts, categories }: PostListProps) {
 								)}
 							>
 								{category.label}
-							</button>
+							</Link>
 						);
 					})}
 				</div>
