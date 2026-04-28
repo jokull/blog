@@ -26,7 +26,7 @@ export interface LineChartProps extends BaseChartProps {
 }
 
 export function LineChart({
-	data = [],
+	data,
 	dataKey,
 	colors = DEFAULT_COLORS,
 	connectNulls = false,
