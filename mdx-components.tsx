@@ -9,8 +9,7 @@ import langSql from "@shikijs/langs/sql";
 import langTsx from "@shikijs/langs/tsx";
 import langTypescript from "@shikijs/langs/typescript";
 import type { MDXComponents } from "mdx/types";
-import Image from "next/image";
-import Link from "next/link";
+import { Image, Link, type StaticImageData } from "@/src/lib/navigation";
 import type { ComponentProps, ReactNode } from "react";
 import { createCssVariablesTheme, createHighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
@@ -51,6 +50,8 @@ const highlighter = createHighlighterCore({
 	],
 	engine: createJavaScriptRegexEngine(),
 });
+
+const assetImages = import.meta.glob<{ default: StaticImageData }>("./assets/images/*");
 
 interface CodeProps {
 	children?: ReactNode;
@@ -210,10 +211,13 @@ export const components: MDXComponents = {
 			);
 		} else {
 			try {
-				// oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
-				const image = (await import(`./assets/images/${src}`)) as {
-					default: import("next/image").StaticImageData;
-				};
+				const loadImage = assetImages[`./assets/images/${src}`] as
+					| (() => Promise<{ default: StaticImageData }>)
+					| undefined;
+				if (!loadImage) {
+					throw new Error(`Image not found: ${src}`);
+				}
+				const image = await loadImage();
 				img = (
 					<Image
 						key={src}

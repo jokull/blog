@@ -21,7 +21,7 @@ export function Editor({ mdx, ...props }: { post: InferSelectModel<typeof Post>;
 
 	const debouncedSavePreview = useDebouncedCallback(
 		(value: string) => {
-			void previewPost(post.slug, { previewMarkdown: value });
+			void previewPost({ data: { slug: post.slug, previewMarkdown: value } });
 		},
 		{
 			wait: 2000,
@@ -99,7 +99,7 @@ export function Editor({ mdx, ...props }: { post: InferSelectModel<typeof Post>;
 							className="contents"
 							onSubmit={(event) => {
 								event.preventDefault();
-								void togglePublishPost(post.slug);
+								void togglePublishPost({ data: { slug: post.slug } });
 							}}
 						>
 							<Button type="submit" intent="secondary" className="group relative">
@@ -118,11 +118,14 @@ export function Editor({ mdx, ...props }: { post: InferSelectModel<typeof Post>;
 							className="contents"
 							onSubmit={(event) => {
 								event.preventDefault();
-								void updatePost(post.slug, {
-									title: post.title,
-									publishedAt: post.publishedAt,
-									locale: post.locale,
-									previewMarkdown: post.previewMarkdown,
+								void updatePost({
+									data: {
+										slug: post.slug,
+										title: post.title,
+										publishedAt: post.publishedAt,
+										locale: post.locale,
+										previewMarkdown: post.previewMarkdown,
+									},
 								});
 							}}
 						>

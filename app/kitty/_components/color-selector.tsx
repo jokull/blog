@@ -22,6 +22,7 @@ function ColorItem({ colorKey, color, isSelected, onSelect }: ColorItemProps) {
 		<button
 			type="button"
 			onClick={onSelect}
+			aria-label={`Select ${colorLabels[colorKey]}`}
 			className={`flex items-center gap-2 p-2 rounded-md border transition-all text-left w-full ${
 				isSelected
 					? "bg-blue-500/10 border-blue-500"

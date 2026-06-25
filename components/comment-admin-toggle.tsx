@@ -13,7 +13,7 @@ export function CommentAdminToggle({ commentId, isHidden }: CommentAdminTogglePr
 
 	function handleToggle() {
 		startTransition(async () => {
-			await toggleCommentHidden(commentId, !isHidden);
+			await toggleCommentHidden({ data: { commentId, isHidden: !isHidden } });
 		});
 	}
 

@@ -1,8 +1,8 @@
 import { requireAdmin } from "@/auth";
 import { db } from "@/db";
 import { createStatsClient } from "@/lib/onedollarstats";
-import { Category, Post } from "@/schema";
-import { asc, desc, sql } from "drizzle-orm";
+import { Post } from "@/schema";
+import { sql } from "drizzle-orm";
 import { BrokenLinksPanel } from "./_components/broken-links-panel";
 import { CategoryManager } from "./_components/category-manager";
 import { PostsTable } from "./_components/posts-table";
@@ -15,12 +15,12 @@ export default async function AdminPage() {
 
 	// Fetch all posts (drafts + published)
 	const posts = await db.query.Post.findMany({
-		orderBy: [desc(Post.publishedAt)],
+		orderBy: { publishedAt: "desc" },
 	});
 
 	// Fetch all categories
 	const categories = await db.query.Category.findMany({
-		orderBy: [asc(Category.label)],
+		orderBy: { label: "asc" },
 	});
 
 	// Calculate post counts per category

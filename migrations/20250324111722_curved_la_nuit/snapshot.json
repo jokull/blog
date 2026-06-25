@@ -1,0 +1,100 @@
+{
+	"dialect": "sqlite",
+	"id": "b091fed5-0cb1-4f4b-956e-cc6cee159b16",
+	"prevIds": ["aec20ca9-2f5d-45b9-9b2b-f3780c77cf63"],
+	"version": "7",
+	"ddl": [
+		{
+			"name": "post",
+			"entityType": "tables"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "slug",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"columns": ["slug"],
+			"nameExplicit": false,
+			"name": "post_pk",
+			"table": "post",
+			"entityType": "pks"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "title",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "markdown",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "preview_markdown",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "public_at",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "published_at",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "modified_at",
+			"table": "post",
+			"entityType": "columns"
+		}
+	],
+	"renames": []
+}

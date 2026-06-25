@@ -5,10 +5,8 @@ import { db } from "@/db";
 import { env } from "@/env";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
-import { Comment, Post } from "@/schema";
-import { eq, isNotNull } from "drizzle-orm";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "@/src/lib/metadata";
+import { throwNotFound } from "@/src/lib/router-control";
 import { cache } from "react";
 // safe-mdx renders MDX without eval/new Function — required on Cloudflare Workers where
 // @mdx-js/mdx's run() is blocked (EvalError: Code generation from strings disallowed).
@@ -23,9 +21,9 @@ export const dynamic = "force-dynamic";
 
 // Cache the database query for reuse
 const getPost = cache(async (slug: string) => {
-	const post = await db.query.Post.findFirst({ where: eq(Post.slug, slug) });
+	const post = await db.query.Post.findFirst({ where: { slug } });
 	if (!post) {
-		notFound();
+		throwNotFound();
 	}
 	return post;
 });
@@ -36,7 +34,7 @@ export async function generateStaticParams() {
 		columns: {
 			slug: true,
 		},
-		where: isNotNull(Post.publicAt),
+		where: { publicAt: { isNotNull: true } },
 	});
 
 	return posts.map((post) => ({
@@ -110,8 +108,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
 	// Fetch comments for this post
 	const comments = await db.query.Comment.findMany({
-		where: eq(Comment.postSlug, slug),
-		orderBy: [Comment.createdAt], // Oldest first (chronological order)
+		where: { postSlug: slug },
+		orderBy: { createdAt: "asc" }, // Oldest first (chronological order)
 	});
 
 	// Pre-render markdown content for each comment

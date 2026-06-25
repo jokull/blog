@@ -1,8 +1,8 @@
 import { Theater } from "@/components/theater";
 import { db } from "@/db";
-import { Category, Comment, Post } from "@/schema";
-import { desc, eq, isNotNull, sql } from "drizzle-orm";
-import type { Metadata } from "next";
+import { Comment } from "@/schema";
+import { eq, sql } from "drizzle-orm";
+import type { Metadata } from "@/src/lib/metadata";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
 import { Hero } from "./_components/hero";
@@ -18,7 +18,7 @@ export async function generateMetadata({
 
 	if (category) {
 		const cat = await db.query.Category.findFirst({
-			where: eq(Category.slug, category),
+			where: { slug: category },
 		});
 		if (cat) {
 			return {
@@ -66,8 +66,8 @@ function ShowsSkeleton() {
 export default async function Page() {
 	// Fetch all posts with category information
 	const posts = await db.query.Post.findMany({
-		where: isNotNull(Post.publicAt),
-		orderBy: [desc(Post.publishedAt)],
+		where: { publicAt: { isNotNull: true } },
+		orderBy: { publishedAt: "desc" },
 	});
 
 	// Fetch all categories

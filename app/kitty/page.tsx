@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
-import type { Metadata } from "next";
+import type { Metadata } from "@/src/lib/metadata";
+import { throwRedirect } from "@/src/lib/router-control";
 import { defaultTheme } from "./_lib/default-theme";
 import { communityFileToSlug } from "./_lib/slug-utils";
 import { KittyEditor } from "./_components/kitty-editor";
@@ -37,12 +37,12 @@ export default async function KittyPage({ searchParams }: PageProps) {
 			// "community:themes/NightOwl.conf" -> "/kitty/community/nightowl"
 			const communityFile = themeParam.slice("community:".length);
 			const slug = communityFileToSlug(communityFile);
-			redirect(`/kitty/community/${slug}`);
+			throwRedirect({ href: `/kitty/community/${slug}` });
 		} else {
 			// "123" -> "/kitty/123"
 			const themeId = parseInt(themeParam, 10);
 			if (!isNaN(themeId)) {
-				redirect(`/kitty/${themeId}`);
+				throwRedirect({ href: `/kitty/${themeId}` });
 			}
 		}
 	}

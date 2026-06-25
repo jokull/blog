@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNextRouter as useRouter } from "@/src/lib/navigation";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { fetchThemesList, type ThemeMetadata } from "../_lib/theme-parser";
 import type { KittyTheme } from "../_lib/types";
@@ -76,7 +76,7 @@ export function KittyProvider({
 	}, [communityThemes, communityLoading]);
 
 	const refreshThemes = useCallback(() => {
-		router.refresh();
+		void router.refresh();
 	}, [router]);
 
 	return (

@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { and, desc, eq, isNotNull, lt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { z } from "zod/v4";
@@ -101,14 +101,14 @@ const route = app
 	})
 	.get("/posts", authMiddleware, async (c) => {
 		const posts = await db.query.Post.findMany({
-			orderBy: [desc(Post.publishedAt)],
+			orderBy: { publishedAt: "desc" },
 		});
 		return c.json({ posts });
 	})
 	.get("/posts/:slug", authMiddleware, async (c) => {
 		const slug = c.req.param("slug")!;
 		const post = await db.query.Post.findFirst({
-			where: eq(Post.slug, slug),
+			where: { slug },
 		});
 		if (!post) return c.json({ error: "Not found" }, 404);
 		return c.json({ post });
@@ -150,12 +150,13 @@ const route = app
 	.get("/notes", async (c) => {
 		const cursor = c.req.query("cursor");
 		const limit = 20;
-		const where = cursor
-			? and(isNotNull(Note.publishedAt), lt(Note.publishedAt, new Date(Number(cursor))))
-			: isNotNull(Note.publishedAt);
 		const notes = await db.query.Note.findMany({
-			where,
-			orderBy: [desc(Note.publishedAt)],
+			where: {
+				publishedAt: cursor
+					? { isNotNull: true, lt: new Date(Number(cursor)) }
+					: { isNotNull: true },
+			},
+			orderBy: { publishedAt: "desc" },
 			limit: limit + 1,
 		});
 		const hasMore = notes.length > limit;
@@ -165,14 +166,14 @@ const route = app
 	})
 	.get("/notes/all", authMiddleware, async (c) => {
 		const notes = await db.query.Note.findMany({
-			orderBy: [desc(Note.createdAt)],
+			orderBy: { createdAt: "desc" },
 		});
 		return c.json({ notes });
 	})
 	.get("/notes/:id", authMiddleware, async (c) => {
 		const id = c.req.param("id")!;
 		const note = await db.query.Note.findFirst({
-			where: eq(Note.id, id),
+			where: { id },
 		});
 		if (!note) return c.json({ error: "Not found" }, 404);
 		return c.json({ note });

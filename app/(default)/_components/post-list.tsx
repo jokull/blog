@@ -1,7 +1,5 @@
 "use client";
-
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Link, useSearchParams } from "@/src/lib/navigation";
 import { useMemo, useState } from "react";
 import { groupBy, pipe } from "remeda";
 import { twMerge } from "tailwind-merge";
@@ -50,33 +48,37 @@ function PostLink({ item, commentCount }: PostLinkProps) {
 					{item.formattedDate}
 				</time>
 				{commentCount > 0 && (
-					<svg
-						role="img"
-						aria-label={`${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
-						width="20"
-						height="16"
-						viewBox="0 0 20 16"
-						className="shrink-0 text-black/40 transition-colors group-hover:text-black/55 group-hover:transition-none"
-					>
-						<path
-							d="M3 1.5h14a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-8L5.5 14v-2.5H3A1.5 1.5 0 0 1 1.5 10V3A1.5 1.5 0 0 1 3 1.5z"
-							fill="currentColor"
-							fillOpacity="0.08"
-							stroke="currentColor"
-							strokeWidth="1"
-						/>
-						<text
-							x="10"
-							y="6.5"
-							textAnchor="middle"
-							dominantBaseline="middle"
-							fontSize="8"
-							fontWeight="600"
-							fill="currentColor"
+					<>
+						<span className="sr-only">
+							{commentCount} {commentCount === 1 ? "comment" : "comments"}
+						</span>
+						<svg
+							aria-hidden="true"
+							width="20"
+							height="16"
+							viewBox="0 0 20 16"
+							className="shrink-0 text-black/40 transition-colors group-hover:text-black/55 group-hover:transition-none"
 						>
-							{commentCount}
-						</text>
-					</svg>
+							<path
+								d="M3 1.5h14a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-8L5.5 14v-2.5H3A1.5 1.5 0 0 1 1.5 10V3A1.5 1.5 0 0 1 3 1.5z"
+								fill="currentColor"
+								fillOpacity="0.08"
+								stroke="currentColor"
+								strokeWidth="1"
+							/>
+							<text
+								x="10"
+								y="6.5"
+								textAnchor="middle"
+								dominantBaseline="middle"
+								fontSize="8"
+								fontWeight="600"
+								fill="currentColor"
+							>
+								{commentCount}
+							</text>
+						</svg>
+					</>
 				)}
 			</span>
 		</Link>

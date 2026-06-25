@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import type { Metadata } from "@/src/lib/metadata";
+import { throwNotFound } from "@/src/lib/router-control";
 import { getSession, isAdmin } from "@/auth";
 import { getThemeById } from "../actions";
 import { KittyEditor } from "../_components/kitty-editor";
@@ -51,12 +51,12 @@ export default async function ThemePage({ params }: PageProps) {
 	const themeId = parseInt(id, 10);
 
 	if (isNaN(themeId)) {
-		notFound();
+		throwNotFound();
 	}
 
 	const theme = await getThemeById(themeId);
 	if (!theme) {
-		notFound();
+		throwNotFound();
 	}
 
 	// Determine if user can edit

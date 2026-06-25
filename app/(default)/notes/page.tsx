@@ -1,9 +1,7 @@
 import { db } from "@/db";
 import { components } from "@/mdx-components";
-import { Note } from "@/schema";
-import { and, desc, isNotNull, lt } from "drizzle-orm";
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from "@/src/lib/metadata";
+import { Link } from "@/src/lib/navigation";
 import { SafeMdxRenderer } from "safe-mdx";
 import { mdxParse } from "safe-mdx/parse";
 
@@ -24,13 +22,13 @@ export default async function NotesPage({
 }) {
 	const { cursor } = await searchParams;
 
-	const where = cursor
-		? and(isNotNull(Note.publishedAt), lt(Note.publishedAt, new Date(Number(cursor))))
-		: isNotNull(Note.publishedAt);
-
 	const notes = await db.query.Note.findMany({
-		where,
-		orderBy: [desc(Note.publishedAt)],
+		where: {
+			publishedAt: cursor
+				? { isNotNull: true, lt: new Date(Number(cursor)) }
+				: { isNotNull: true },
+		},
+		orderBy: { publishedAt: "desc" },
 		limit: PAGE_SIZE + 1,
 	});
 

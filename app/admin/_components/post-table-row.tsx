@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
 import type { InferSelectModel } from "drizzle-orm";
 import type { Post } from "@/schema";
-import Link from "next/link";
+import { Link } from "@/src/lib/navigation";
 import { togglePostPublished, updatePostCategory } from "../actions";
 import { useTransition } from "react";
 
@@ -20,13 +20,18 @@ export function PostTableRow({ post, categories, pageviews }: PostTableRowProps)
 
 	const handleTogglePublished = (isSelected: boolean) => {
 		startTransition(async () => {
-			await togglePostPublished(post.slug);
+			await togglePostPublished({ data: { slug: post.slug } });
 		});
 	};
 
 	const handleCategoryChange = (categorySlug: string) => {
 		startTransition(async () => {
-			await updatePostCategory(post.slug, categorySlug === "none" ? null : categorySlug);
+			await updatePostCategory({
+				data: {
+					slug: post.slug,
+					categorySlug: categorySlug === "none" ? null : categorySlug,
+				},
+			});
 		});
 	};
 

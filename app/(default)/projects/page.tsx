@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "@/src/lib/metadata";
 
 export const metadata: Metadata = {
 	title: "Projects — Jökull Sólberg",

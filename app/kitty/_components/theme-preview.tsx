@@ -60,7 +60,7 @@ export function ThemePreview({ theme }: ThemePreviewProps) {
 				</div>
 			</div>
 
-			<style jsx>{`
+			<style>{`
 				@keyframes blink {
 					0%,
 					50% {

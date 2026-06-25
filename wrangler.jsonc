@@ -3,7 +3,7 @@
 	"name": "solberg-blog",
 	"compatibility_date": "2026-02-28",
 	"compatibility_flags": ["nodejs_compat"],
-	"main": "./worker/index.ts",
+	"main": "@tanstack/react-start/server-entry",
 	"placement": { "mode": "targeted", "region": "aws:eu-west-1" },
 	"vars": {
 		"SITE_URL": "https://www.solberg.is",
@@ -19,7 +19,7 @@
 	"routes": [{ "pattern": "www.solberg.is", "custom_domain": true }],
 	"assets": {
 		"not_found_handling": "none",
-		"directory": "dist/client",
+		"directory": ".output/public",
 	},
 	"observability": {
 		"logs": {

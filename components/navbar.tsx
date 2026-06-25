@@ -1,8 +1,7 @@
 "use client";
 
 import cn from "clsx";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/src/lib/navigation";
 
 function Item(props: React.ComponentProps<typeof Link>) {
 	const pathname = usePathname();

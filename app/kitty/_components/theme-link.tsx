@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/src/lib/navigation";
 import type { ComponentProps, MouseEvent } from "react";
 import { useKittyContext } from "../_context/kitty-context";
 

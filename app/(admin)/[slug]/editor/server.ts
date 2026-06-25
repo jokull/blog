@@ -1,88 +1,120 @@
-"use server";
-
-import { eq, type InferSelectModel } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
-import { requireAuth } from "@/auth";
-import { db } from "@/db";
-import { extractFirstImage } from "@/lib/mdx-image-extractor";
+import { createServerFn } from "@tanstack/react-start";
+import type { InferSelectModel } from "drizzle-orm";
 import { Post } from "@/schema";
+import { throwNotFound } from "@/src/lib/router-control";
 
 async function getPostOrThrow(slug: string) {
-	const post = await db.query.Post.findFirst({ where: eq(Post.slug, slug) });
+	const { db } = await import("@/db");
+	const post = await db.query.Post.findFirst({ where: { slug } });
 	if (!post) {
-		notFound();
+		throwNotFound();
 	}
 	return post;
 }
 
-export async function previewPost(
-	slug: string,
-	{ previewMarkdown }: Pick<InferSelectModel<typeof Post>, "previewMarkdown">,
-) {
-	await requireAuth();
-	await getPostOrThrow(slug);
+export const previewPost = createServerFn({ method: "POST" })
+	.validator(
+		(data: {
+			slug: string;
+			previewMarkdown: InferSelectModel<typeof Post>["previewMarkdown"];
+		}) => data,
+	)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { eq }, { extractFirstImage }, { revalidatePath }] =
+			await Promise.all([
+				import("@/auth"),
+				import("@/db"),
+				import("drizzle-orm"),
+				import("@/lib/mdx-image-extractor"),
+				import("@/src/lib/revalidate"),
+			]);
+		await requireAuth();
+		await getPostOrThrow(data.slug);
 
-	const heroImage = previewMarkdown ? await extractFirstImage(previewMarkdown) : null;
+		const heroImage = data.previewMarkdown
+			? await extractFirstImage(data.previewMarkdown)
+			: null;
 
-	await db.update(Post).set({ previewMarkdown, heroImage }).where(eq(Post.slug, slug));
-	revalidatePath("/(admin)/[slug]/editor", "page");
-}
+		await db
+			.update(Post)
+			.set({ previewMarkdown: data.previewMarkdown, heroImage })
+			.where(eq(Post.slug, data.slug));
+		revalidatePath("/(admin)/[slug]/editor", "page");
+	});
 
-export async function togglePublishPost(slug: string) {
-	await requireAuth();
-	const post = await getPostOrThrow(slug);
-	const isCurrentlyPublished = post.publicAt !== null;
+export const togglePublishPost = createServerFn({ method: "POST" })
+	.validator((data: { slug: string }) => data)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { eq }, { extractFirstImage }, { revalidatePath }] =
+			await Promise.all([
+				import("@/auth"),
+				import("@/db"),
+				import("drizzle-orm"),
+				import("@/lib/mdx-image-extractor"),
+				import("@/src/lib/revalidate"),
+			]);
+		await requireAuth();
+		const post = await getPostOrThrow(data.slug);
+		const isCurrentlyPublished = post.publicAt !== null;
 
-	const newMarkdown = isCurrentlyPublished
-		? post.markdown
-		: (post.previewMarkdown ?? post.markdown);
-	const heroImage = newMarkdown ? await extractFirstImage(newMarkdown) : post.heroImage;
+		const newMarkdown = isCurrentlyPublished
+			? post.markdown
+			: (post.previewMarkdown ?? post.markdown);
+		const heroImage = newMarkdown ? await extractFirstImage(newMarkdown) : post.heroImage;
 
-	await db
-		.update(Post)
-		.set({
-			publicAt: isCurrentlyPublished ? null : new Date(),
-			markdown: newMarkdown,
-			previewMarkdown: null,
-			heroImage,
-		})
-		.where(eq(Post.slug, slug));
+		await db
+			.update(Post)
+			.set({
+				publicAt: isCurrentlyPublished ? null : new Date(),
+				markdown: newMarkdown,
+				previewMarkdown: null,
+				heroImage,
+			})
+			.where(eq(Post.slug, data.slug));
 
-	revalidatePath("/(admin)/[slug]/editor", "page");
-	revalidatePath("/(default)/[slug]", "page");
-	revalidatePath("/(default)", "page");
-}
+		revalidatePath("/(admin)/[slug]/editor", "page");
+		revalidatePath("/(default)/[slug]", "page");
+		revalidatePath("/(default)", "page");
+	});
 
-export async function updatePost(
-	slug: string,
-	{
-		title,
-		publishedAt,
-		locale,
-		previewMarkdown,
-	}: Pick<InferSelectModel<typeof Post>, "title" | "publishedAt" | "locale" | "previewMarkdown">,
-) {
-	await requireAuth();
-	const post = await getPostOrThrow(slug);
+export const updatePost = createServerFn({ method: "POST" })
+	.validator(
+		(
+			data: { slug: string } & Pick<
+				InferSelectModel<typeof Post>,
+				"title" | "publishedAt" | "locale" | "previewMarkdown"
+			>,
+		) => data,
+	)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { eq }, { extractFirstImage }, { revalidatePath }] =
+			await Promise.all([
+				import("@/auth"),
+				import("@/db"),
+				import("drizzle-orm"),
+				import("@/lib/mdx-image-extractor"),
+				import("@/src/lib/revalidate"),
+			]);
+		await requireAuth();
+		const post = await getPostOrThrow(data.slug);
 
-	const newMarkdown = previewMarkdown ?? post.markdown;
-	const heroImage = newMarkdown ? await extractFirstImage(newMarkdown) : post.heroImage;
+		const newMarkdown = data.previewMarkdown ?? post.markdown;
+		const heroImage = newMarkdown ? await extractFirstImage(newMarkdown) : post.heroImage;
 
-	await db
-		.update(Post)
-		.set({
-			title,
-			publishedAt,
-			locale,
-			markdown: newMarkdown,
-			previewMarkdown: null,
-			heroImage,
-			modifiedAt: new Date(),
-		})
-		.where(eq(Post.slug, slug));
+		await db
+			.update(Post)
+			.set({
+				title: data.title,
+				publishedAt: data.publishedAt,
+				locale: data.locale,
+				markdown: newMarkdown,
+				previewMarkdown: null,
+				heroImage,
+				modifiedAt: new Date(),
+			})
+			.where(eq(Post.slug, data.slug));
 
-	revalidatePath("/(admin)/[slug]/editor", "page");
-	revalidatePath("/(default)/[slug]", "page");
-	revalidatePath("/(default)", "page");
-}
+		revalidatePath("/(admin)/[slug]/editor", "page");
+		revalidatePath("/(default)/[slug]", "page");
+		revalidatePath("/(default)", "page");
+	});

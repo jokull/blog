@@ -16,7 +16,7 @@ export function CategoryManager({ categories, postCounts }: CategoryManagerProps
 	const handleDelete = async (slug: string) => {
 		if (!confirm(`Delete category "${slug}"?`)) return;
 		try {
-			await deleteCategory(slug);
+			await deleteCategory({ data: { slug } });
 		} catch (error) {
 			alert(error instanceof Error ? error.message : String(error));
 		}

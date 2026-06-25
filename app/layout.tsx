@@ -1,26 +1,7 @@
 import cn from "clsx";
-import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import type { Metadata, Viewport } from "@/src/lib/metadata";
 
 import "./globals.css";
-
-const sans = localFont({
-	src: "./_fonts/InterVariable.woff2",
-	preload: true,
-	variable: "--sans",
-});
-
-const serif = localFont({
-	src: "./_fonts/LoraItalicVariable.woff2",
-	preload: true,
-	variable: "--serif",
-});
-
-const mono = localFont({
-	src: "./_fonts/IosevkaFixedCurly-ExtendedMedium.woff2",
-	preload: true,
-	variable: "--mono",
-});
 
 export const metadata: Metadata = {
 	title: {
@@ -62,9 +43,6 @@ export default function RootLayout({
 		<html lang="en" className="touch-manipulation">
 			<body
 				className={cn(
-					sans.variable,
-					serif.variable,
-					mono.variable,
 					"relative",
 					"text-sm leading-6 sm:text-[15px] sm:leading-7 md:text-base md:leading-7",
 					"text-neutral-600",

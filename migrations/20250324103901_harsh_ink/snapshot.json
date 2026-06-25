@@ -1,0 +1,80 @@
+{
+	"dialect": "sqlite",
+	"id": "b6f502c3-fe01-49a9-9e92-1aa5cabedbb9",
+	"prevIds": ["00000000-0000-0000-0000-000000000000"],
+	"version": "7",
+	"ddl": [
+		{
+			"name": "post",
+			"entityType": "tables"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "title",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "slug",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"columns": ["slug"],
+			"nameExplicit": false,
+			"name": "post_pk",
+			"table": "post",
+			"entityType": "pks"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "markdown",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "published_at",
+			"table": "post",
+			"entityType": "columns"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "modified_at",
+			"table": "post",
+			"entityType": "columns"
+		}
+	],
+	"renames": []
+}

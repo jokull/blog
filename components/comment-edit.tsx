@@ -20,7 +20,7 @@ export function CommentEdit({ commentId, initialContent, onCancel }: CommentEdit
 
 		startTransition(async () => {
 			try {
-				await updateComment(commentId, content);
+				await updateComment({ data: { commentId, content } });
 				onCancel(); // Close edit mode
 			} catch (_error) {}
 		});

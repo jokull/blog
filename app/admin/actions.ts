@@ -1,99 +1,136 @@
-"use server";
-
-import { requireAuth } from "@/auth";
-import { db } from "@/db";
-import { env } from "@/env";
-import { type BrokenLink, checkPostLinks } from "@/lib/link-checker";
-import { Category, Post } from "@/schema";
-import { eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { createServerFn } from "@tanstack/react-start";
+import type { BrokenLink } from "@/lib/link-checker";
 
 // Category CRUD
-export async function createCategory(slug: string, label: string) {
-	await requireAuth();
+export const createCategory = createServerFn({ method: "POST" })
+	.validator((data: { slug: string; label: string }) => data)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { Category }, { revalidatePath }] = await Promise.all([
+			import("@/auth"),
+			import("@/db"),
+			import("@/schema"),
+			import("@/src/lib/revalidate"),
+		]);
+		await requireAuth();
 
-	// Validate slug format
-	if (!/^[a-z0-9-]+$/.test(slug)) {
-		throw new Error("Slug must contain only lowercase letters, numbers, and hyphens");
-	}
+		// Validate slug format
+		if (!/^[a-z0-9-]+$/.test(data.slug)) {
+			throw new Error("Slug must contain only lowercase letters, numbers, and hyphens");
+		}
 
-	// Check for duplicate
-	const existing = await db.query.Category.findFirst({
-		where: eq(Category.slug, slug),
+		// Check for duplicate
+		const existing = await db.query.Category.findFirst({
+			where: { slug: data.slug },
+		});
+		if (existing) {
+			throw new Error("Category slug already exists");
+		}
+
+		await db.insert(Category).values({ slug: data.slug, label: data.label });
+		revalidatePath("/admin");
 	});
-	if (existing) {
-		throw new Error("Category slug already exists");
-	}
 
-	await db.insert(Category).values({ slug, label });
-	revalidatePath("/admin");
-}
+export const deleteCategory = createServerFn({ method: "POST" })
+	.validator((data: { slug: string }) => data)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { Category, Post }, { eq, sql }, { revalidatePath }] =
+			await Promise.all([
+				import("@/auth"),
+				import("@/db"),
+				import("@/schema"),
+				import("drizzle-orm"),
+				import("@/src/lib/revalidate"),
+			]);
+		await requireAuth();
 
-export async function deleteCategory(slug: string) {
-	await requireAuth();
+		// Check post count
+		const result = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(Post)
+			.where(eq(Post.categorySlug, data.slug));
 
-	// Check post count
-	const result = await db
-		.select({ count: sql<number>`count(*)` })
-		.from(Post)
-		.where(eq(Post.categorySlug, slug));
+		const count = result[0]?.count ?? 0;
+		if (count > 0) {
+			throw new Error(`Cannot delete category with ${count} post(s)`);
+		}
 
-	const count = result[0]?.count ?? 0;
-	if (count > 0) {
-		throw new Error(`Cannot delete category with ${count} post(s)`);
-	}
-
-	await db.delete(Category).where(eq(Category.slug, slug));
-	revalidatePath("/admin");
-}
+		await db.delete(Category).where(eq(Category.slug, data.slug));
+		revalidatePath("/admin");
+	});
 
 // Post mutations
-export async function togglePostPublished(slug: string) {
-	await requireAuth();
+export const togglePostPublished = createServerFn({ method: "POST" })
+	.validator((data: { slug: string }) => data)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { Post }, { eq }, { revalidatePath }] = await Promise.all([
+			import("@/auth"),
+			import("@/db"),
+			import("@/schema"),
+			import("drizzle-orm"),
+			import("@/src/lib/revalidate"),
+		]);
+		await requireAuth();
 
-	const post = await db.query.Post.findFirst({
-		where: eq(Post.slug, slug),
+		const post = await db.query.Post.findFirst({
+			where: { slug: data.slug },
+		});
+
+		if (!post) throw new Error("Post not found");
+
+		await db
+			.update(Post)
+			.set({
+				publicAt: post.publicAt ? null : new Date(),
+				modifiedAt: new Date(),
+			})
+			.where(eq(Post.slug, data.slug));
+
+		revalidatePath("/admin");
+		revalidatePath("/(default)");
+		revalidatePath(`/(default)/${data.slug}`);
 	});
 
-	if (!post) throw new Error("Post not found");
+export const updatePostCategory = createServerFn({ method: "POST" })
+	.validator((data: { slug: string; categorySlug: string | null }) => data)
+	.handler(async ({ data }) => {
+		const [{ requireAuth }, { db }, { Post }, { eq }, { revalidatePath }] = await Promise.all([
+			import("@/auth"),
+			import("@/db"),
+			import("@/schema"),
+			import("drizzle-orm"),
+			import("@/src/lib/revalidate"),
+		]);
+		await requireAuth();
 
-	await db
-		.update(Post)
-		.set({
-			publicAt: post.publicAt ? null : new Date(),
-			modifiedAt: new Date(),
-		})
-		.where(eq(Post.slug, slug));
+		// Validate category exists if not null
+		if (data.categorySlug) {
+			const category = await db.query.Category.findFirst({
+				where: { slug: data.categorySlug },
+			});
+			if (!category) throw new Error("Category not found");
+		}
 
-	revalidatePath("/admin");
-	revalidatePath("/(default)");
-	revalidatePath(`/(default)/${slug}`);
-}
+		await db
+			.update(Post)
+			.set({
+				categorySlug: data.categorySlug,
+				modifiedAt: new Date(),
+			})
+			.where(eq(Post.slug, data.slug));
 
-export async function updatePostCategory(slug: string, categorySlug: string | null) {
-	await requireAuth();
+		revalidatePath("/admin");
+	});
 
-	// Validate category exists if not null
-	if (categorySlug) {
-		const category = await db.query.Category.findFirst({
-			where: eq(Category.slug, categorySlug),
-		});
-		if (!category) throw new Error("Category not found");
-	}
-
-	await db
-		.update(Post)
-		.set({
-			categorySlug,
-			modifiedAt: new Date(),
-		})
-		.where(eq(Post.slug, slug));
-
-	revalidatePath("/admin");
-}
-
-export async function runLinkChecker(): Promise<BrokenLink[]> {
-	await requireAuth();
-	const posts = await db.query.Post.findMany();
-	return checkPostLinks(posts, env.SITE_URL);
-}
+export const runLinkChecker = createServerFn({ method: "POST" }).handler(
+	async (): Promise<BrokenLink[]> => {
+		const [{ requireAuth }, { db }, { env }, { checkPostLinks }] = await Promise.all([
+			import("@/auth"),
+			import("@/db"),
+			import("@/env"),
+			import("@/lib/link-checker"),
+		]);
+		await requireAuth();
+		const posts = await db.query.Post.findMany();
+		return checkPostLinks(posts, env.SITE_URL);
+	},
+);

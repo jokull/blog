@@ -1,3 +1,4 @@
+import { defineRelations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const Category = sqliteTable("category", {
@@ -96,4 +97,12 @@ export const KittyTheme = sqliteTable("kitty_theme", {
 		.notNull()
 		.$default(() => new Date()),
 	modifiedAt: integer("modified_at", { mode: "timestamp" }),
+});
+
+export const relations = defineRelations({
+	Category,
+	Comment,
+	KittyTheme,
+	Note,
+	Post,
 });

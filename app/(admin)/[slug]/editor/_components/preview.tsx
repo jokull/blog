@@ -27,8 +27,8 @@ export function Preview({
 				className="contents"
 				onSubmit={(event) => {
 					event.preventDefault();
-					void previewPost(post.slug, {
-						previewMarkdown: post.previewMarkdown,
+					void previewPost({
+						data: { slug: post.slug, previewMarkdown: post.previewMarkdown },
 					});
 				}}
 			>

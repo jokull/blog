@@ -1,7 +1,7 @@
 "use client";
 
 import type { BrokenLink } from "@/lib/link-checker";
-import Link from "next/link";
+import { Link } from "@/src/lib/navigation";
 import { useTransition, useState } from "react";
 import { runLinkChecker } from "../actions";
 

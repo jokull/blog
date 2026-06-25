@@ -31,7 +31,7 @@ export function AddCategoryDialog({ isOpen, onClose }: AddCategoryDialogProps) {
 
 		void (async () => {
 			try {
-				await createCategory(slug, label);
+				await createCategory({ data: { slug, label } });
 				onClose();
 				setSlug("");
 				setLabel("");

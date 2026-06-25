@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import type { ReactElement, ReactNode } from "react";
 // safe-mdx: no eval/new Function — needed for Cloudflare Workers (see slug/page.tsx)
 import { SafeMdxRenderer } from "safe-mdx";
@@ -16,7 +15,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 	const { slug } = await params;
 	await requireAdmin(`/${slug}/editor`);
 
-	let post = await db.query.Post.findFirst({ where: eq(Post.slug, slug) });
+	let post = await db.query.Post.findFirst({ where: { slug } });
 	post ??= await db
 		.insert(Post)
 		.values({

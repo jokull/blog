@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import type { Metadata } from "@/src/lib/metadata";
+import { throwNotFound } from "@/src/lib/router-control";
 import { defaultTheme } from "../../_lib/default-theme";
 import { findCommunityThemeBySlug } from "../../_lib/slug-utils";
 import { fetchThemeConfig, fetchThemesList, parseThemeConfig } from "../../_lib/theme-parser";
@@ -53,7 +53,7 @@ export default async function CommunityThemePage({ params }: PageProps) {
 	const meta = findCommunityThemeBySlug(themes, slug);
 
 	if (!meta) {
-		notFound();
+		throwNotFound();
 	}
 
 	// Fetch and parse the theme config from GitHub

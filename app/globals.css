@@ -1,6 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+	font-family: "Inter";
+	src: url("/_fonts/InterVariable.woff2") format("woff2");
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Lora";
+	src: url("/_fonts/LoraItalicVariable.woff2") format("woff2");
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Iosevka";
+	src: url("/_fonts/IosevkaFixedCurly-ExtendedMedium.woff2") format("woff2");
+	font-display: swap;
+}
+
 @variant dark (&:is(.dark *));
 @plugin "tailwindcss-react-aria-components";
 
@@ -141,6 +159,9 @@
 }
 
 :root {
+	--sans: "Inter";
+	--serif: "Lora";
+	--mono: "Iosevka";
 	--sans-variation: "opsz" 32;
 	--font-features: "cpsp" 1, "cv01", "cv03", "cv04", "calt", "ss03";
 

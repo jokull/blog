@@ -17,7 +17,7 @@ export function CommentDeleteButton({ commentId }: CommentDeleteButtonProps) {
 			)
 		) {
 			startTransition(async () => {
-				await deleteComment(commentId);
+				await deleteComment({ data: { commentId } });
 			});
 		}
 	}

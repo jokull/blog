@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNextRouter as useRouter } from "@/src/lib/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useKittyContext } from "../_context/kitty-context";
 import { defaultTheme } from "../_lib/default-theme";
@@ -12,7 +12,7 @@ import {
 	getForkedFromTheme,
 	togglePublish,
 	updateTheme,
-} from "../actions";
+} from "../mutations";
 import { EditorToolbar, type EditorMode } from "./editor-toolbar";
 import { ThemeEditor } from "./theme-editor";
 
@@ -65,9 +65,11 @@ export function KittyEditor({
 	// Load forked from theme info
 	useEffect(() => {
 		if (currentTheme.forkedFromId) {
-			void getForkedFromTheme(currentTheme.forkedFromId).then((theme) => {
-				if (theme) setForkedFrom(theme);
-			});
+			void getForkedFromTheme({ data: { forkedFromId: currentTheme.forkedFromId } }).then(
+				(theme) => {
+					if (theme) setForkedFrom(theme);
+				},
+			);
 		} else {
 			setForkedFrom(null);
 		}
@@ -92,10 +94,15 @@ export function KittyEditor({
 		if (!currentTheme.id) return;
 
 		startTransition(async () => {
-			const updated = await updateTheme(currentTheme.id!, {
-				name: currentTheme.name,
-				blurb: currentTheme.blurb,
-				colors: currentTheme.colors,
+			const updated = await updateTheme({
+				data: {
+					id: currentTheme.id!,
+					updates: {
+						name: currentTheme.name,
+						blurb: currentTheme.blurb,
+						colors: currentTheme.colors,
+					},
+				},
 			});
 			setSavedTheme(updated);
 			setCurrentTheme(updated);
@@ -137,7 +144,7 @@ export function KittyEditor({
 	// Discard draft (navigate back to index)
 	const handleDiscard = () => {
 		setHasUnsavedChanges(false);
-		router.push("/kitty");
+		void router.push("/kitty");
 	};
 
 	// Publish/unpublish
@@ -145,7 +152,7 @@ export function KittyEditor({
 		if (!currentTheme.id) return;
 
 		startTransition(async () => {
-			const updated = await togglePublish(currentTheme.id!);
+			const updated = await togglePublish({ data: { id: currentTheme.id! } });
 			setCurrentTheme(updated);
 			setSavedTheme(updated);
 			refreshThemes();
@@ -165,18 +172,20 @@ export function KittyEditor({
 			if (isCommunityTheme || currentTheme.id === null) {
 				// For community themes, create a new theme with the colors
 				newTheme = await createTheme({
-					name: `${currentTheme.name} (Remix)`,
-					colors: currentTheme.colors,
-					blurb: currentTheme.blurb ?? "",
+					data: {
+						name: `${currentTheme.name} (Remix)`,
+						colors: currentTheme.colors,
+						blurb: currentTheme.blurb ?? "",
+					},
 				});
 			} else {
 				// For DB themes, use the fork action
-				newTheme = await forkTheme(currentTheme.id);
+				newTheme = await forkTheme({ data: { originalId: currentTheme.id } });
 			}
 
 			setHasUnsavedChanges(false);
 			refreshThemes();
-			router.push(`/kitty/${newTheme.id}`);
+			void router.push(`/kitty/${newTheme.id}`);
 		});
 	};
 
@@ -185,10 +194,10 @@ export function KittyEditor({
 		if (!currentTheme.id) return;
 
 		startTransition(async () => {
-			await deleteTheme(currentTheme.id!);
+			await deleteTheme({ data: { id: currentTheme.id! } });
 			setHasUnsavedChanges(false);
 			refreshThemes();
-			router.push("/kitty");
+			void router.push("/kitty");
 		});
 	};
 
@@ -201,12 +210,14 @@ export function KittyEditor({
 
 		startTransition(async () => {
 			const newTheme = await createTheme({
-				name: "Untitled Theme",
-				colors: defaultTheme.colors,
-				blurb: "",
+				data: {
+					name: "Untitled Theme",
+					colors: defaultTheme.colors,
+					blurb: "",
+				},
 			});
 			refreshThemes();
-			router.push(`/kitty/${newTheme.id}`);
+			void router.push(`/kitty/${newTheme.id}`);
 		});
 	};
 

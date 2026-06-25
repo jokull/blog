@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/src/lib/navigation";
 
 export default function KittyNotFound() {
 	return (

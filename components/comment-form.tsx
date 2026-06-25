@@ -27,7 +27,7 @@ export function CommentForm({ postSlug, user }: CommentFormProps) {
 		if (!newComment.trim() || !user || isPending) return;
 
 		startTransition(async () => {
-			await createComment(postSlug, newComment);
+			await createComment({ data: { postSlug, content: newComment } });
 			setNewComment("");
 		});
 	}

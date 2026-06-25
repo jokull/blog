@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Image } from "@/src/lib/navigation";
 
 export function Hero() {
 	return (

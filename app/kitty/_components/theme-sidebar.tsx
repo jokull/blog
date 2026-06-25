@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Tab, TabList, TabPanel, Tabs } from "@/components/ui/tabs";
 import { TextField } from "@/components/ui/text-field";
-import { useRouter, usePathname } from "next/navigation";
+import { useNextRouter as useRouter, usePathname } from "@/src/lib/navigation";
 import type { ChangeEvent } from "react";
 import { useMemo, useState, useTransition } from "react";
 import { isSidebarTab, useKittyContext } from "../_context/kitty-context";
@@ -14,7 +14,7 @@ import { defaultTheme } from "../_lib/default-theme";
 import { communityFileToSlug } from "../_lib/slug-utils";
 import type { KittyTheme } from "../_lib/types";
 import type { ThemeMetadata } from "../_lib/theme-parser";
-import { createTheme } from "../actions";
+import { createTheme } from "../mutations";
 import { ThemeLink } from "./theme-link";
 
 export function ThemeSidebar() {
@@ -96,13 +96,15 @@ export function ThemeSidebar() {
 
 		startTransition(async () => {
 			const newTheme = await createTheme({
-				name: "Untitled Theme",
-				colors: defaultTheme.colors,
-				blurb: "",
+				data: {
+					name: "Untitled Theme",
+					colors: defaultTheme.colors,
+					blurb: "",
+				},
 			});
 			setHasUnsavedChanges(false);
 			refreshThemes();
-			router.push(`/kitty/${newTheme.id}`);
+			void router.push(`/kitty/${newTheme.id}`);
 		});
 	};
 
