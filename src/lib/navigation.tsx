@@ -1,4 +1,4 @@
-import { useLocation, useRouter } from "@tanstack/react-router";
+import { Link as RouterLink, useLocation, useRouter } from "@tanstack/react-router";
 import type { AnchorHTMLAttributes, ImgHTMLAttributes } from "react";
 
 type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
@@ -16,6 +16,14 @@ export function Link({
 	scroll: _scroll,
 	...props
 }: LinkProps) {
+	if (href.startsWith("/") && !href.startsWith("//")) {
+		return (
+			<RouterLink to={href} {...props}>
+				{children}
+			</RouterLink>
+		);
+	}
+
 	return (
 		<a href={href} {...props}>
 			{children}
