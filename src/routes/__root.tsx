@@ -1,5 +1,6 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import cn from "clsx";
+import { asHead, siteHead } from "@/src/lib/seo";
 import "../../app/globals.css";
 
 export const Route = createRootRoute({
@@ -15,8 +16,16 @@ export const Route = createRootRoute({
 			},
 			{ name: "color-scheme", content: "only light" },
 			{ name: "theme-color", content: "#fcfcfc" },
+			...asHead({ ...siteHead(), links: [] }).meta,
 		],
-		links: [{ rel: "alternate", type: "application/rss+xml", href: "/feed.xml" }],
+		links: [
+			{
+				rel: "alternate",
+				type: "application/rss+xml",
+				href: "/feed.xml",
+				title: "Jökull Sólberg RSS Feed",
+			},
+		],
 	}),
 	component: RootComponent,
 });

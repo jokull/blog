@@ -27,8 +27,11 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as ApiDevAuthRouteImport } from './routes/api/dev-auth'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as SlugEditorRouteImport } from './routes/$slug.editor'
+import { Route as OgKittyChar123idChar125DotpngRouteImport } from './routes/og.kitty.{$id}[.]png'
+import { Route as OgBlogSlugRouteImport } from './routes/og.blog.$slug'
 import { Route as KittyCommunitySlugRouteImport } from './routes/kitty.community.$slug'
 import { Route as ApiMarkdownSlugRouteImport } from './routes/api/markdown/$slug'
+import { Route as OgKittyCommunityChar123slugChar125DotpngRouteImport } from './routes/og.kitty.community.{$slug}[.]png'
 
 const Char123slugChar125DotmdRoute = Char123slugChar125DotmdRouteImport.update({
   id: '/{$slug}.md',
@@ -120,6 +123,17 @@ const SlugEditorRoute = SlugEditorRouteImport.update({
   path: '/editor',
   getParentRoute: () => SlugRoute,
 } as any)
+const OgKittyChar123idChar125DotpngRoute =
+  OgKittyChar123idChar125DotpngRouteImport.update({
+    id: '/og/kitty/{$id}.png',
+    path: '/og/kitty/{$id}.png',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OgBlogSlugRoute = OgBlogSlugRouteImport.update({
+  id: '/og/blog/$slug',
+  path: '/og/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KittyCommunitySlugRoute = KittyCommunitySlugRouteImport.update({
   id: '/kitty/community/$slug',
   path: '/kitty/community/$slug',
@@ -130,6 +144,12 @@ const ApiMarkdownSlugRoute = ApiMarkdownSlugRouteImport.update({
   path: '/api/markdown/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OgKittyCommunityChar123slugChar125DotpngRoute =
+  OgKittyCommunityChar123slugChar125DotpngRouteImport.update({
+    id: '/og/kitty/community/{$slug}.png',
+    path: '/og/kitty/community/{$slug}.png',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,6 +172,9 @@ export interface FileRoutesByFullPath {
   '/kitty/': typeof KittyIndexRoute
   '/api/markdown/$slug': typeof ApiMarkdownSlugRoute
   '/kitty/community/$slug': typeof KittyCommunitySlugRoute
+  '/og/blog/$slug': typeof OgBlogSlugRoute
+  '/og/kitty/{$id}.png': typeof OgKittyChar123idChar125DotpngRoute
+  '/og/kitty/community/{$slug}.png': typeof OgKittyCommunityChar123slugChar125DotpngRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +197,9 @@ export interface FileRoutesByTo {
   '/kitty': typeof KittyIndexRoute
   '/api/markdown/$slug': typeof ApiMarkdownSlugRoute
   '/kitty/community/$slug': typeof KittyCommunitySlugRoute
+  '/og/blog/$slug': typeof OgBlogSlugRoute
+  '/og/kitty/{$id}.png': typeof OgKittyChar123idChar125DotpngRoute
+  '/og/kitty/community/{$slug}.png': typeof OgKittyCommunityChar123slugChar125DotpngRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +223,9 @@ export interface FileRoutesById {
   '/kitty/': typeof KittyIndexRoute
   '/api/markdown/$slug': typeof ApiMarkdownSlugRoute
   '/kitty/community/$slug': typeof KittyCommunitySlugRoute
+  '/og/blog/$slug': typeof OgBlogSlugRoute
+  '/og/kitty/{$id}.png': typeof OgKittyChar123idChar125DotpngRoute
+  '/og/kitty/community/{$slug}.png': typeof OgKittyCommunityChar123slugChar125DotpngRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,6 +250,9 @@ export interface FileRouteTypes {
     | '/kitty/'
     | '/api/markdown/$slug'
     | '/kitty/community/$slug'
+    | '/og/blog/$slug'
+    | '/og/kitty/{$id}.png'
+    | '/og/kitty/community/{$slug}.png'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +275,9 @@ export interface FileRouteTypes {
     | '/kitty'
     | '/api/markdown/$slug'
     | '/kitty/community/$slug'
+    | '/og/blog/$slug'
+    | '/og/kitty/{$id}.png'
+    | '/og/kitty/community/{$slug}.png'
   id:
     | '__root__'
     | '/'
@@ -265,6 +300,9 @@ export interface FileRouteTypes {
     | '/kitty/'
     | '/api/markdown/$slug'
     | '/kitty/community/$slug'
+    | '/og/blog/$slug'
+    | '/og/kitty/{$id}.png'
+    | '/og/kitty/community/{$slug}.png'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -287,6 +325,9 @@ export interface RootRouteChildren {
   KittyIndexRoute: typeof KittyIndexRoute
   ApiMarkdownSlugRoute: typeof ApiMarkdownSlugRoute
   KittyCommunitySlugRoute: typeof KittyCommunitySlugRoute
+  OgBlogSlugRoute: typeof OgBlogSlugRoute
+  OgKittyChar123idChar125DotpngRoute: typeof OgKittyChar123idChar125DotpngRoute
+  OgKittyCommunityChar123slugChar125DotpngRoute: typeof OgKittyCommunityChar123slugChar125DotpngRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -417,6 +458,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugEditorRouteImport
       parentRoute: typeof SlugRoute
     }
+    '/og/kitty/{$id}.png': {
+      id: '/og/kitty/{$id}.png'
+      path: '/og/kitty/{$id}.png'
+      fullPath: '/og/kitty/{$id}.png'
+      preLoaderRoute: typeof OgKittyChar123idChar125DotpngRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/blog/$slug': {
+      id: '/og/blog/$slug'
+      path: '/og/blog/$slug'
+      fullPath: '/og/blog/$slug'
+      preLoaderRoute: typeof OgBlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kitty/community/$slug': {
       id: '/kitty/community/$slug'
       path: '/kitty/community/$slug'
@@ -429,6 +484,13 @@ declare module '@tanstack/react-router' {
       path: '/api/markdown/$slug'
       fullPath: '/api/markdown/$slug'
       preLoaderRoute: typeof ApiMarkdownSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/kitty/community/{$slug}.png': {
+      id: '/og/kitty/community/{$slug}.png'
+      path: '/og/kitty/community/{$slug}.png'
+      fullPath: '/og/kitty/community/{$slug}.png'
+      preLoaderRoute: typeof OgKittyCommunityChar123slugChar125DotpngRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -464,6 +526,10 @@ const rootRouteChildren: RootRouteChildren = {
   KittyIndexRoute: KittyIndexRoute,
   ApiMarkdownSlugRoute: ApiMarkdownSlugRoute,
   KittyCommunitySlugRoute: KittyCommunitySlugRoute,
+  OgBlogSlugRoute: OgBlogSlugRoute,
+  OgKittyChar123idChar125DotpngRoute: OgKittyChar123idChar125DotpngRoute,
+  OgKittyCommunityChar123slugChar125DotpngRoute:
+    OgKittyCommunityChar123slugChar125DotpngRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
