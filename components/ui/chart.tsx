@@ -127,26 +127,24 @@ const getColorValue = (color?: string): string => {
 	return color;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
 function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
-	if (typeof payload !== "object" || payload === null) {
+	if (!isRecord(payload)) {
 		return undefined;
 	}
+	const payloadRecord = payload;
 
-	const payloadPayload =
-		"payload" in payload && typeof payload.payload === "object" && payload.payload !== null
-			? payload.payload
-			: undefined;
+	const payloadPayload = isRecord(payloadRecord.payload) ? payloadRecord.payload : undefined;
 
 	let configLabelKey: string = key;
 
-	if (key in payload && typeof payload[key as keyof typeof payload] === "string") {
-		configLabelKey = payload[key as keyof typeof payload] as string;
-	} else if (
-		payloadPayload &&
-		key in payloadPayload &&
-		typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
-	) {
-		configLabelKey = payloadPayload[key as keyof typeof payloadPayload] as string;
+	if (typeof payloadRecord[key] === "string") {
+		configLabelKey = payloadRecord[key];
+	} else if (payloadPayload && typeof payloadPayload[key] === "string") {
+		configLabelKey = payloadPayload[key];
 	}
 
 	return configLabelKey in config ? config[configLabelKey] : config[key];

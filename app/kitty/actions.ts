@@ -81,7 +81,7 @@ export const createTheme = createServerFn({ method: "POST" })
 			...theme[0],
 			blurb: theme[0].blurb ?? null,
 			colors: theme[0].colors,
-		} as KittyThemeType;
+		};
 	});
 
 // Update theme (owner or admin)
@@ -232,7 +232,7 @@ export async function getThemeBySlug(slug: string): Promise<KittyThemeType | nul
 		...theme,
 		blurb: theme.blurb ?? null,
 		colors: theme.colors,
-	} as KittyThemeType;
+	};
 }
 
 // Get forked from theme info
@@ -249,7 +249,7 @@ export const getForkedFromTheme = createServerFn({ method: "GET" })
 			...theme,
 			blurb: theme.blurb ?? null,
 			colors: theme.colors,
-		} as KittyThemeType;
+		};
 	});
 
 // Get single theme by ID (with permission check)
@@ -267,7 +267,7 @@ export async function getThemeById(id: number): Promise<KittyThemeType | null> {
 			...theme,
 			blurb: theme.blurb ?? null,
 			colors: theme.colors,
-		} as KittyThemeType;
+		};
 	}
 
 	// For unpublished themes, check ownership/admin status
@@ -283,5 +283,5 @@ export async function getThemeById(id: number): Promise<KittyThemeType | null> {
 		...theme,
 		blurb: theme.blurb ?? null,
 		colors: theme.colors,
-	} as KittyThemeType;
+	};
 }

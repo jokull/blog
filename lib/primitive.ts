@@ -19,10 +19,13 @@ type CxArgs<T> = [...ClassNameValue[], Render<T>] | [[...ClassNameValue[], Rende
 export function cx<T = unknown>(...args: CxArgs<T>): string | ((v: T) => string) {
 	let resolvedArgs = args;
 	if (args.length === 1 && Array.isArray(args[0])) {
-		resolvedArgs = args[0] as [...ClassNameValue[], Render<T>];
+		resolvedArgs = args[0];
 	}
 
+	// TypeScript loses the tuple's trailing render value after runtime normalization.
+	// oxlint-disable-next-line typescript-eslint/no-unnecessary-type-assertion
 	const className = resolvedArgs.pop() as Render<T>;
+	// oxlint-disable-next-line typescript-eslint/no-unnecessary-type-assertion
 	const tailwinds = resolvedArgs as ClassNameValue[];
 
 	const fixed = twMerge(...tailwinds);

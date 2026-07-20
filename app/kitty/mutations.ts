@@ -170,5 +170,5 @@ export const getForkedFromTheme = createServerFn({ method: "GET" })
 			where: { id: data.forkedFromId },
 		});
 		if (!theme) return null;
-		return { ...theme, blurb: theme.blurb ?? null, colors: theme.colors } as KittyThemeType;
+		return { ...theme, blurb: theme.blurb ?? null, colors: theme.colors };
 	});

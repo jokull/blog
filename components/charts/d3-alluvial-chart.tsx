@@ -1,6 +1,6 @@
 "use client";
 
-import { sankeyLinkHorizontal, type SankeyLink } from "d3-sankey";
+import { sankeyLinkHorizontal } from "d3-sankey";
 import { GRID_COLOR, TEXT_COLOR } from "./colors";
 import { useChartDimensions } from "./use-chart-dimensions";
 
@@ -251,8 +251,7 @@ export function D3AlluvialChart({
 							return (
 								<path
 									key={link.id}
-									// oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
-									d={linkPath(link as SankeyLink<LayoutNode, LayoutLink>) ?? ""}
+									d={linkPath(link) ?? ""}
 									fill="none"
 									stroke={color}
 									strokeOpacity={link.transition ? 0.65 : 0.35}
