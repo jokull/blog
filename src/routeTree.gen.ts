@@ -9,78 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as Char123slugChar125DotmdRouteImport } from './routes/{$slug}[.]md'
-import { Route as UiRouteImport } from './routes/ui'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as NotesRouteImport } from './routes/notes'
-import { Route as LlmDottxtRouteImport } from './routes/llm[.]txt'
-import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
-import { Route as CallbackRouteImport } from './routes/callback'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CallbackRouteImport } from './routes/callback'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
+import { Route as LlmDottxtRouteImport } from './routes/llm[.]txt'
+import { Route as NotesRouteImport } from './routes/notes'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as UiRouteImport } from './routes/ui'
+import { Route as Char123slugChar125DotmdRouteImport } from './routes/{$slug}[.]md'
+import { Route as SlugEditorRouteImport } from './routes/$slug.editor'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
+import { Route as ApiDevAuthRouteImport } from './routes/api/dev-auth'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as KittyIndexRouteImport } from './routes/kitty.index'
 import { Route as KittyIdRouteImport } from './routes/kitty.$id'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as ApiDevAuthRouteImport } from './routes/api/dev-auth'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
-import { Route as SlugEditorRouteImport } from './routes/$slug.editor'
-import { Route as OgKittyChar123idChar125DotpngRouteImport } from './routes/og.kitty.{$id}[.]png'
-import { Route as OgBlogSlugRouteImport } from './routes/og.blog.$slug'
-import { Route as KittyCommunitySlugRouteImport } from './routes/kitty.community.$slug'
 import { Route as ApiMarkdownSlugRouteImport } from './routes/api/markdown/$slug'
+import { Route as KittyCommunitySlugRouteImport } from './routes/kitty.community.$slug'
+import { Route as OgBlogSlugRouteImport } from './routes/og.blog.$slug'
+import { Route as OgKittyChar123idChar125DotpngRouteImport } from './routes/og.kitty.{$id}[.]png'
 import { Route as OgKittyCommunityChar123slugChar125DotpngRouteImport } from './routes/og.kitty.community.{$slug}[.]png'
 
-const Char123slugChar125DotmdRoute = Char123slugChar125DotmdRouteImport.update({
-  id: '/{$slug}.md',
-  path: '/{$slug}.md',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UiRoute = UiRouteImport.update({
-  id: '/ui',
-  path: '/ui',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotesRoute = NotesRouteImport.update({
-  id: '/notes',
-  path: '/notes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LlmDottxtRoute = LlmDottxtRouteImport.update({
-  id: '/llm.txt',
-  path: '/llm.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
-  id: '/feed.xml',
-  path: '/feed.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CallbackRoute = CallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -88,9 +43,74 @@ const SlugRoute = SlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CallbackRoute = CallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmDottxtRoute = LlmDottxtRouteImport.update({
+  id: '/llm.txt',
+  path: '/llm.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesRoute = NotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UiRoute = UiRouteImport.update({
+  id: '/ui',
+  path: '/ui',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char123slugChar125DotmdRoute = Char123slugChar125DotmdRouteImport.update({
+  id: '/{$slug}.md',
+  path: '/{$slug}.md',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugEditorRoute = SlugEditorRouteImport.update({
+  id: '/editor',
+  path: '/editor',
+  getParentRoute: () => SlugRoute,
+} as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDevAuthRoute = ApiDevAuthRouteImport.update({
+  id: '/api/dev-auth',
+  path: '/api/dev-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KittyIndexRoute = KittyIndexRouteImport.update({
@@ -103,35 +123,9 @@ const KittyIdRoute = KittyIdRouteImport.update({
   path: '/kitty/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDevAuthRoute = ApiDevAuthRouteImport.update({
-  id: '/api/dev-auth',
-  path: '/api/dev-auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SlugEditorRoute = SlugEditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
-  getParentRoute: () => SlugRoute,
-} as any)
-const OgKittyChar123idChar125DotpngRoute =
-  OgKittyChar123idChar125DotpngRouteImport.update({
-    id: '/og/kitty/{$id}.png',
-    path: '/og/kitty/{$id}.png',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OgBlogSlugRoute = OgBlogSlugRouteImport.update({
-  id: '/og/blog/$slug',
-  path: '/og/blog/$slug',
+const ApiMarkdownSlugRoute = ApiMarkdownSlugRouteImport.update({
+  id: '/api/markdown/$slug',
+  path: '/api/markdown/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KittyCommunitySlugRoute = KittyCommunitySlugRouteImport.update({
@@ -139,11 +133,17 @@ const KittyCommunitySlugRoute = KittyCommunitySlugRouteImport.update({
   path: '/kitty/community/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiMarkdownSlugRoute = ApiMarkdownSlugRouteImport.update({
-  id: '/api/markdown/$slug',
-  path: '/api/markdown/$slug',
+const OgBlogSlugRoute = OgBlogSlugRouteImport.update({
+  id: '/og/blog/$slug',
+  path: '/og/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OgKittyChar123idChar125DotpngRoute =
+  OgKittyChar123idChar125DotpngRouteImport.update({
+    id: '/og/kitty/{$id}.png',
+    path: '/og/kitty/{$id}.png',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OgKittyCommunityChar123slugChar125DotpngRoute =
   OgKittyCommunityChar123slugChar125DotpngRouteImport.update({
     id: '/og/kitty/community/{$slug}.png',
@@ -332,74 +332,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/{$slug}.md': {
-      id: '/{$slug}.md'
-      path: '/{$slug}.md'
-      fullPath: '/{$slug}.md'
-      preLoaderRoute: typeof Char123slugChar125DotmdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ui': {
-      id: '/ui'
-      path: '/ui'
-      fullPath: '/ui'
-      preLoaderRoute: typeof UiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notes': {
-      id: '/notes'
-      path: '/notes'
-      fullPath: '/notes'
-      preLoaderRoute: typeof NotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llm.txt': {
-      id: '/llm.txt'
-      path: '/llm.txt'
-      fullPath: '/llm.txt'
-      preLoaderRoute: typeof LlmDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feed.xml': {
-      id: '/feed.xml'
-      path: '/feed.xml'
-      fullPath: '/feed.xml'
-      preLoaderRoute: typeof FeedDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/callback': {
-      id: '/callback'
-      path: '/callback'
-      fullPath: '/callback'
-      preLoaderRoute: typeof CallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -409,11 +346,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/callback': {
+      id: '/callback'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof CallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llm.txt': {
+      id: '/llm.txt'
+      path: '/llm.txt'
+      fullPath: '/llm.txt'
+      preLoaderRoute: typeof LlmDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notes': {
+      id: '/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof NotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ui': {
+      id: '/ui'
+      path: '/ui'
+      fullPath: '/ui'
+      preLoaderRoute: typeof UiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/{$slug}.md': {
+      id: '/{$slug}.md'
+      path: '/{$slug}.md'
+      fullPath: '/{$slug}.md'
+      preLoaderRoute: typeof Char123slugChar125DotmdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/editor': {
+      id: '/$slug/editor'
+      path: '/editor'
+      fullPath: '/$slug/editor'
+      preLoaderRoute: typeof SlugEditorRouteImport
+      parentRoute: typeof SlugRoute
+    }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dev-auth': {
+      id: '/api/dev-auth'
+      path: '/api/dev-auth'
+      fullPath: '/api/dev-auth'
+      preLoaderRoute: typeof ApiDevAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kitty/': {
@@ -430,46 +458,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KittyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/dev-auth': {
-      id: '/api/dev-auth'
-      path: '/api/dev-auth'
-      fullPath: '/api/dev-auth'
-      preLoaderRoute: typeof ApiDevAuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$slug/editor': {
-      id: '/$slug/editor'
-      path: '/editor'
-      fullPath: '/$slug/editor'
-      preLoaderRoute: typeof SlugEditorRouteImport
-      parentRoute: typeof SlugRoute
-    }
-    '/og/kitty/{$id}.png': {
-      id: '/og/kitty/{$id}.png'
-      path: '/og/kitty/{$id}.png'
-      fullPath: '/og/kitty/{$id}.png'
-      preLoaderRoute: typeof OgKittyChar123idChar125DotpngRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/og/blog/$slug': {
-      id: '/og/blog/$slug'
-      path: '/og/blog/$slug'
-      fullPath: '/og/blog/$slug'
-      preLoaderRoute: typeof OgBlogSlugRouteImport
+    '/api/markdown/$slug': {
+      id: '/api/markdown/$slug'
+      path: '/api/markdown/$slug'
+      fullPath: '/api/markdown/$slug'
+      preLoaderRoute: typeof ApiMarkdownSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kitty/community/$slug': {
@@ -479,11 +472,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KittyCommunitySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/markdown/$slug': {
-      id: '/api/markdown/$slug'
-      path: '/api/markdown/$slug'
-      fullPath: '/api/markdown/$slug'
-      preLoaderRoute: typeof ApiMarkdownSlugRouteImport
+    '/og/blog/$slug': {
+      id: '/og/blog/$slug'
+      path: '/og/blog/$slug'
+      fullPath: '/og/blog/$slug'
+      preLoaderRoute: typeof OgBlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/kitty/{$id}.png': {
+      id: '/og/kitty/{$id}.png'
+      path: '/og/kitty/{$id}.png'
+      fullPath: '/og/kitty/{$id}.png'
+      preLoaderRoute: typeof OgKittyChar123idChar125DotpngRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/og/kitty/community/{$slug}.png': {

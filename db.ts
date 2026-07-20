@@ -2,20 +2,16 @@ import { drizzle, type DrizzleD1Database } from "drizzle-orm/d1";
 // @ts-expect-error — virtual module provided by @cloudflare/vite-plugin at runtime
 import { env } from "cloudflare:workers";
 import * as schema from "./schema";
-import { relations } from "./schema";
 
-type Database = DrizzleD1Database<typeof schema, typeof relations>;
+type Database = DrizzleD1Database<typeof schema>;
 
 let _db: Database | undefined;
 
 export function getDb() {
-	_db ??= drizzle<typeof schema, typeof relations>(
+	_db ??= drizzle<typeof schema>(
 		// oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- Cloudflare provides DB through a Vite virtual module at runtime.
 		(env as Record<string, unknown>).DB as Parameters<typeof drizzle>[0],
-		{
-			schema,
-			relations,
-		},
+		{ schema },
 	);
 	return _db;
 }

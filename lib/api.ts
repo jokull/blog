@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
-import { eq } from "drizzle-orm";
-import type { Context, Next } from "hono";
+import { eq, lt } from "drizzle-orm";
+import type { Context, Env, Next } from "hono";
 import { Hono } from "hono";
 import { z } from "zod/v4";
 import { getSession, whoami } from "@/auth";
@@ -9,7 +9,7 @@ import { db } from "@/db";
 import { env } from "@/env";
 import { Note, Post } from "@/schema";
 
-const app = new Hono().basePath("/api");
+const app = new Hono<Env>().basePath("/api");
 
 // Auth middleware - checks for admin access via app token, GitHub token, or session
 async function authMiddleware(c: Context, next: Next) {
@@ -113,7 +113,7 @@ const route = app
 		if (!post) return c.json({ error: "Not found" }, 404);
 		return c.json({ post });
 	})
-	.post("/posts", authMiddleware, zValidator("json", CreatePostSchema), async (c) => {
+	.post("/posts", authMiddleware, zValidator<typeof CreatePostSchema, "json", Env>("json", CreatePostSchema), async (c) => {
 		const data = c.req.valid("json");
 		await db.insert(Post).values({
 			slug: data.slug,
@@ -126,7 +126,7 @@ const route = app
 		});
 		return c.json({ success: true, slug: data.slug });
 	})
-	.patch("/posts/:slug", authMiddleware, zValidator("json", UpdatePostSchema), async (c) => {
+	.patch("/posts/:slug", authMiddleware, zValidator<typeof UpdatePostSchema, "json", Env>("json", UpdatePostSchema), async (c) => {
 		const slug = c.req.param("slug");
 		const data = c.req.valid("json");
 
@@ -178,7 +178,7 @@ const route = app
 		if (!note) return c.json({ error: "Not found" }, 404);
 		return c.json({ note });
 	})
-	.post("/notes", authMiddleware, zValidator("json", CreateNoteSchema), async (c) => {
+	.post("/notes", authMiddleware, zValidator<typeof CreateNoteSchema, "json", Env>("json", CreateNoteSchema), async (c) => {
 		const data = c.req.valid("json");
 		await db.insert(Note).values({
 			id: data.id,
@@ -187,7 +187,7 @@ const route = app
 		});
 		return c.json({ success: true, id: data.id });
 	})
-	.patch("/notes/:id", authMiddleware, zValidator("json", UpdateNoteSchema), async (c) => {
+	.patch("/notes/:id", authMiddleware, zValidator<typeof UpdateNoteSchema, "json", Env>("json", UpdateNoteSchema), async (c) => {
 		const id = c.req.param("id");
 		const data = c.req.valid("json");
 		const updateData: Record<string, unknown> = {};
