@@ -113,35 +113,45 @@ const route = app
 		if (!post) return c.json({ error: "Not found" }, 404);
 		return c.json({ post });
 	})
-	.post("/posts", authMiddleware, zValidator<typeof CreatePostSchema, "json", Env>("json", CreatePostSchema), async (c) => {
-		const data = c.req.valid("json");
-		await db.insert(Post).values({
-			slug: data.slug,
-			title: data.title,
-			markdown: data.markdown,
-			locale: data.locale,
-			categorySlug: data.categorySlug ?? null,
-			heroImage: data.heroImage ?? null,
-			publishedAt: new Date(),
-		});
-		return c.json({ success: true, slug: data.slug });
-	})
-	.patch("/posts/:slug", authMiddleware, zValidator<typeof UpdatePostSchema, "json", Env>("json", UpdatePostSchema), async (c) => {
-		const slug = c.req.param("slug");
-		const data = c.req.valid("json");
+	.post(
+		"/posts",
+		authMiddleware,
+		zValidator<typeof CreatePostSchema, "json", Env>("json", CreatePostSchema),
+		async (c) => {
+			const data = c.req.valid("json");
+			await db.insert(Post).values({
+				slug: data.slug,
+				title: data.title,
+				markdown: data.markdown,
+				locale: data.locale,
+				categorySlug: data.categorySlug ?? null,
+				heroImage: data.heroImage ?? null,
+				publishedAt: new Date(),
+			});
+			return c.json({ success: true, slug: data.slug });
+		},
+	)
+	.patch(
+		"/posts/:slug",
+		authMiddleware,
+		zValidator<typeof UpdatePostSchema, "json", Env>("json", UpdatePostSchema),
+		async (c) => {
+			const slug = c.req.param("slug");
+			const data = c.req.valid("json");
 
-		const updateData: Record<string, unknown> = { modifiedAt: new Date() };
-		if (data.title !== undefined) updateData.title = data.title;
-		if (data.markdown !== undefined) updateData.markdown = data.markdown;
-		if (data.locale !== undefined) updateData.locale = data.locale;
-		if (data.categorySlug !== undefined) updateData.categorySlug = data.categorySlug;
-		if (data.heroImage !== undefined) updateData.heroImage = data.heroImage;
-		if (data.publish === true) updateData.publicAt = new Date();
-		if (data.publish === false) updateData.publicAt = null;
+			const updateData: Record<string, unknown> = { modifiedAt: new Date() };
+			if (data.title !== undefined) updateData.title = data.title;
+			if (data.markdown !== undefined) updateData.markdown = data.markdown;
+			if (data.locale !== undefined) updateData.locale = data.locale;
+			if (data.categorySlug !== undefined) updateData.categorySlug = data.categorySlug;
+			if (data.heroImage !== undefined) updateData.heroImage = data.heroImage;
+			if (data.publish === true) updateData.publicAt = new Date();
+			if (data.publish === false) updateData.publicAt = null;
 
-		await db.update(Post).set(updateData).where(eq(Post.slug, slug));
-		return c.json({ success: true });
-	})
+			await db.update(Post).set(updateData).where(eq(Post.slug, slug));
+			return c.json({ success: true });
+		},
+	)
 	.delete("/posts/:slug", authMiddleware, async (c) => {
 		const slug = c.req.param("slug")!;
 		await db.delete(Post).where(eq(Post.slug, slug));
@@ -178,25 +188,35 @@ const route = app
 		if (!note) return c.json({ error: "Not found" }, 404);
 		return c.json({ note });
 	})
-	.post("/notes", authMiddleware, zValidator<typeof CreateNoteSchema, "json", Env>("json", CreateNoteSchema), async (c) => {
-		const data = c.req.valid("json");
-		await db.insert(Note).values({
-			id: data.id,
-			description: data.description ?? null,
-			publishedAt: data.publish ? new Date() : null,
-		});
-		return c.json({ success: true, id: data.id });
-	})
-	.patch("/notes/:id", authMiddleware, zValidator<typeof UpdateNoteSchema, "json", Env>("json", UpdateNoteSchema), async (c) => {
-		const id = c.req.param("id");
-		const data = c.req.valid("json");
-		const updateData: Record<string, unknown> = {};
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.publish === true) updateData.publishedAt = new Date();
-		if (data.publish === false) updateData.publishedAt = null;
-		await db.update(Note).set(updateData).where(eq(Note.id, id));
-		return c.json({ success: true });
-	})
+	.post(
+		"/notes",
+		authMiddleware,
+		zValidator<typeof CreateNoteSchema, "json", Env>("json", CreateNoteSchema),
+		async (c) => {
+			const data = c.req.valid("json");
+			await db.insert(Note).values({
+				id: data.id,
+				description: data.description ?? null,
+				publishedAt: data.publish ? new Date() : null,
+			});
+			return c.json({ success: true, id: data.id });
+		},
+	)
+	.patch(
+		"/notes/:id",
+		authMiddleware,
+		zValidator<typeof UpdateNoteSchema, "json", Env>("json", UpdateNoteSchema),
+		async (c) => {
+			const id = c.req.param("id");
+			const data = c.req.valid("json");
+			const updateData: Record<string, unknown> = {};
+			if (data.description !== undefined) updateData.description = data.description;
+			if (data.publish === true) updateData.publishedAt = new Date();
+			if (data.publish === false) updateData.publishedAt = null;
+			await db.update(Note).set(updateData).where(eq(Note.id, id));
+			return c.json({ success: true });
+		},
+	)
 	.delete("/notes/:id", authMiddleware, async (c) => {
 		const id = c.req.param("id")!;
 		await db.delete(Note).where(eq(Note.id, id));

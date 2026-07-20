@@ -1,3 +1,4 @@
+import { defineRelations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const Category = sqliteTable("category", {
@@ -97,3 +98,28 @@ export const KittyTheme = sqliteTable("kitty_theme", {
 		.$default(() => new Date()),
 	modifiedAt: integer("modified_at", { mode: "timestamp" }),
 });
+
+export const relations = defineRelations({ Category, Comment, KittyTheme, Note, Post }, (r) => ({
+	Category: {
+		posts: r.many.Post({ from: r.Category.slug, to: r.Post.categorySlug }),
+	},
+	Post: {
+		category: r.one.Category({ from: r.Post.categorySlug, to: r.Category.slug }),
+		comments: r.many.Comment(),
+	},
+	Comment: {
+		post: r.one.Post({ from: r.Comment.postSlug, to: r.Post.slug, optional: false }),
+	},
+	KittyTheme: {
+		forkedFrom: r.one.KittyTheme({
+			from: r.KittyTheme.forkedFromId,
+			to: r.KittyTheme.id,
+			alias: "forkedFrom",
+		}),
+		forks: r.many.KittyTheme({
+			from: r.KittyTheme.id,
+			to: r.KittyTheme.forkedFromId,
+			alias: "forkedFrom",
+		}),
+	},
+}));

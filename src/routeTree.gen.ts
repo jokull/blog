@@ -8,538 +8,536 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as SlugRouteImport } from './routes/$slug'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as CallbackRouteImport } from './routes/callback'
-import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
-import { Route as LlmDottxtRouteImport } from './routes/llm[.]txt'
-import { Route as NotesRouteImport } from './routes/notes'
-import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as UiRouteImport } from './routes/ui'
-import { Route as Char123slugChar125DotmdRouteImport } from './routes/{$slug}[.]md'
-import { Route as SlugEditorRouteImport } from './routes/$slug.editor'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
-import { Route as ApiDevAuthRouteImport } from './routes/api/dev-auth'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as KittyIndexRouteImport } from './routes/kitty.index'
-import { Route as KittyIdRouteImport } from './routes/kitty.$id'
-import { Route as ApiMarkdownSlugRouteImport } from './routes/api/markdown/$slug'
-import { Route as KittyCommunitySlugRouteImport } from './routes/kitty.community.$slug'
-import { Route as OgBlogSlugRouteImport } from './routes/og.blog.$slug'
-import { Route as OgKittyChar123idChar125DotpngRouteImport } from './routes/og.kitty.{$id}[.]png'
-import { Route as OgKittyCommunityChar123slugChar125DotpngRouteImport } from './routes/og.kitty.community.{$slug}[.]png'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as SlugRouteImport } from "./routes/$slug";
+import { Route as AdminRouteImport } from "./routes/admin";
+import { Route as CallbackRouteImport } from "./routes/callback";
+import { Route as FeedDotxmlRouteImport } from "./routes/feed[.]xml";
+import { Route as LlmDottxtRouteImport } from "./routes/llm[.]txt";
+import { Route as NotesRouteImport } from "./routes/notes";
+import { Route as ProjectsRouteImport } from "./routes/projects";
+import { Route as RobotsDottxtRouteImport } from "./routes/robots[.]txt";
+import { Route as SitemapDotxmlRouteImport } from "./routes/sitemap[.]xml";
+import { Route as UiRouteImport } from "./routes/ui";
+import { Route as Char123slugChar125DotmdRouteImport } from "./routes/{$slug}[.]md";
+import { Route as SlugEditorRouteImport } from "./routes/$slug.editor";
+import { Route as ApiSplatRouteImport } from "./routes/api/$";
+import { Route as ApiDevAuthRouteImport } from "./routes/api/dev-auth";
+import { Route as AuthLoginRouteImport } from "./routes/auth/login";
+import { Route as KittyIndexRouteImport } from "./routes/kitty.index";
+import { Route as KittyIdRouteImport } from "./routes/kitty.$id";
+import { Route as ApiMarkdownSlugRouteImport } from "./routes/api/markdown/$slug";
+import { Route as KittyCommunitySlugRouteImport } from "./routes/kitty.community.$slug";
+import { Route as OgBlogSlugRouteImport } from "./routes/og.blog.$slug";
+import { Route as OgKittyChar123idChar125DotpngRouteImport } from "./routes/og.kitty.{$id}[.]png";
+import { Route as OgKittyCommunityChar123slugChar125DotpngRouteImport } from "./routes/og.kitty.community.{$slug}[.]png";
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/",
+	path: "/",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const SlugRoute = SlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/$slug",
+	path: "/$slug",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/admin",
+	path: "/admin",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const CallbackRoute = CallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/callback",
+	path: "/callback",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
-  id: '/feed.xml',
-  path: '/feed.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/feed.xml",
+	path: "/feed.xml",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const LlmDottxtRoute = LlmDottxtRouteImport.update({
-  id: '/llm.txt',
-  path: '/llm.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/llm.txt",
+	path: "/llm.txt",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const NotesRoute = NotesRouteImport.update({
-  id: '/notes',
-  path: '/notes',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/notes",
+	path: "/notes",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/projects",
+	path: "/projects",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/robots.txt",
+	path: "/robots.txt",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/sitemap.xml",
+	path: "/sitemap.xml",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const UiRoute = UiRouteImport.update({
-  id: '/ui',
-  path: '/ui',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/ui",
+	path: "/ui",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const Char123slugChar125DotmdRoute = Char123slugChar125DotmdRouteImport.update({
-  id: '/{$slug}.md',
-  path: '/{$slug}.md',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/{$slug}.md",
+	path: "/{$slug}.md",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const SlugEditorRoute = SlugEditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
-  getParentRoute: () => SlugRoute,
-} as any)
+	id: "/editor",
+	path: "/editor",
+	getParentRoute: () => SlugRoute,
+} as any);
 const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/api/$",
+	path: "/api/$",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const ApiDevAuthRoute = ApiDevAuthRouteImport.update({
-  id: '/api/dev-auth',
-  path: '/api/dev-auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/api/dev-auth",
+	path: "/api/dev-auth",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/auth/login",
+	path: "/auth/login",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const KittyIndexRoute = KittyIndexRouteImport.update({
-  id: '/kitty/',
-  path: '/kitty/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/kitty/",
+	path: "/kitty/",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const KittyIdRoute = KittyIdRouteImport.update({
-  id: '/kitty/$id',
-  path: '/kitty/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/kitty/$id",
+	path: "/kitty/$id",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const ApiMarkdownSlugRoute = ApiMarkdownSlugRouteImport.update({
-  id: '/api/markdown/$slug',
-  path: '/api/markdown/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/api/markdown/$slug",
+	path: "/api/markdown/$slug",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const KittyCommunitySlugRoute = KittyCommunitySlugRouteImport.update({
-  id: '/kitty/community/$slug',
-  path: '/kitty/community/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/kitty/community/$slug",
+	path: "/kitty/community/$slug",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const OgBlogSlugRoute = OgBlogSlugRouteImport.update({
-  id: '/og/blog/$slug',
-  path: '/og/blog/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OgKittyChar123idChar125DotpngRoute =
-  OgKittyChar123idChar125DotpngRouteImport.update({
-    id: '/og/kitty/{$id}.png',
-    path: '/og/kitty/{$id}.png',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+	id: "/og/blog/$slug",
+	path: "/og/blog/$slug",
+	getParentRoute: () => rootRouteImport,
+} as any);
+const OgKittyChar123idChar125DotpngRoute = OgKittyChar123idChar125DotpngRouteImport.update({
+	id: "/og/kitty/{$id}.png",
+	path: "/og/kitty/{$id}.png",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const OgKittyCommunityChar123slugChar125DotpngRoute =
-  OgKittyCommunityChar123slugChar125DotpngRouteImport.update({
-    id: '/og/kitty/community/{$slug}.png',
-    path: '/og/kitty/community/{$slug}.png',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+	OgKittyCommunityChar123slugChar125DotpngRouteImport.update({
+		id: "/og/kitty/community/{$slug}.png",
+		path: "/og/kitty/community/{$slug}.png",
+		getParentRoute: () => rootRouteImport,
+	} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/$slug': typeof SlugRouteWithChildren
-  '/admin': typeof AdminRoute
-  '/callback': typeof CallbackRoute
-  '/feed.xml': typeof FeedDotxmlRoute
-  '/llm.txt': typeof LlmDottxtRoute
-  '/notes': typeof NotesRoute
-  '/projects': typeof ProjectsRoute
-  '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/ui': typeof UiRoute
-  '/{$slug}.md': typeof Char123slugChar125DotmdRoute
-  '/$slug/editor': typeof SlugEditorRoute
-  '/api/$': typeof ApiSplatRoute
-  '/api/dev-auth': typeof ApiDevAuthRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/kitty/$id': typeof KittyIdRoute
-  '/kitty/': typeof KittyIndexRoute
-  '/api/markdown/$slug': typeof ApiMarkdownSlugRoute
-  '/kitty/community/$slug': typeof KittyCommunitySlugRoute
-  '/og/blog/$slug': typeof OgBlogSlugRoute
-  '/og/kitty/{$id}.png': typeof OgKittyChar123idChar125DotpngRoute
-  '/og/kitty/community/{$slug}.png': typeof OgKittyCommunityChar123slugChar125DotpngRoute
+	"/": typeof IndexRoute;
+	"/$slug": typeof SlugRouteWithChildren;
+	"/admin": typeof AdminRoute;
+	"/callback": typeof CallbackRoute;
+	"/feed.xml": typeof FeedDotxmlRoute;
+	"/llm.txt": typeof LlmDottxtRoute;
+	"/notes": typeof NotesRoute;
+	"/projects": typeof ProjectsRoute;
+	"/robots.txt": typeof RobotsDottxtRoute;
+	"/sitemap.xml": typeof SitemapDotxmlRoute;
+	"/ui": typeof UiRoute;
+	"/{$slug}.md": typeof Char123slugChar125DotmdRoute;
+	"/$slug/editor": typeof SlugEditorRoute;
+	"/api/$": typeof ApiSplatRoute;
+	"/api/dev-auth": typeof ApiDevAuthRoute;
+	"/auth/login": typeof AuthLoginRoute;
+	"/kitty/$id": typeof KittyIdRoute;
+	"/kitty/": typeof KittyIndexRoute;
+	"/api/markdown/$slug": typeof ApiMarkdownSlugRoute;
+	"/kitty/community/$slug": typeof KittyCommunitySlugRoute;
+	"/og/blog/$slug": typeof OgBlogSlugRoute;
+	"/og/kitty/{$id}.png": typeof OgKittyChar123idChar125DotpngRoute;
+	"/og/kitty/community/{$slug}.png": typeof OgKittyCommunityChar123slugChar125DotpngRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/$slug': typeof SlugRouteWithChildren
-  '/admin': typeof AdminRoute
-  '/callback': typeof CallbackRoute
-  '/feed.xml': typeof FeedDotxmlRoute
-  '/llm.txt': typeof LlmDottxtRoute
-  '/notes': typeof NotesRoute
-  '/projects': typeof ProjectsRoute
-  '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/ui': typeof UiRoute
-  '/{$slug}.md': typeof Char123slugChar125DotmdRoute
-  '/$slug/editor': typeof SlugEditorRoute
-  '/api/$': typeof ApiSplatRoute
-  '/api/dev-auth': typeof ApiDevAuthRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/kitty/$id': typeof KittyIdRoute
-  '/kitty': typeof KittyIndexRoute
-  '/api/markdown/$slug': typeof ApiMarkdownSlugRoute
-  '/kitty/community/$slug': typeof KittyCommunitySlugRoute
-  '/og/blog/$slug': typeof OgBlogSlugRoute
-  '/og/kitty/{$id}.png': typeof OgKittyChar123idChar125DotpngRoute
-  '/og/kitty/community/{$slug}.png': typeof OgKittyCommunityChar123slugChar125DotpngRoute
+	"/": typeof IndexRoute;
+	"/$slug": typeof SlugRouteWithChildren;
+	"/admin": typeof AdminRoute;
+	"/callback": typeof CallbackRoute;
+	"/feed.xml": typeof FeedDotxmlRoute;
+	"/llm.txt": typeof LlmDottxtRoute;
+	"/notes": typeof NotesRoute;
+	"/projects": typeof ProjectsRoute;
+	"/robots.txt": typeof RobotsDottxtRoute;
+	"/sitemap.xml": typeof SitemapDotxmlRoute;
+	"/ui": typeof UiRoute;
+	"/{$slug}.md": typeof Char123slugChar125DotmdRoute;
+	"/$slug/editor": typeof SlugEditorRoute;
+	"/api/$": typeof ApiSplatRoute;
+	"/api/dev-auth": typeof ApiDevAuthRoute;
+	"/auth/login": typeof AuthLoginRoute;
+	"/kitty/$id": typeof KittyIdRoute;
+	"/kitty": typeof KittyIndexRoute;
+	"/api/markdown/$slug": typeof ApiMarkdownSlugRoute;
+	"/kitty/community/$slug": typeof KittyCommunitySlugRoute;
+	"/og/blog/$slug": typeof OgBlogSlugRoute;
+	"/og/kitty/{$id}.png": typeof OgKittyChar123idChar125DotpngRoute;
+	"/og/kitty/community/{$slug}.png": typeof OgKittyCommunityChar123slugChar125DotpngRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/$slug': typeof SlugRouteWithChildren
-  '/admin': typeof AdminRoute
-  '/callback': typeof CallbackRoute
-  '/feed.xml': typeof FeedDotxmlRoute
-  '/llm.txt': typeof LlmDottxtRoute
-  '/notes': typeof NotesRoute
-  '/projects': typeof ProjectsRoute
-  '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/ui': typeof UiRoute
-  '/{$slug}.md': typeof Char123slugChar125DotmdRoute
-  '/$slug/editor': typeof SlugEditorRoute
-  '/api/$': typeof ApiSplatRoute
-  '/api/dev-auth': typeof ApiDevAuthRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/kitty/$id': typeof KittyIdRoute
-  '/kitty/': typeof KittyIndexRoute
-  '/api/markdown/$slug': typeof ApiMarkdownSlugRoute
-  '/kitty/community/$slug': typeof KittyCommunitySlugRoute
-  '/og/blog/$slug': typeof OgBlogSlugRoute
-  '/og/kitty/{$id}.png': typeof OgKittyChar123idChar125DotpngRoute
-  '/og/kitty/community/{$slug}.png': typeof OgKittyCommunityChar123slugChar125DotpngRoute
+	__root__: typeof rootRouteImport;
+	"/": typeof IndexRoute;
+	"/$slug": typeof SlugRouteWithChildren;
+	"/admin": typeof AdminRoute;
+	"/callback": typeof CallbackRoute;
+	"/feed.xml": typeof FeedDotxmlRoute;
+	"/llm.txt": typeof LlmDottxtRoute;
+	"/notes": typeof NotesRoute;
+	"/projects": typeof ProjectsRoute;
+	"/robots.txt": typeof RobotsDottxtRoute;
+	"/sitemap.xml": typeof SitemapDotxmlRoute;
+	"/ui": typeof UiRoute;
+	"/{$slug}.md": typeof Char123slugChar125DotmdRoute;
+	"/$slug/editor": typeof SlugEditorRoute;
+	"/api/$": typeof ApiSplatRoute;
+	"/api/dev-auth": typeof ApiDevAuthRoute;
+	"/auth/login": typeof AuthLoginRoute;
+	"/kitty/$id": typeof KittyIdRoute;
+	"/kitty/": typeof KittyIndexRoute;
+	"/api/markdown/$slug": typeof ApiMarkdownSlugRoute;
+	"/kitty/community/$slug": typeof KittyCommunitySlugRoute;
+	"/og/blog/$slug": typeof OgBlogSlugRoute;
+	"/og/kitty/{$id}.png": typeof OgKittyChar123idChar125DotpngRoute;
+	"/og/kitty/community/{$slug}.png": typeof OgKittyCommunityChar123slugChar125DotpngRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/$slug'
-    | '/admin'
-    | '/callback'
-    | '/feed.xml'
-    | '/llm.txt'
-    | '/notes'
-    | '/projects'
-    | '/robots.txt'
-    | '/sitemap.xml'
-    | '/ui'
-    | '/{$slug}.md'
-    | '/$slug/editor'
-    | '/api/$'
-    | '/api/dev-auth'
-    | '/auth/login'
-    | '/kitty/$id'
-    | '/kitty/'
-    | '/api/markdown/$slug'
-    | '/kitty/community/$slug'
-    | '/og/blog/$slug'
-    | '/og/kitty/{$id}.png'
-    | '/og/kitty/community/{$slug}.png'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/$slug'
-    | '/admin'
-    | '/callback'
-    | '/feed.xml'
-    | '/llm.txt'
-    | '/notes'
-    | '/projects'
-    | '/robots.txt'
-    | '/sitemap.xml'
-    | '/ui'
-    | '/{$slug}.md'
-    | '/$slug/editor'
-    | '/api/$'
-    | '/api/dev-auth'
-    | '/auth/login'
-    | '/kitty/$id'
-    | '/kitty'
-    | '/api/markdown/$slug'
-    | '/kitty/community/$slug'
-    | '/og/blog/$slug'
-    | '/og/kitty/{$id}.png'
-    | '/og/kitty/community/{$slug}.png'
-  id:
-    | '__root__'
-    | '/'
-    | '/$slug'
-    | '/admin'
-    | '/callback'
-    | '/feed.xml'
-    | '/llm.txt'
-    | '/notes'
-    | '/projects'
-    | '/robots.txt'
-    | '/sitemap.xml'
-    | '/ui'
-    | '/{$slug}.md'
-    | '/$slug/editor'
-    | '/api/$'
-    | '/api/dev-auth'
-    | '/auth/login'
-    | '/kitty/$id'
-    | '/kitty/'
-    | '/api/markdown/$slug'
-    | '/kitty/community/$slug'
-    | '/og/blog/$slug'
-    | '/og/kitty/{$id}.png'
-    | '/og/kitty/community/{$slug}.png'
-  fileRoutesById: FileRoutesById
+	fileRoutesByFullPath: FileRoutesByFullPath;
+	fullPaths:
+		| "/"
+		| "/$slug"
+		| "/admin"
+		| "/callback"
+		| "/feed.xml"
+		| "/llm.txt"
+		| "/notes"
+		| "/projects"
+		| "/robots.txt"
+		| "/sitemap.xml"
+		| "/ui"
+		| "/{$slug}.md"
+		| "/$slug/editor"
+		| "/api/$"
+		| "/api/dev-auth"
+		| "/auth/login"
+		| "/kitty/$id"
+		| "/kitty/"
+		| "/api/markdown/$slug"
+		| "/kitty/community/$slug"
+		| "/og/blog/$slug"
+		| "/og/kitty/{$id}.png"
+		| "/og/kitty/community/{$slug}.png";
+	fileRoutesByTo: FileRoutesByTo;
+	to:
+		| "/"
+		| "/$slug"
+		| "/admin"
+		| "/callback"
+		| "/feed.xml"
+		| "/llm.txt"
+		| "/notes"
+		| "/projects"
+		| "/robots.txt"
+		| "/sitemap.xml"
+		| "/ui"
+		| "/{$slug}.md"
+		| "/$slug/editor"
+		| "/api/$"
+		| "/api/dev-auth"
+		| "/auth/login"
+		| "/kitty/$id"
+		| "/kitty"
+		| "/api/markdown/$slug"
+		| "/kitty/community/$slug"
+		| "/og/blog/$slug"
+		| "/og/kitty/{$id}.png"
+		| "/og/kitty/community/{$slug}.png";
+	id:
+		| "__root__"
+		| "/"
+		| "/$slug"
+		| "/admin"
+		| "/callback"
+		| "/feed.xml"
+		| "/llm.txt"
+		| "/notes"
+		| "/projects"
+		| "/robots.txt"
+		| "/sitemap.xml"
+		| "/ui"
+		| "/{$slug}.md"
+		| "/$slug/editor"
+		| "/api/$"
+		| "/api/dev-auth"
+		| "/auth/login"
+		| "/kitty/$id"
+		| "/kitty/"
+		| "/api/markdown/$slug"
+		| "/kitty/community/$slug"
+		| "/og/blog/$slug"
+		| "/og/kitty/{$id}.png"
+		| "/og/kitty/community/{$slug}.png";
+	fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SlugRoute: typeof SlugRouteWithChildren
-  AdminRoute: typeof AdminRoute
-  CallbackRoute: typeof CallbackRoute
-  FeedDotxmlRoute: typeof FeedDotxmlRoute
-  LlmDottxtRoute: typeof LlmDottxtRoute
-  NotesRoute: typeof NotesRoute
-  ProjectsRoute: typeof ProjectsRoute
-  RobotsDottxtRoute: typeof RobotsDottxtRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  UiRoute: typeof UiRoute
-  Char123slugChar125DotmdRoute: typeof Char123slugChar125DotmdRoute
-  ApiSplatRoute: typeof ApiSplatRoute
-  ApiDevAuthRoute: typeof ApiDevAuthRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  KittyIdRoute: typeof KittyIdRoute
-  KittyIndexRoute: typeof KittyIndexRoute
-  ApiMarkdownSlugRoute: typeof ApiMarkdownSlugRoute
-  KittyCommunitySlugRoute: typeof KittyCommunitySlugRoute
-  OgBlogSlugRoute: typeof OgBlogSlugRoute
-  OgKittyChar123idChar125DotpngRoute: typeof OgKittyChar123idChar125DotpngRoute
-  OgKittyCommunityChar123slugChar125DotpngRoute: typeof OgKittyCommunityChar123slugChar125DotpngRoute
+	IndexRoute: typeof IndexRoute;
+	SlugRoute: typeof SlugRouteWithChildren;
+	AdminRoute: typeof AdminRoute;
+	CallbackRoute: typeof CallbackRoute;
+	FeedDotxmlRoute: typeof FeedDotxmlRoute;
+	LlmDottxtRoute: typeof LlmDottxtRoute;
+	NotesRoute: typeof NotesRoute;
+	ProjectsRoute: typeof ProjectsRoute;
+	RobotsDottxtRoute: typeof RobotsDottxtRoute;
+	SitemapDotxmlRoute: typeof SitemapDotxmlRoute;
+	UiRoute: typeof UiRoute;
+	Char123slugChar125DotmdRoute: typeof Char123slugChar125DotmdRoute;
+	ApiSplatRoute: typeof ApiSplatRoute;
+	ApiDevAuthRoute: typeof ApiDevAuthRoute;
+	AuthLoginRoute: typeof AuthLoginRoute;
+	KittyIdRoute: typeof KittyIdRoute;
+	KittyIndexRoute: typeof KittyIndexRoute;
+	ApiMarkdownSlugRoute: typeof ApiMarkdownSlugRoute;
+	KittyCommunitySlugRoute: typeof KittyCommunitySlugRoute;
+	OgBlogSlugRoute: typeof OgBlogSlugRoute;
+	OgKittyChar123idChar125DotpngRoute: typeof OgKittyChar123idChar125DotpngRoute;
+	OgKittyCommunityChar123slugChar125DotpngRoute: typeof OgKittyCommunityChar123slugChar125DotpngRoute;
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$slug': {
-      id: '/$slug'
-      path: '/$slug'
-      fullPath: '/$slug'
-      preLoaderRoute: typeof SlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/callback': {
-      id: '/callback'
-      path: '/callback'
-      fullPath: '/callback'
-      preLoaderRoute: typeof CallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feed.xml': {
-      id: '/feed.xml'
-      path: '/feed.xml'
-      fullPath: '/feed.xml'
-      preLoaderRoute: typeof FeedDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llm.txt': {
-      id: '/llm.txt'
-      path: '/llm.txt'
-      fullPath: '/llm.txt'
-      preLoaderRoute: typeof LlmDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notes': {
-      id: '/notes'
-      path: '/notes'
-      fullPath: '/notes'
-      preLoaderRoute: typeof NotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ui': {
-      id: '/ui'
-      path: '/ui'
-      fullPath: '/ui'
-      preLoaderRoute: typeof UiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/{$slug}.md': {
-      id: '/{$slug}.md'
-      path: '/{$slug}.md'
-      fullPath: '/{$slug}.md'
-      preLoaderRoute: typeof Char123slugChar125DotmdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$slug/editor': {
-      id: '/$slug/editor'
-      path: '/editor'
-      fullPath: '/$slug/editor'
-      preLoaderRoute: typeof SlugEditorRouteImport
-      parentRoute: typeof SlugRoute
-    }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/dev-auth': {
-      id: '/api/dev-auth'
-      path: '/api/dev-auth'
-      fullPath: '/api/dev-auth'
-      preLoaderRoute: typeof ApiDevAuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kitty/': {
-      id: '/kitty/'
-      path: '/kitty'
-      fullPath: '/kitty/'
-      preLoaderRoute: typeof KittyIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kitty/$id': {
-      id: '/kitty/$id'
-      path: '/kitty/$id'
-      fullPath: '/kitty/$id'
-      preLoaderRoute: typeof KittyIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/markdown/$slug': {
-      id: '/api/markdown/$slug'
-      path: '/api/markdown/$slug'
-      fullPath: '/api/markdown/$slug'
-      preLoaderRoute: typeof ApiMarkdownSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kitty/community/$slug': {
-      id: '/kitty/community/$slug'
-      path: '/kitty/community/$slug'
-      fullPath: '/kitty/community/$slug'
-      preLoaderRoute: typeof KittyCommunitySlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/og/blog/$slug': {
-      id: '/og/blog/$slug'
-      path: '/og/blog/$slug'
-      fullPath: '/og/blog/$slug'
-      preLoaderRoute: typeof OgBlogSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/og/kitty/{$id}.png': {
-      id: '/og/kitty/{$id}.png'
-      path: '/og/kitty/{$id}.png'
-      fullPath: '/og/kitty/{$id}.png'
-      preLoaderRoute: typeof OgKittyChar123idChar125DotpngRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/og/kitty/community/{$slug}.png': {
-      id: '/og/kitty/community/{$slug}.png'
-      path: '/og/kitty/community/{$slug}.png'
-      fullPath: '/og/kitty/community/{$slug}.png'
-      preLoaderRoute: typeof OgKittyCommunityChar123slugChar125DotpngRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
+declare module "@tanstack/react-router" {
+	interface FileRoutesByPath {
+		"/": {
+			id: "/";
+			path: "/";
+			fullPath: "/";
+			preLoaderRoute: typeof IndexRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/$slug": {
+			id: "/$slug";
+			path: "/$slug";
+			fullPath: "/$slug";
+			preLoaderRoute: typeof SlugRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/admin": {
+			id: "/admin";
+			path: "/admin";
+			fullPath: "/admin";
+			preLoaderRoute: typeof AdminRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/callback": {
+			id: "/callback";
+			path: "/callback";
+			fullPath: "/callback";
+			preLoaderRoute: typeof CallbackRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/feed.xml": {
+			id: "/feed.xml";
+			path: "/feed.xml";
+			fullPath: "/feed.xml";
+			preLoaderRoute: typeof FeedDotxmlRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/llm.txt": {
+			id: "/llm.txt";
+			path: "/llm.txt";
+			fullPath: "/llm.txt";
+			preLoaderRoute: typeof LlmDottxtRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/notes": {
+			id: "/notes";
+			path: "/notes";
+			fullPath: "/notes";
+			preLoaderRoute: typeof NotesRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/projects": {
+			id: "/projects";
+			path: "/projects";
+			fullPath: "/projects";
+			preLoaderRoute: typeof ProjectsRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/robots.txt": {
+			id: "/robots.txt";
+			path: "/robots.txt";
+			fullPath: "/robots.txt";
+			preLoaderRoute: typeof RobotsDottxtRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/sitemap.xml": {
+			id: "/sitemap.xml";
+			path: "/sitemap.xml";
+			fullPath: "/sitemap.xml";
+			preLoaderRoute: typeof SitemapDotxmlRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/ui": {
+			id: "/ui";
+			path: "/ui";
+			fullPath: "/ui";
+			preLoaderRoute: typeof UiRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/{$slug}.md": {
+			id: "/{$slug}.md";
+			path: "/{$slug}.md";
+			fullPath: "/{$slug}.md";
+			preLoaderRoute: typeof Char123slugChar125DotmdRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/$slug/editor": {
+			id: "/$slug/editor";
+			path: "/editor";
+			fullPath: "/$slug/editor";
+			preLoaderRoute: typeof SlugEditorRouteImport;
+			parentRoute: typeof SlugRoute;
+		};
+		"/api/$": {
+			id: "/api/$";
+			path: "/api/$";
+			fullPath: "/api/$";
+			preLoaderRoute: typeof ApiSplatRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/api/dev-auth": {
+			id: "/api/dev-auth";
+			path: "/api/dev-auth";
+			fullPath: "/api/dev-auth";
+			preLoaderRoute: typeof ApiDevAuthRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/auth/login": {
+			id: "/auth/login";
+			path: "/auth/login";
+			fullPath: "/auth/login";
+			preLoaderRoute: typeof AuthLoginRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/kitty/": {
+			id: "/kitty/";
+			path: "/kitty";
+			fullPath: "/kitty/";
+			preLoaderRoute: typeof KittyIndexRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/kitty/$id": {
+			id: "/kitty/$id";
+			path: "/kitty/$id";
+			fullPath: "/kitty/$id";
+			preLoaderRoute: typeof KittyIdRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/api/markdown/$slug": {
+			id: "/api/markdown/$slug";
+			path: "/api/markdown/$slug";
+			fullPath: "/api/markdown/$slug";
+			preLoaderRoute: typeof ApiMarkdownSlugRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/kitty/community/$slug": {
+			id: "/kitty/community/$slug";
+			path: "/kitty/community/$slug";
+			fullPath: "/kitty/community/$slug";
+			preLoaderRoute: typeof KittyCommunitySlugRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/og/blog/$slug": {
+			id: "/og/blog/$slug";
+			path: "/og/blog/$slug";
+			fullPath: "/og/blog/$slug";
+			preLoaderRoute: typeof OgBlogSlugRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/og/kitty/{$id}.png": {
+			id: "/og/kitty/{$id}.png";
+			path: "/og/kitty/{$id}.png";
+			fullPath: "/og/kitty/{$id}.png";
+			preLoaderRoute: typeof OgKittyChar123idChar125DotpngRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/og/kitty/community/{$slug}.png": {
+			id: "/og/kitty/community/{$slug}.png";
+			path: "/og/kitty/community/{$slug}.png";
+			fullPath: "/og/kitty/community/{$slug}.png";
+			preLoaderRoute: typeof OgKittyCommunityChar123slugChar125DotpngRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+	}
 }
 
 interface SlugRouteChildren {
-  SlugEditorRoute: typeof SlugEditorRoute
+	SlugEditorRoute: typeof SlugEditorRoute;
 }
 
 const SlugRouteChildren: SlugRouteChildren = {
-  SlugEditorRoute: SlugEditorRoute,
-}
+	SlugEditorRoute: SlugEditorRoute,
+};
 
-const SlugRouteWithChildren = SlugRoute._addFileChildren(SlugRouteChildren)
+const SlugRouteWithChildren = SlugRoute._addFileChildren(SlugRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  SlugRoute: SlugRouteWithChildren,
-  AdminRoute: AdminRoute,
-  CallbackRoute: CallbackRoute,
-  FeedDotxmlRoute: FeedDotxmlRoute,
-  LlmDottxtRoute: LlmDottxtRoute,
-  NotesRoute: NotesRoute,
-  ProjectsRoute: ProjectsRoute,
-  RobotsDottxtRoute: RobotsDottxtRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
-  UiRoute: UiRoute,
-  Char123slugChar125DotmdRoute: Char123slugChar125DotmdRoute,
-  ApiSplatRoute: ApiSplatRoute,
-  ApiDevAuthRoute: ApiDevAuthRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  KittyIdRoute: KittyIdRoute,
-  KittyIndexRoute: KittyIndexRoute,
-  ApiMarkdownSlugRoute: ApiMarkdownSlugRoute,
-  KittyCommunitySlugRoute: KittyCommunitySlugRoute,
-  OgBlogSlugRoute: OgBlogSlugRoute,
-  OgKittyChar123idChar125DotpngRoute: OgKittyChar123idChar125DotpngRoute,
-  OgKittyCommunityChar123slugChar125DotpngRoute:
-    OgKittyCommunityChar123slugChar125DotpngRoute,
-}
+	IndexRoute: IndexRoute,
+	SlugRoute: SlugRouteWithChildren,
+	AdminRoute: AdminRoute,
+	CallbackRoute: CallbackRoute,
+	FeedDotxmlRoute: FeedDotxmlRoute,
+	LlmDottxtRoute: LlmDottxtRoute,
+	NotesRoute: NotesRoute,
+	ProjectsRoute: ProjectsRoute,
+	RobotsDottxtRoute: RobotsDottxtRoute,
+	SitemapDotxmlRoute: SitemapDotxmlRoute,
+	UiRoute: UiRoute,
+	Char123slugChar125DotmdRoute: Char123slugChar125DotmdRoute,
+	ApiSplatRoute: ApiSplatRoute,
+	ApiDevAuthRoute: ApiDevAuthRoute,
+	AuthLoginRoute: AuthLoginRoute,
+	KittyIdRoute: KittyIdRoute,
+	KittyIndexRoute: KittyIndexRoute,
+	ApiMarkdownSlugRoute: ApiMarkdownSlugRoute,
+	KittyCommunitySlugRoute: KittyCommunitySlugRoute,
+	OgBlogSlugRoute: OgBlogSlugRoute,
+	OgKittyChar123idChar125DotpngRoute: OgKittyChar123idChar125DotpngRoute,
+	OgKittyCommunityChar123slugChar125DotpngRoute: OgKittyCommunityChar123slugChar125DotpngRoute,
+};
 export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+	._addFileChildren(rootRouteChildren)
+	._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
+import type { getRouter } from "./router.tsx";
+import type { createStart } from "@tanstack/react-start";
+declare module "@tanstack/react-start" {
+	interface Register {
+		ssr: true;
+		router: Awaited<ReturnType<typeof getRouter>>;
+	}
 }
