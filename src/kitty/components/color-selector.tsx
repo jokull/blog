@@ -1,11 +1,11 @@
 "use client";
 
-import { oklchToCss } from "../_lib/color-utils";
-import type { ColorKey, KittyTheme } from "../_lib/types";
-import { colorLabels } from "../_lib/types";
+import { oklchToCss } from "../lib/color-utils";
+import type { ColorKey, ThemeView } from "../lib/types";
+import { colorLabels } from "../lib/types";
 
 interface ColorSelectorProps {
-	theme: KittyTheme;
+	theme: ThemeView;
 	selectedColor: ColorKey;
 	onSelectColor: (key: ColorKey) => void;
 }
@@ -43,7 +43,7 @@ function ColorItem({ colorKey, color, isSelected, onSelect }: ColorItemProps) {
 
 interface ColorGroupProps {
 	colors: ColorKey[];
-	theme: KittyTheme;
+	theme: ThemeView;
 	selectedColor: ColorKey;
 	onSelectColor: (key: ColorKey) => void;
 }

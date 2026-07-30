@@ -1,5 +1,8 @@
 import { defineRelations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+// Type-only: the same declaration the wire codec uses, so the column and the
+// RPC contract cannot drift. Erased at build.
+import type { ThemeColors } from "@/src/kitty/colors";
 
 export const Category = sqliteTable("category", {
 	slug: text("slug").notNull().primaryKey(),
@@ -42,12 +45,6 @@ export const Comment = sqliteTable("comment", {
 		.$default(() => new Date()),
 });
 
-interface OklchColor {
-	l: number; // Lightness (0-1)
-	c: number; // Chroma (0-0.37)
-	h: number; // Hue (0-360)
-}
-
 export const Note = sqliteTable("note", {
 	id: text("id").notNull().primaryKey(),
 	description: text("description"),
@@ -70,29 +67,7 @@ export const KittyTheme = sqliteTable("kitty_theme", {
 		(): any => KittyTheme.id,
 	),
 	blurb: text("blurb"),
-	colors: text("colors", { mode: "json" }).notNull().$type<{
-		color0: OklchColor;
-		color1: OklchColor;
-		color2: OklchColor;
-		color3: OklchColor;
-		color4: OklchColor;
-		color5: OklchColor;
-		color6: OklchColor;
-		color7: OklchColor;
-		color8: OklchColor;
-		color9: OklchColor;
-		color10: OklchColor;
-		color11: OklchColor;
-		color12: OklchColor;
-		color13: OklchColor;
-		color14: OklchColor;
-		color15: OklchColor;
-		foreground: OklchColor;
-		background: OklchColor;
-		cursor: OklchColor;
-		selection_foreground: OklchColor;
-		selection_background: OklchColor;
-	}>(),
+	colors: text("colors", { mode: "json" }).notNull().$type<ThemeColors>(),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.$default(() => new Date()),

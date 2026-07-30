@@ -14,6 +14,7 @@ import { Route as SlugRouteImport } from "./routes/$slug";
 import { Route as AdminRouteImport } from "./routes/admin";
 import { Route as CallbackRouteImport } from "./routes/callback";
 import { Route as FeedDotxmlRouteImport } from "./routes/feed[.]xml";
+import { Route as KittyRouteRouteImport } from "./routes/kitty.route";
 import { Route as LlmDottxtRouteImport } from "./routes/llm[.]txt";
 import { Route as NotesRouteImport } from "./routes/notes";
 import { Route as ProjectsRouteImport } from "./routes/projects";
@@ -24,6 +25,7 @@ import { Route as Char123slugChar125DotmdRouteImport } from "./routes/{$slug}[.]
 import { Route as SlugEditorRouteImport } from "./routes/$slug.editor";
 import { Route as ApiSplatRouteImport } from "./routes/api/$";
 import { Route as ApiDevAuthRouteImport } from "./routes/api/dev-auth";
+import { Route as ApiRpcRouteImport } from "./routes/api/rpc";
 import { Route as AuthLoginRouteImport } from "./routes/auth/login";
 import { Route as KittyIndexRouteImport } from "./routes/kitty.index";
 import { Route as KittyIdRouteImport } from "./routes/kitty.$id";
@@ -56,6 +58,11 @@ const CallbackRoute = CallbackRouteImport.update({
 const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
 	id: "/feed.xml",
 	path: "/feed.xml",
+	getParentRoute: () => rootRouteImport,
+} as any);
+const KittyRouteRoute = KittyRouteRouteImport.update({
+	id: "/kitty",
+	path: "/kitty",
 	getParentRoute: () => rootRouteImport,
 } as any);
 const LlmDottxtRoute = LlmDottxtRouteImport.update({
@@ -108,20 +115,25 @@ const ApiDevAuthRoute = ApiDevAuthRouteImport.update({
 	path: "/api/dev-auth",
 	getParentRoute: () => rootRouteImport,
 } as any);
+const ApiRpcRoute = ApiRpcRouteImport.update({
+	id: "/api/rpc",
+	path: "/api/rpc",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const AuthLoginRoute = AuthLoginRouteImport.update({
 	id: "/auth/login",
 	path: "/auth/login",
 	getParentRoute: () => rootRouteImport,
 } as any);
 const KittyIndexRoute = KittyIndexRouteImport.update({
-	id: "/kitty/",
-	path: "/kitty/",
-	getParentRoute: () => rootRouteImport,
+	id: "/",
+	path: "/",
+	getParentRoute: () => KittyRouteRoute,
 } as any);
 const KittyIdRoute = KittyIdRouteImport.update({
-	id: "/kitty/$id",
-	path: "/kitty/$id",
-	getParentRoute: () => rootRouteImport,
+	id: "/$id",
+	path: "/$id",
+	getParentRoute: () => KittyRouteRoute,
 } as any);
 const ApiMarkdownSlugRoute = ApiMarkdownSlugRouteImport.update({
 	id: "/api/markdown/$slug",
@@ -129,9 +141,9 @@ const ApiMarkdownSlugRoute = ApiMarkdownSlugRouteImport.update({
 	getParentRoute: () => rootRouteImport,
 } as any);
 const KittyCommunitySlugRoute = KittyCommunitySlugRouteImport.update({
-	id: "/kitty/community/$slug",
-	path: "/kitty/community/$slug",
-	getParentRoute: () => rootRouteImport,
+	id: "/community/$slug",
+	path: "/community/$slug",
+	getParentRoute: () => KittyRouteRoute,
 } as any);
 const OgBlogSlugRoute = OgBlogSlugRouteImport.update({
 	id: "/og/blog/$slug",
@@ -152,6 +164,7 @@ const OgKittyCommunityChar123slugChar125DotpngRoute =
 
 export interface FileRoutesByFullPath {
 	"/": typeof IndexRoute;
+	"/kitty": typeof KittyRouteRouteWithChildren;
 	"/$slug": typeof SlugRouteWithChildren;
 	"/admin": typeof AdminRoute;
 	"/callback": typeof CallbackRoute;
@@ -166,6 +179,7 @@ export interface FileRoutesByFullPath {
 	"/$slug/editor": typeof SlugEditorRoute;
 	"/api/$": typeof ApiSplatRoute;
 	"/api/dev-auth": typeof ApiDevAuthRoute;
+	"/api/rpc": typeof ApiRpcRoute;
 	"/auth/login": typeof AuthLoginRoute;
 	"/kitty/$id": typeof KittyIdRoute;
 	"/kitty/": typeof KittyIndexRoute;
@@ -191,6 +205,7 @@ export interface FileRoutesByTo {
 	"/$slug/editor": typeof SlugEditorRoute;
 	"/api/$": typeof ApiSplatRoute;
 	"/api/dev-auth": typeof ApiDevAuthRoute;
+	"/api/rpc": typeof ApiRpcRoute;
 	"/auth/login": typeof AuthLoginRoute;
 	"/kitty/$id": typeof KittyIdRoute;
 	"/kitty": typeof KittyIndexRoute;
@@ -203,6 +218,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
 	__root__: typeof rootRouteImport;
 	"/": typeof IndexRoute;
+	"/kitty": typeof KittyRouteRouteWithChildren;
 	"/$slug": typeof SlugRouteWithChildren;
 	"/admin": typeof AdminRoute;
 	"/callback": typeof CallbackRoute;
@@ -217,6 +233,7 @@ export interface FileRoutesById {
 	"/$slug/editor": typeof SlugEditorRoute;
 	"/api/$": typeof ApiSplatRoute;
 	"/api/dev-auth": typeof ApiDevAuthRoute;
+	"/api/rpc": typeof ApiRpcRoute;
 	"/auth/login": typeof AuthLoginRoute;
 	"/kitty/$id": typeof KittyIdRoute;
 	"/kitty/": typeof KittyIndexRoute;
@@ -230,6 +247,7 @@ export interface FileRouteTypes {
 	fileRoutesByFullPath: FileRoutesByFullPath;
 	fullPaths:
 		| "/"
+		| "/kitty"
 		| "/$slug"
 		| "/admin"
 		| "/callback"
@@ -244,6 +262,7 @@ export interface FileRouteTypes {
 		| "/$slug/editor"
 		| "/api/$"
 		| "/api/dev-auth"
+		| "/api/rpc"
 		| "/auth/login"
 		| "/kitty/$id"
 		| "/kitty/"
@@ -269,6 +288,7 @@ export interface FileRouteTypes {
 		| "/$slug/editor"
 		| "/api/$"
 		| "/api/dev-auth"
+		| "/api/rpc"
 		| "/auth/login"
 		| "/kitty/$id"
 		| "/kitty"
@@ -280,6 +300,7 @@ export interface FileRouteTypes {
 	id:
 		| "__root__"
 		| "/"
+		| "/kitty"
 		| "/$slug"
 		| "/admin"
 		| "/callback"
@@ -294,6 +315,7 @@ export interface FileRouteTypes {
 		| "/$slug/editor"
 		| "/api/$"
 		| "/api/dev-auth"
+		| "/api/rpc"
 		| "/auth/login"
 		| "/kitty/$id"
 		| "/kitty/"
@@ -306,6 +328,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
 	IndexRoute: typeof IndexRoute;
+	KittyRouteRoute: typeof KittyRouteRouteWithChildren;
 	SlugRoute: typeof SlugRouteWithChildren;
 	AdminRoute: typeof AdminRoute;
 	CallbackRoute: typeof CallbackRoute;
@@ -319,11 +342,9 @@ export interface RootRouteChildren {
 	Char123slugChar125DotmdRoute: typeof Char123slugChar125DotmdRoute;
 	ApiSplatRoute: typeof ApiSplatRoute;
 	ApiDevAuthRoute: typeof ApiDevAuthRoute;
+	ApiRpcRoute: typeof ApiRpcRoute;
 	AuthLoginRoute: typeof AuthLoginRoute;
-	KittyIdRoute: typeof KittyIdRoute;
-	KittyIndexRoute: typeof KittyIndexRoute;
 	ApiMarkdownSlugRoute: typeof ApiMarkdownSlugRoute;
-	KittyCommunitySlugRoute: typeof KittyCommunitySlugRoute;
 	OgBlogSlugRoute: typeof OgBlogSlugRoute;
 	OgKittyChar123idChar125DotpngRoute: typeof OgKittyChar123idChar125DotpngRoute;
 	OgKittyCommunityChar123slugChar125DotpngRoute: typeof OgKittyCommunityChar123slugChar125DotpngRoute;
@@ -364,6 +385,13 @@ declare module "@tanstack/react-router" {
 			path: "/feed.xml";
 			fullPath: "/feed.xml";
 			preLoaderRoute: typeof FeedDotxmlRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/kitty": {
+			id: "/kitty";
+			path: "/kitty";
+			fullPath: "/kitty";
+			preLoaderRoute: typeof KittyRouteRouteImport;
 			parentRoute: typeof rootRouteImport;
 		};
 		"/llm.txt": {
@@ -436,6 +464,13 @@ declare module "@tanstack/react-router" {
 			preLoaderRoute: typeof ApiDevAuthRouteImport;
 			parentRoute: typeof rootRouteImport;
 		};
+		"/api/rpc": {
+			id: "/api/rpc";
+			path: "/api/rpc";
+			fullPath: "/api/rpc";
+			preLoaderRoute: typeof ApiRpcRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
 		"/auth/login": {
 			id: "/auth/login";
 			path: "/auth/login";
@@ -445,17 +480,17 @@ declare module "@tanstack/react-router" {
 		};
 		"/kitty/": {
 			id: "/kitty/";
-			path: "/kitty";
+			path: "/";
 			fullPath: "/kitty/";
 			preLoaderRoute: typeof KittyIndexRouteImport;
-			parentRoute: typeof rootRouteImport;
+			parentRoute: typeof KittyRouteRoute;
 		};
 		"/kitty/$id": {
 			id: "/kitty/$id";
-			path: "/kitty/$id";
+			path: "/$id";
 			fullPath: "/kitty/$id";
 			preLoaderRoute: typeof KittyIdRouteImport;
-			parentRoute: typeof rootRouteImport;
+			parentRoute: typeof KittyRouteRoute;
 		};
 		"/api/markdown/$slug": {
 			id: "/api/markdown/$slug";
@@ -466,10 +501,10 @@ declare module "@tanstack/react-router" {
 		};
 		"/kitty/community/$slug": {
 			id: "/kitty/community/$slug";
-			path: "/kitty/community/$slug";
+			path: "/community/$slug";
 			fullPath: "/kitty/community/$slug";
 			preLoaderRoute: typeof KittyCommunitySlugRouteImport;
-			parentRoute: typeof rootRouteImport;
+			parentRoute: typeof KittyRouteRoute;
 		};
 		"/og/blog/$slug": {
 			id: "/og/blog/$slug";
@@ -495,6 +530,20 @@ declare module "@tanstack/react-router" {
 	}
 }
 
+interface KittyRouteRouteChildren {
+	KittyIdRoute: typeof KittyIdRoute;
+	KittyIndexRoute: typeof KittyIndexRoute;
+	KittyCommunitySlugRoute: typeof KittyCommunitySlugRoute;
+}
+
+const KittyRouteRouteChildren: KittyRouteRouteChildren = {
+	KittyIdRoute: KittyIdRoute,
+	KittyIndexRoute: KittyIndexRoute,
+	KittyCommunitySlugRoute: KittyCommunitySlugRoute,
+};
+
+const KittyRouteRouteWithChildren = KittyRouteRoute._addFileChildren(KittyRouteRouteChildren);
+
 interface SlugRouteChildren {
 	SlugEditorRoute: typeof SlugEditorRoute;
 }
@@ -507,6 +556,7 @@ const SlugRouteWithChildren = SlugRoute._addFileChildren(SlugRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
 	IndexRoute: IndexRoute,
+	KittyRouteRoute: KittyRouteRouteWithChildren,
 	SlugRoute: SlugRouteWithChildren,
 	AdminRoute: AdminRoute,
 	CallbackRoute: CallbackRoute,
@@ -520,11 +570,9 @@ const rootRouteChildren: RootRouteChildren = {
 	Char123slugChar125DotmdRoute: Char123slugChar125DotmdRoute,
 	ApiSplatRoute: ApiSplatRoute,
 	ApiDevAuthRoute: ApiDevAuthRoute,
+	ApiRpcRoute: ApiRpcRoute,
 	AuthLoginRoute: AuthLoginRoute,
-	KittyIdRoute: KittyIdRoute,
-	KittyIndexRoute: KittyIndexRoute,
 	ApiMarkdownSlugRoute: ApiMarkdownSlugRoute,
-	KittyCommunitySlugRoute: KittyCommunitySlugRoute,
 	OgBlogSlugRoute: OgBlogSlugRoute,
 	OgKittyChar123idChar125DotpngRoute: OgKittyChar123idChar125DotpngRoute,
 	OgKittyCommunityChar123slugChar125DotpngRoute: OgKittyCommunityChar123slugChar125DotpngRoute,

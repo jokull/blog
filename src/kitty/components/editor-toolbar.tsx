@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import type { KittyTheme } from "../_lib/types";
-import { oklchToString } from "../_lib/color-utils";
-import { colorLabels, isColorKey } from "../_lib/types";
+import type { ThemeView } from "../lib/types";
+import { oklchToString } from "../lib/color-utils";
+import { colorLabels, isColorKey } from "../lib/types";
 
 export type EditorMode = "view" | "edit" | "draft";
 
 interface EditorToolbarProps {
-	theme: KittyTheme;
+	theme: ThemeView;
 	mode: EditorMode;
 	isOwner: boolean;
 	hasUnsavedChanges: boolean;

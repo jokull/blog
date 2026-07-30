@@ -1,4 +1,3 @@
-import { env } from "@/env";
 import type {
 	DetailedHTMLProps,
 	LinkHTMLAttributes,
@@ -30,8 +29,23 @@ export function asHead(data: SeoData): SeoHead {
 	};
 }
 
+/**
+ * The canonical origin, as a constant rather than `env.SITE_URL`.
+ *
+ * This module is client-reachable: route `head()` functions run during
+ * hydration as well as on the server. `env` reads `process.env`, which does
+ * not exist in the browser, so `env.SITE_URL` was `undefined` there and
+ * `url()` threw mid-hydration — blanking the entire site, not just this page.
+ *
+ * Reading `env` here also pulled the whole env schema into the client bundle,
+ * shipping the *names* of server-only secrets. `SITE_URL` is identical in
+ * `.env` and `.env.production`, so it was never environment-varying config to
+ * begin with.
+ */
+const SITE_URL = "https://www.solberg.is";
+
 function url(path: string) {
-	return new URL(path, `${env.SITE_URL.replace(/\/$/, "")}/`).toString();
+	return new URL(path, `${SITE_URL}/`).toString();
 }
 
 function description(value: string) {

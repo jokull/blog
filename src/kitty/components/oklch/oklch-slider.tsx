@@ -2,7 +2,7 @@
 
 import { formatCss, modeOklch, useMode } from "culori/fn";
 import { useEffect, useRef, useState } from "react";
-import type { OklchColor } from "../../_lib/types";
+import type { OklchColor } from "../../lib/types";
 
 // Note: `useMode` is a culori utility function, NOT a React hook
 // It registers a color mode and returns a converter function

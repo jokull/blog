@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { oklch } from "culori";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { OklchColor } from "../../_lib/types";
+import type { OklchColor } from "../../lib/types";
 import { OklchSlider } from "./oklch-slider";
 
 interface OklchPickerProps {

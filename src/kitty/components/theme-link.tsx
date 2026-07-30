@@ -2,7 +2,7 @@
 
 import { Link } from "@/src/lib/navigation";
 import type { ComponentProps, MouseEvent } from "react";
-import { useKittyContext } from "../_context/kitty-context";
+import { useKittyContext } from "./kitty-context";
 
 interface ThemeLinkProps extends ComponentProps<typeof Link> {
 	children: React.ReactNode;

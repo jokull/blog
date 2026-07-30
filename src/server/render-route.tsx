@@ -8,9 +8,6 @@ type RenderRequest =
 	| { route: "post"; slug: string }
 	| { route: "admin" }
 	| { route: "editor"; slug: string }
-	| { route: "kitty"; search?: { theme?: string } }
-	| { route: "kitty-id"; id: string }
-	| { route: "kitty-community"; slug: string }
 	| { route: "ui" };
 
 function promise<T>(value: T) {
@@ -85,40 +82,6 @@ export const renderLegacyRoute = createServerFn({ method: "GET" })
 					<AdminLayout>
 						<EditorPage params={promise({ slug: data.slug })} />
 					</AdminLayout>,
-				);
-			}
-			case "kitty": {
-				const [{ default: KittyLayout }, { default: KittyPage }] = await Promise.all([
-					import("../../app/kitty/layout"),
-					import("../../app/kitty/page"),
-				]);
-				return renderServerComponent(
-					<KittyLayout>
-						<KittyPage searchParams={promise(data.search ?? {})} />
-					</KittyLayout>,
-				);
-			}
-			case "kitty-id": {
-				const [{ default: KittyLayout }, { default: KittyIdPage }] = await Promise.all([
-					import("../../app/kitty/layout"),
-					import("../../app/kitty/[id]/page"),
-				]);
-				return renderServerComponent(
-					<KittyLayout>
-						<KittyIdPage params={promise({ id: data.id })} />
-					</KittyLayout>,
-				);
-			}
-			case "kitty-community": {
-				const [{ default: KittyLayout }, { default: KittyCommunityPage }] =
-					await Promise.all([
-						import("../../app/kitty/layout"),
-						import("../../app/kitty/community/[slug]/page"),
-					]);
-				return renderServerComponent(
-					<KittyLayout>
-						<KittyCommunityPage params={promise({ slug: data.slug })} />
-					</KittyLayout>,
 				);
 			}
 			case "ui": {

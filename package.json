@@ -53,6 +53,7 @@
 		"recharts": "^3.10.0",
 		"remark-gfm": "^4.0.1",
 		"remeda": "^2.39.0",
+		"result-rpc": "^0.1.0",
 		"rss": "^1.2.2",
 		"safe-mdx": "^1.11.5",
 		"shiki": "^4.3.1",

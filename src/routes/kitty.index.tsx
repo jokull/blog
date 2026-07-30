@@ -1,13 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { renderLegacyRoute } from "@/src/server/render-route";
+import { KittyEditor } from "@/src/kitty/components/kitty-editor";
+import { defaultThemeView } from "@/src/kitty/lib/default-theme";
+import { communityFileToSlug } from "@/src/kitty/lib/theme-parser";
+import { throwRedirect } from "@/src/lib/router-control";
 import { asHead, pageHead } from "@/src/lib/seo";
 
 export const Route = createFileRoute("/kitty/")({
-	validateSearch: (search: Record<string, unknown>) => ({
-		theme: typeof search.theme === "string" ? search.theme : undefined,
-	}),
-	loaderDeps: ({ search }) => search,
-	loader: ({ deps }) => renderLegacyRoute({ data: { route: "kitty", search: deps } }),
+	// Returning the key only when present keeps it OPTIONAL in the generated
+	// search type — otherwise every `<Link to="/kitty">` in the app has to
+	// pass `search={{ theme: undefined }}`.
+	validateSearch: (search: Record<string, unknown>): { theme?: string } =>
+		typeof search.theme === "string" ? { theme: search.theme } : {},
+	// Backwards compatibility for the pre-route-segment `?theme=` URLs.
+	beforeLoad: ({ search }) => {
+		if (!search.theme) return;
+		if (search.theme.startsWith("community:")) {
+			const slug = communityFileToSlug(search.theme.slice("community:".length));
+			throwRedirect({ href: `/kitty/community/${slug}` });
+		}
+		const id = parseInt(search.theme, 10);
+		if (!Number.isNaN(id)) {
+			throwRedirect({ href: `/kitty/${id}` });
+		}
+	},
 	head: () =>
 		asHead(
 			pageHead({
@@ -18,9 +33,11 @@ export const Route = createFileRoute("/kitty/")({
 				image: "/og/blog/site",
 			}),
 		),
-	component: Page,
+	component: KittyIndex,
 });
 
-function Page() {
-	return <>{Route.useLoaderData()}</>;
+function KittyIndex() {
+	// The empty state previews NightOwl Chroma — an unsaved theme, which is
+	// exactly what a nullable-id ThemeView is for.
+	return <KittyEditor initialTheme={defaultThemeView()} initialMode="view" showEmptyState />;
 }

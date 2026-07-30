@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import type { ColorKey, KittyTheme, OklchColor } from "../_lib/types";
+import type { ColorKey, ThemeView, OklchColor } from "../lib/types";
 import type { EditorMode } from "./editor-toolbar";
 import { TextField } from "@/components/ui/text-field";
 import { Label } from "@/components/ui/field";
@@ -11,9 +11,9 @@ import { ColorEditor } from "./color-editor";
 import { ThemePreview } from "./theme-preview";
 
 interface ThemeEditorProps {
-	theme: KittyTheme;
+	theme: ThemeView;
 	mode: EditorMode;
-	forkedFrom: KittyTheme | null;
+	forkedFrom: ThemeView | null;
 	selectedColor: ColorKey;
 	onSelectColor: (key: ColorKey) => void;
 	onColorChange: (key: ColorKey, color: OklchColor) => void;

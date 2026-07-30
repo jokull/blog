@@ -1,7 +1,7 @@
 "use client";
 
-import { oklchToCss } from "../_lib/color-utils";
-import type { OklchColor } from "../_lib/types";
+import { oklchToCss } from "../lib/color-utils";
+import type { OklchColor } from "../lib/types";
 import { OklchPicker } from "./oklch/oklch-picker";
 
 interface ColorEditorProps {

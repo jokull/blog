@@ -1,20 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getThemeById } from "@/app/kitty/actions";
+import { kittyServerClient } from "@/src/kitty/rpc-server";
 import { ogImage } from "@/src/lib/og";
 
 export const Route = createFileRoute("/og/kitty/{$id}.png")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				const theme = Number.isInteger(Number(params.id))
-					? await getThemeById(Number(params.id))
-					: null;
-				if (!theme) return new Response("Not Found", { status: 404 });
+				const id = Number(params.id);
+				if (!Number.isInteger(id)) return new Response("Not Found", { status: 404 });
+
+				// The same procedure the browser calls, so an unpublished theme
+				// stays hidden here too — no second visibility rule to keep in sync.
+				const theme = await kittyServerClient().themes.byId({ id });
+				if (!theme.ok) return new Response("Not Found", { status: 404 });
+
 				return ogImage({
-					title: theme.authorGithubUsername
-						? `${theme.name} by ${theme.authorGithubUsername}`
-						: theme.name,
-					description: theme.blurb ?? "A color theme for the Kitty terminal emulator.",
+					title: theme.value.authorGithubUsername
+						? `${theme.value.name} by ${theme.value.authorGithubUsername}`
+						: theme.value.name,
+					description:
+						theme.value.blurb ?? "A color theme for the Kitty terminal emulator.",
 					kicker: "Kitty Theme Builder",
 				});
 			},

@@ -1,10 +1,10 @@
 "use client";
 
-import { oklchToCss } from "../_lib/color-utils";
-import type { KittyTheme } from "../_lib/types";
+import { oklchToCss } from "../lib/color-utils";
+import type { ThemeView } from "../lib/types";
 
 interface ThemePreviewProps {
-	theme: KittyTheme;
+	theme: ThemeView;
 }
 
 export function ThemePreview({ theme }: ThemePreviewProps) {

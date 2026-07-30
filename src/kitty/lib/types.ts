@@ -1,10 +1,22 @@
-export interface OklchColor {
-	l: number; // Lightness (0-1)
-	c: number; // Chroma
-	h: number; // Hue (0-360)
-}
+/**
+ * Editor-facing types. The wire shapes live in ../models — these are what the
+ * React tree renders, which is a slightly wider thing: the editor also renders
+ * themes that were never saved (a community import, the default palette), and
+ * those genuinely have no database identity.
+ *
+ * That is why `ThemeView.id` is nullable while `SavedTheme.id` is not. The old
+ * code used one interface with `id: number | null` for both, so every
+ * persisted theme carried a null check it could never fail — and the six
+ * `currentTheme.id!` assertions in kitty-editor.tsx were the cost.
+ */
+import type { OklchColor, SavedTheme, ThemeColors } from "../models";
 
-export interface KittyTheme {
+export type { OklchColor, SavedTheme, ThemeColors };
+
+export type ColorKey = keyof ThemeColors;
+
+/** A theme as the editor renders it: saved rows and unsaved drafts alike. */
+export interface ThemeView {
 	id: number | null;
 	slug: string;
 	name: string;
@@ -16,34 +28,13 @@ export interface KittyTheme {
 	forkedFromId: number | null;
 	createdAt: Date;
 	modifiedAt: Date | null;
-
-	// All 21 colors
-	colors: {
-		color0: OklchColor; // Black
-		color1: OklchColor; // Red
-		color2: OklchColor; // Green
-		color3: OklchColor; // Yellow
-		color4: OklchColor; // Blue
-		color5: OklchColor; // Magenta
-		color6: OklchColor; // Cyan
-		color7: OklchColor; // White
-		color8: OklchColor; // Bright Black
-		color9: OklchColor; // Bright Red
-		color10: OklchColor; // Bright Green
-		color11: OklchColor; // Bright Yellow
-		color12: OklchColor; // Bright Blue
-		color13: OklchColor; // Bright Magenta
-		color14: OklchColor; // Bright Cyan
-		color15: OklchColor; // Bright White
-		foreground: OklchColor;
-		background: OklchColor;
-		cursor: OklchColor;
-		selection_foreground: OklchColor;
-		selection_background: OklchColor;
-	};
+	colors: ThemeColors;
 }
 
-export type ColorKey = keyof KittyTheme["colors"];
+/** A persisted theme is a view whose id happens to be non-null. */
+export function toThemeView(theme: SavedTheme): ThemeView {
+	return { ...theme };
+}
 
 const colorKeys = new Set<string>([
 	"color0",
