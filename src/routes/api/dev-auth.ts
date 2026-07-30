@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { env } from "@/env";
 import { getSession } from "@/auth";
+import { redirect } from "@/src/lib/http";
 
 export const Route = createFileRoute("/api/dev-auth")({
 	server: {
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/api/dev-auth")({
 				await session.save();
 
 				const nextUrl = url.searchParams.get("next") ?? "/";
-				return Response.redirect(new URL(nextUrl, request.url).toString(), 302);
+				return redirect(new URL(nextUrl, request.url).toString());
 			},
 		},
 	},

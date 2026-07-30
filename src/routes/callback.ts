@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getOauthClient, getSession, whoami } from "@/auth";
+import { redirect } from "@/src/lib/http";
 
 export const Route = createFileRoute("/callback")({
 	server: {
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/callback")({
 					await session.save();
 
 					const redirectUrl = nextUrl ? decodeURIComponent(nextUrl) : "/";
-					return Response.redirect(new URL(redirectUrl, request.url).toString(), 302);
+					return redirect(new URL(redirectUrl, request.url).toString());
 				} catch (error) {
 					return Response.json(
 						{
