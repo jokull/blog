@@ -1,9 +1,11 @@
+import { Form, reset, submit, useField, useForm } from "@formisch/react";
 import { useNextRouter as useRouter } from "@/src/lib/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { defaultThemeColors } from "../lib/default-theme";
-import type { ColorKey, OklchColor, ThemeView } from "../lib/types";
+import type { ColorKey, OklchColor, ThemeColors, ThemeView } from "../lib/types";
 import { KittyThemeModel } from "../models";
 import { client } from "../rpc-client";
+import { ThemeMetaSchema, toThemeInput } from "../schemas";
 import { SessionShell, SignInShell, dispatch } from "../shells";
 import { EditorToolbar, type EditorMode } from "./editor-toolbar";
 import { useKittyContext } from "./kitty-context";
@@ -29,16 +31,41 @@ export function KittyEditor({
 	const { setHasUnsavedChanges } = useKittyContext();
 
 	const [mode, setMode] = useState<EditorMode>(initialMode);
-	const [currentTheme, setCurrentTheme] = useState(initialTheme);
-	const [savedTheme, setSavedTheme] = useState(initialTheme);
+	const [identity, setIdentity] = useState(initialTheme);
+	const [colors, setColors] = useState<ThemeColors>(initialTheme.colors);
+	const [savedColors, setSavedColors] = useState<ThemeColors>(initialTheme.colors);
 	const [selectedColor, setSelectedColor] = useState<ColorKey>("color1");
 
-	const themeId = currentTheme.id;
-	const isOwner = currentTheme.authorGithubUsername === viewer?.username;
-	const hasUnsavedChanges =
-		currentTheme.name !== savedTheme.name ||
-		currentTheme.blurb !== savedTheme.blurb ||
-		JSON.stringify(currentTheme.colors) !== JSON.stringify(savedTheme.colors);
+	/**
+	 * The metadata form. Name and blurb live in the form store rather than in
+	 * React state, so Formisch owns their validation, dirtiness and per-field
+	 * errors. The 21 colours are not form inputs — they are edited through
+	 * canvas sliders — so they stay in state beside it.
+	 */
+	const metaForm = useForm({
+		schema: ThemeMetaSchema,
+		initialInput: { name: initialTheme.name, blurb: initialTheme.blurb ?? "" },
+	});
+
+	// Reactive reads, so the toolbar's .conf export and the live preview show
+	// what is currently typed rather than the last saved value.
+	const nameField = useField(metaForm, { path: ["name"] });
+	const blurbField = useField(metaForm, { path: ["blurb"] });
+	const typedName = nameField.input ?? "";
+	const typedBlurb = blurbField.input ?? "";
+
+	const themeId = identity.id;
+	const isOwner = identity.authorGithubUsername === viewer?.username;
+	const colorsDirty = JSON.stringify(colors) !== JSON.stringify(savedColors);
+	const hasUnsavedChanges = metaForm.isDirty || colorsDirty;
+
+	/** What the rest of the tree renders: saved identity + live edits. */
+	const currentTheme: ThemeView = {
+		...identity,
+		name: typedName,
+		blurb: typedBlurb === "" ? null : typedBlurb,
+		colors,
+	};
 
 	/**
 	 * Attribution for a forked theme. This replaced a `useEffect` that fired a
@@ -48,15 +75,15 @@ export function KittyEditor({
 	 */
 	const forkedFrom = SignInShell.useQuery(
 		client.themes.byId,
-		{ id: currentTheme.forkedFromId ?? 0 },
-		{ enabled: currentTheme.forkedFromId !== null, staleTime: 5 * 60_000 },
+		{ id: identity.forkedFromId ?? 0 },
+		{ enabled: identity.forkedFromId !== null, staleTime: 5 * 60_000 },
 	);
 
 	/**
 	 * Saving patches the entity everywhere it is cached — the sidebar row's
-	 * title and Draft badge update on keystroke-commit, before the request
-	 * settles. `updateEntity` returns its own rollback, which `onFailure`
-	 * applies if the server disagrees.
+	 * title and Draft badge update before the request settles. `updateEntity`
+	 * returns its own rollback, which `onFailure` applies if the server
+	 * disagrees.
 	 */
 	const save = SignInShell.useMutation(client.themes.update, {
 		optimistic: (input, cache) => ({
@@ -67,8 +94,13 @@ export function KittyEditor({
 			})),
 		}),
 		onSuccess: (theme) => {
-			setSavedTheme(theme);
-			setCurrentTheme(theme);
+			setIdentity(theme);
+			setColors(theme.colors);
+			setSavedColors(theme.colors);
+			// Rebase the form's initial input so it stops reporting dirty.
+			reset(metaForm, {
+				initialInput: { name: theme.name, blurb: theme.blurb ?? "" },
+			});
 			setMode((previous) => (previous === "draft" ? "edit" : previous));
 		},
 		onFailure: (_error, _input, context) => context?.rollback(),
@@ -77,7 +109,7 @@ export function KittyEditor({
 
 	const togglePublish = SignInShell.useMutation(client.themes.togglePublish, {
 		optimistic: (input, cache) => {
-			const next = !currentTheme.isPublished;
+			const next = !identity.isPublished;
 			return {
 				rollback: cache.updateEntity(KittyThemeModel, input.id, () => ({
 					isPublished: next,
@@ -85,8 +117,7 @@ export function KittyEditor({
 			};
 		},
 		onSuccess: (theme) => {
-			setSavedTheme(theme);
-			setCurrentTheme(theme);
+			setIdentity(theme);
 		},
 		onFailure: (_error, _input, context) => context?.rollback(),
 		onCancel: (_input, context) => context?.rollback(),
@@ -122,22 +153,29 @@ export function KittyEditor({
 
 	// Reset when navigating between themes.
 	useEffect(() => {
-		setCurrentTheme(initialTheme);
-		setSavedTheme(initialTheme);
+		setIdentity(initialTheme);
+		setColors(initialTheme.colors);
+		setSavedColors(initialTheme.colors);
 		setMode(initialMode);
-	}, [initialTheme, initialMode]);
+		reset(metaForm, {
+			initialInput: { name: initialTheme.name, blurb: initialTheme.blurb ?? "" },
+		});
+	}, [initialTheme, initialMode, metaForm]);
 
-	const handleSave = useCallback(() => {
+	/**
+	 * Submitting is the single save path — the toolbar button and Cmd+S both
+	 * route through it, so neither can skip validation. `onSubmit` only runs
+	 * once the schema passes, which is why it receives a parsed `meta` rather
+	 * than raw strings.
+	 */
+	const handleSubmit = (meta: { name: string; blurb: string }) => {
 		if (themeId === null) return;
-		dispatch(
-			save.mutate({
-				id: themeId,
-				name: currentTheme.name,
-				blurb: currentTheme.blurb,
-				colors: currentTheme.colors,
-			}),
-		);
-	}, [themeId, currentTheme, save]);
+		dispatch(save.mutate({ id: themeId, ...toThemeInput(meta), colors }));
+	};
+
+	const requestSave = useCallback(() => {
+		submit(metaForm);
+	}, [metaForm]);
 
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -157,7 +195,7 @@ export function KittyEditor({
 			if ((e.metaKey || e.ctrlKey) && e.key === "s") {
 				e.preventDefault();
 				if ((mode === "edit" || mode === "draft") && hasUnsavedChanges && !isPending) {
-					handleSave();
+					requestSave();
 				}
 			}
 		};
@@ -165,7 +203,7 @@ export function KittyEditor({
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [mode, hasUnsavedChanges, isPending, handleSave]);
+	}, [mode, hasUnsavedChanges, isPending, requestSave]);
 
 	/**
 	 * A community theme or the default palette has no row to fork, so it is
@@ -176,9 +214,9 @@ export function KittyEditor({
 		if (isCommunityTheme || themeId === null) {
 			dispatch(
 				create.mutate({
-					name: `${currentTheme.name} (Remix)`,
-					blurb: currentTheme.blurb,
-					colors: currentTheme.colors,
+					name: `${typedName} (Remix)`.slice(0, 60),
+					blurb: typedBlurb === "" ? null : typedBlurb,
+					colors,
 				}),
 			);
 			return;
@@ -198,27 +236,19 @@ export function KittyEditor({
 	};
 
 	const handleColorChange = (colorKey: ColorKey, newColor: OklchColor) => {
-		setCurrentTheme((prev) => ({
-			...prev,
-			colors: { ...prev.colors, [colorKey]: newColor },
-		}));
+		setColors((prev) => ({ ...prev, [colorKey]: newColor }));
 	};
 
 	const editorProps = {
+		form: metaForm,
 		theme: currentTheme,
 		selectedColor,
 		onSelectColor: setSelectedColor,
 		onColorChange: handleColorChange,
-		onUpdateName: (name: string) => {
-			setCurrentTheme((prev) => ({ ...prev, name }));
-		},
-		onUpdateBlurb: (blurb: string) => {
-			setCurrentTheme((prev) => ({ ...prev, blurb }));
-		},
 	};
 
 	return (
-		<>
+		<Form of={metaForm} onSubmit={handleSubmit}>
 			<EditorToolbar
 				theme={currentTheme}
 				mode={mode}
@@ -229,10 +259,11 @@ export function KittyEditor({
 					if (canEdit) setMode("edit");
 				}}
 				onCancelEdit={() => {
-					setCurrentTheme(savedTheme);
+					reset(metaForm);
+					setColors(savedColors);
 					setMode("view");
 				}}
-				onSave={handleSave}
+				onSave={requestSave}
 				onDiscard={() => {
 					setHasUnsavedChanges(false);
 					void router.push("/kitty");
@@ -260,14 +291,15 @@ export function KittyEditor({
 					forkedFrom={forkedFrom.state === "success" ? forkedFrom.value : null}
 				/>
 			)}
-		</>
+		</Form>
 	);
 }
 
 /**
- * `auth/required` is absent from this union — SignInShell claims it — so
- * these are the only two outcomes a save can present here, and adding a case
- * for anything else is a type error.
+ * `auth/required` is absent from this union — SignInShell claims it — and so
+ * is `server/bad-request`, which the DefectShell claims and escalates. These
+ * are the only two outcomes a save can present here, and adding a case for
+ * anything else is a type error.
  */
 function SaveFailure({ tag }: { tag: "theme/not-found" | "theme/not-owner" }) {
 	return (
@@ -279,13 +311,9 @@ function SaveFailure({ tag }: { tag: "theme/not-found" | "theme/not-owner" }) {
 	);
 }
 
-interface EmptyStateProps {
-	theme: ThemeView;
-	selectedColor: ColorKey;
-	onSelectColor: (key: ColorKey) => void;
-	onColorChange: (key: ColorKey, color: OklchColor) => void;
-	onUpdateName: (name: string) => void;
-	onUpdateBlurb: (blurb: string) => void;
+type EditorProps = Parameters<typeof ThemeEditor>[0];
+
+interface EmptyStateProps extends Omit<EditorProps, "mode" | "forkedFrom"> {
 	onFork: () => void;
 	onCreateNew: () => void;
 	isPending: boolean;

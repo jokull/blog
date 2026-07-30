@@ -11,7 +11,11 @@ import {
 import { cx } from "@/lib/primitive";
 
 interface InputProps extends PrimitiveInputProps {
-	ref?: React.RefObject<HTMLInputElement>;
+	// `Ref`, not `RefObject`: callback refs are valid React and the underlying
+	// primitive accepts them. Form libraries (Formisch) hand out callback refs
+	// so they can focus the first invalid field. Sibling `Textarea` never
+	// narrowed this — the restriction here was the outlier.
+	ref?: React.Ref<HTMLInputElement>;
 }
 
 export function Input({ className, ref, ...props }: InputProps) {

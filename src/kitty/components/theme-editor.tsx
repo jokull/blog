@@ -1,35 +1,33 @@
-"use client";
-
-import type { ChangeEvent } from "react";
-import type { ColorKey, ThemeView, OklchColor } from "../lib/types";
-import type { EditorMode } from "./editor-toolbar";
-import { TextField } from "@/components/ui/text-field";
+import { Field, type FormStore } from "@formisch/react";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ColorSelector } from "./color-selector";
+import { TextField } from "@/components/ui/text-field";
+import { Textarea } from "@/components/ui/textarea";
+import type { ColorKey, OklchColor, ThemeView } from "../lib/types";
+import type { ThemeMetaSchema } from "../schemas";
 import { ColorEditor } from "./color-editor";
+import { ColorSelector } from "./color-selector";
+import type { EditorMode } from "./editor-toolbar";
 import { ThemePreview } from "./theme-preview";
 
 interface ThemeEditorProps {
+	form: FormStore<typeof ThemeMetaSchema>;
 	theme: ThemeView;
 	mode: EditorMode;
 	forkedFrom: ThemeView | null;
 	selectedColor: ColorKey;
 	onSelectColor: (key: ColorKey) => void;
 	onColorChange: (key: ColorKey, color: OklchColor) => void;
-	onUpdateName: (name: string) => void;
-	onUpdateBlurb: (blurb: string) => void;
 }
 
 export function ThemeEditor({
+	form,
 	theme,
 	mode,
 	forkedFrom,
 	selectedColor,
 	onSelectColor,
 	onColorChange,
-	onUpdateName,
-	onUpdateBlurb,
 }: ThemeEditorProps) {
 	const isEditing = mode === "edit" || mode === "draft";
 
@@ -62,33 +60,46 @@ export function ThemeEditor({
 					)}
 				</div>
 
-				{/* Name input */}
-				<TextField>
-					<Label>Theme Name</Label>
-					<Input
-						value={theme.name}
-						onChange={(e: ChangeEvent<HTMLInputElement>) => {
-							onUpdateName(e.target.value);
-						}}
-						disabled={!isEditing}
-						placeholder="My Awesome Theme"
-					/>
-				</TextField>
+				{/*
+				 * Formisch is headless: `field.props` carries name/ref and the
+				 * input/change/blur handlers, and we supply the value and styling.
+				 * Errors are per-field, so an empty name surfaces here instead of
+				 * being silently saved.
+				 */}
+				<Field of={form} path={["name"]}>
+					{(field) => (
+						<TextField isInvalid={field.errors !== null}>
+							<Label>Theme Name</Label>
+							<Input
+								{...field.props}
+								value={field.input ?? ""}
+								disabled={!isEditing}
+								placeholder="My Awesome Theme"
+							/>
+							{field.errors && (
+								<span className="text-xs text-danger mt-1">{field.errors[0]}</span>
+							)}
+						</TextField>
+					)}
+				</Field>
 
-				{/* Description - hidden for now */}
-				{/* <div>
-					<Label htmlFor="blurb">Description</Label>
-					<Textarea
-						id="blurb"
-						value={theme.blurb ?? ""}
-						onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
-							onUpdateBlurb(e.target.value);
-						}}
-						disabled={!isEditing}
-						placeholder="A brief description of your theme..."
-						rows={2}
-					/>
-				</div> */}
+				<Field of={form} path={["blurb"]}>
+					{(field) => (
+						<TextField isInvalid={field.errors !== null}>
+							<Label>Description</Label>
+							<Textarea
+								{...field.props}
+								value={field.input ?? ""}
+								disabled={!isEditing}
+								placeholder="A brief description of your theme..."
+								rows={2}
+							/>
+							{field.errors && (
+								<span className="text-xs text-danger mt-1">{field.errors[0]}</span>
+							)}
+						</TextField>
+					)}
+				</Field>
 			</div>
 
 			{/* Color selector and editor: auto-auto-auto-1fr grid */}

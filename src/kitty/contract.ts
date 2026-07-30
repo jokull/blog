@@ -17,6 +17,7 @@ import {
 	ThemeColorsCodec,
 } from "./models";
 import type { AppContext } from "./rpc-server";
+import { ThemeBlurbSchema, ThemeNameSchema } from "./schemas";
 
 export const app = rpc.context<AppContext>();
 
@@ -55,9 +56,18 @@ export const themeByIdContract = app
 	.errors(pickErrors(themeErrors, "notFound"))
 	.query();
 
+/**
+ * The metadata fields adopt the same Valibot schemas the form runs, via
+ * `wire.standard`. So "a theme must have a name" is declared once and enforced
+ * at both boundaries — previously `wire.string` accepted `""` and an empty
+ * name could be saved.
+ *
+ * The stable `id`s participate in the contract digest: bump them whenever the
+ * accepted shape or semantics change, so skewed clients are detected.
+ */
 const themeDraftInput = {
-	name: wire.string,
-	blurb: wire.union([wire.string, wire.null]),
+	name: wire.standard(ThemeNameSchema, { id: "theme-name/v1" }),
+	blurb: wire.union([wire.standard(ThemeBlurbSchema, { id: "theme-blurb/v1" }), wire.null]),
 	colors: ThemeColorsCodec,
 };
 
