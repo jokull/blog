@@ -12,5 +12,14 @@
 	"bracketSameLine": false,
 	"arrowParens": "always",
 	"endOfLine": "lf",
-	"ignorePatterns": ["node_modules", ".next", ".wrangler", "out", "dist", "build", ".turbo"]
+	"ignorePatterns": [
+		"node_modules",
+		".next",
+		".wrangler",
+		"out",
+		"dist",
+		"build",
+		".turbo",
+		"**/*.gen.ts"
+	]
 }
