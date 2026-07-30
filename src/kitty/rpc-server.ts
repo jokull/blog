@@ -235,7 +235,7 @@ const fetchIndex = () =>
 		);
 		if (!response.ok) return yield* err(communityErrors.unavailable());
 		const payload = yield* await tryPromise(
-			() => response.json() as Promise<unknown>,
+			() => response.json(),
 			() => communityErrors.unavailable(),
 		);
 		return themeIndexEntries(payload);

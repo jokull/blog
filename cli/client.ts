@@ -1,6 +1,10 @@
 import { hc } from "hono/client";
 import type { AppType } from "../lib/api";
 
+// `worker-configuration.d.ts` declares every binding as a required
+// `ProcessEnv` key, which is true inside the Worker and a lie here — this CLI
+// runs on plain Bun, where the variable really can be absent.
+// oxlint-disable-next-line typescript/no-unnecessary-condition
 const API_BASE = process.env.BLOG_API_URL ?? "http://localhost:3000";
 
 export function createClient(token: string) {

@@ -84,8 +84,9 @@ export async function safeFetchJson<T = unknown>(
 	}
 
 	return Result.tryPromise({
-		// oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
-		try: () => response.json() as Promise<T>,
+		// `Response.json()` is generic in the current workers types, so `T` is
+		// supplied by inference rather than an assertion.
+		try: () => response.json<T>(),
 		catch: (cause) =>
 			new ParseError({
 				message: cause instanceof Error ? cause.message : String(cause),
