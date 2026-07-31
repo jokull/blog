@@ -2,7 +2,7 @@
 
 ## Development Commands
 
-- `bun dev` — vinext dev server
+- `bun dev` — TanStack Start Vite dev server
 - `bun run build` — Vite build
 - `bun run deploy` — build + `wrangler deploy`
 - `bun run format-and-lint` (check) / `bun run format-and-lint:fix` (fix)
@@ -25,7 +25,7 @@ so a `??` fallback there is correct even though the type says otherwise.
 
 ## Stack
 
-- **vinext** (Vite + React Server Components on Cloudflare Workers)
+- **TanStack Start** (Vite + React Server Components on Cloudflare Workers)
 - **Cloudflare D1** (SQLite) with Drizzle ORM
 - **Hono** API routes
 - **Tailwind CSS v4**, **Intent UI** (react-aria-components, via shadcn CLI)
@@ -39,7 +39,7 @@ Manage blog posts via `cli/blog.ts`:
 bun run blog <command> [options]
 ```
 
-By default the CLI hits `http://localhost:3000`. To run against production:
+By default the CLI hits `http://localhost:5173`. To run against production:
 
 ```bash
 BLOG_API_URL="https://www.solberg.is" bun run blog <command>
@@ -49,7 +49,7 @@ bun run blog:prod <command>
 
 **Commands:** `login`, `logout`, `whoami`, `list`, `get <slug>`, `create`, `update <slug>`, `delete <slug>`, `categories`, `backup`
 
-**Common options:** `-s/--slug`, `-t/--title`, `-b/--body`, `-f/--body-file`, `-c/--category`, `-l/--locale` (`en`/`is`), `--hero-image`, `--publish`/`--unpublish`
+**Common options:** `-s/--slug`, `-t/--title`, `-b/--body`, `-f/--body-file` (`-` for stdin), `-c/--category`, `-l/--locale` (`en`/`is`), `--hero-image`, `--publish`/`--unpublish`, `--diff`, and `--dry-run`. `get` supports `--body-only` and `--json`; use the returned ETag with `update --if-match` to protect read-modify-write edits.
 
 Authentication uses GitHub OAuth — run `bun run blog login` first. Token stored in `~/.blog-cli-session`.
 

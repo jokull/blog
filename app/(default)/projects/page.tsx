@@ -24,6 +24,13 @@ const icelandProjects: Project[] = [
 		repo: "https://github.com/planitor/planitor",
 	},
 	{
+		name: "Lyklaborð",
+		description:
+			"A privacy-first Icelandic iOS keyboard with BÍN-powered autocorrect and on-device learning.",
+		href: "https://lyklabord.solberg.is",
+		repo: "https://github.com/jokull/LyklabordApp",
+	},
+	{
 		name: "orflaedi.is",
 		description: "Finder for used and new car parts in Iceland.",
 		href: "https://www.orflaedi.is",
@@ -33,6 +40,7 @@ const icelandProjects: Project[] = [
 		name: "lemma-is",
 		description: "Icelandic lemmatization for JavaScript.",
 		href: "https://github.com/jokull/lemma-is",
+		repo: "https://github.com/jokull/lemma-is",
 	},
 	{
 		name: "icelandic-data",
@@ -63,15 +71,30 @@ const icelandProjects: Project[] = [
 			"Command line for the Noona.is appointment marketplace — search, book, cancel.",
 		href: "https://github.com/jokull/moona",
 	},
-	{
-		name: "klownan",
-		description:
-			"CLI for procuring provisions from a large, undisclosed Icelandic establishment.",
-		href: "https://github.com/jokull/klownan",
-	},
 ];
 
 const otherProjects: Project[] = [
+	{
+		name: "result-rpc",
+		description:
+			"Typed RPC for React, with one wire-safe error union from the server to the component that handles it.",
+		href: "https://result-rpc.com",
+		repo: "https://github.com/jokull/result-rpc",
+	},
+	{
+		name: "onwardpg",
+		description:
+			"A PostgreSQL schema-diff planner that generates the compatibility window around an application deployment.",
+		href: "https://onwardpg.solberg.is",
+		repo: "https://github.com/jokull/onwardpg",
+	},
+	{
+		name: "procpane",
+		description:
+			"An agent-native process supervisor for Turborepo, with health-gated services, local HTTPS and queryable logs.",
+		href: "https://github.com/jokull/procpane",
+		repo: "https://github.com/jokull/procpane",
+	},
 	{
 		name: "agent-cms",
 		description:
@@ -79,10 +102,18 @@ const otherProjects: Project[] = [
 		href: "https://github.com/jokull/agent-cms",
 	},
 	{
+		name: "Loftur",
+		description:
+			"A runtime website engine for AI agents over MCP — schema, content, code and design with no build step.",
+		href: "https://loftur.app",
+		repo: "https://github.com/jokull/loftur",
+	},
+	{
 		name: "UDL",
 		description:
 			"A single Go binary replacing Sonarr + Radarr + NZBGet for Usenet-based media automation.",
 		href: "https://github.com/jokull/udl",
+		repo: "https://github.com/jokull/udl",
 	},
 	{
 		name: "gymrat.is",

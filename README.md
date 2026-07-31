@@ -1,82 +1,185 @@
 # solberg.is
 
-A blog built with Next.js 15. Forked from [shuding/shud.in](https://github.com/shuding/shud.in) with the layout and design foundation preserved, while adding a Monaco based Markdown editor.
+Source for [solberg.is](https://www.solberg.is), my personal blog and projects page.
 
-The key technical innovation is server-side syntax highlighting using Shiki, which processes code highlighting at build time rather than in the browser, resulting in zero JavaScript overhead for syntax highlighting while maintaining full visual fidelity.
+The site includes the public blog, an authenticated Markdown editor and admin area, a CLI for
+managing posts, and the [Kitty](https://www.solberg.is/kitty) terminal-theme editor.
 
-## Features
+## Stack
 
-- **Server-side syntax highlighting** - Shiki processes code highlighting in React Server Components, eliminating client-side JavaScript for code blocks
-- **Monaco-based markdown editor** - Full-featured web editor with live preview and syntax highlighting
-- **Turso database** - Edge-optimized LibSQL database with Drizzle ORM
-- **oxlint and oxfmt** - Fast linting and formatting with type-aware analysis
-- **Tailwind CSS v4** - Latest CSS framework with improved performance
-- **MDX support** - Markdown with embedded React components
+- [TanStack Start](https://tanstack.com/start) with React Server Components and React 19
+- [Vite](https://vite.dev) and the Cloudflare Vite plugin
+- [Cloudflare Workers](https://workers.cloudflare.com) and
+  [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- [Drizzle ORM](https://orm.drizzle.team) for the SQLite schema and migrations
+- Markdown and MDX rendered with `safe-mdx`, with server-side Shiki highlighting
+- Monaco for post editing
+- Tailwind CSS v4
+- Hono for the authenticated blog API
+- Bun, TypeScript, oxlint, and oxfmt
 
-## Tech Stack
+## Local development
 
-- **Framework:** Next.js 15 with React Server Components
-- **Database:** Turso (LibSQL) with Drizzle ORM
-- **Styling:** Tailwind CSS v4
-- **Content:** MDX with server-side Shiki syntax highlighting
-- **Tooling:** oxlint, oxfmt, TypeScript, Bun
-- **Editor:** Monaco Editor for markdown editing
+Install dependencies and start Vite:
 
-## Getting Started
-
-```bash
-# Install dependencies
+```sh
 bun install
+bun run dev
+```
 
-# Set up database
+Local configuration lives in `.env`, which is ignored by Git. The application expects:
+
+```dotenv
+NODE_ENV=development
+SITE_URL=http://localhost:5173
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+ONEDOLLARSTATS_API_KEY=...
+```
+
+The development app bypasses GitHub OAuth through `/api/dev-auth`, but still needs a sufficiently
+long `GITHUB_CLIENT_SECRET` for the encrypted admin session. Use the URL printed by Vite if it
+chooses a port other than 5173.
+
+### Local D1 database
+
+To initialize a fresh local D1 database, apply the checked-in migrations in timestamp order:
+
+```sh
+for migration in migrations/*/migration.sql; do
+  bunx wrangler d1 execute solberg-blog --local --file "$migration"
+done
+```
+
+After changing [schema.ts](./schema.ts), generate and inspect a new migration:
+
+```sh
 bun run generate:migration
-bun run run:migration
-
-# Start development server
-bun dev
-
-# Run Turso locally
-turso dev --db-file database.db --port 9797
 ```
 
-## CLI Tool
+Apply one generated migration locally:
 
-A command-line interface for managing posts without the web editor:
-
-```bash
-# Authenticate (opens browser for GitHub OAuth)
-bun run blog login
-
-# List all posts
-bun run blog list
-
-# Create a new post
-bun run blog create --slug my-post --title "My Post" --body-file ./post.md
-
-# Update and publish
-bun run blog update my-post --publish
-
-# Backup all posts to iCloud Documents
-bun run blog backup
+```sh
+bunx wrangler d1 execute solberg-blog \
+  --local \
+  --file migrations/<timestamp_name>/migration.sql
 ```
 
-Run `bun run blog --help` for all commands and options.
+Apply it to production explicitly:
 
-## Content Management
+```sh
+bunx wrangler d1 execute solberg-blog \
+  --remote \
+  --file migrations/<timestamp_name>/migration.sql \
+  --yes
+```
 
-The blog uses a clean URL structure for content management:
+Production schema changes must land before application code that reads the new schema. D1 schema
+work is not applied automatically by a Worker deployment.
 
-- `/` - Post index
-- `/{slug}` - Published post view
-- `/{slug}/editor` - Create new post or edit existing post
+## Blog CLI
 
-The editor features:
+The Bun CLI in [`cli/blog.ts`](./cli/blog.ts) manages posts and notes through the authenticated
+Hono API.
 
-- Monaco Editor for markdown editing with syntax highlighting
-- Live preview with real-time rendering
-- Draft and publish state management
-- Server-side processing of MDX
+It targets the Vite development server at `http://localhost:5173` by default. Set `BLOG_API_URL`
+if Vite chooses another port, or use the production shortcut:
 
----
+```sh
+bun run blog:prod login
+bun run blog:prod list
+bun run blog:prod get how-i-use-claude-code
+```
 
-Live site: [https://www.solberg.is](https://www.solberg.is)
+Login uses GitHub's device flow and stores the resulting app token in `~/.blog-cli-session`.
+
+### Create a post
+
+New posts are drafts unless `--publish` is supplied. The body can come from a file or stdin:
+
+```sh
+bun run blog:prod create \
+  --slug my-post \
+  --title "My Post" \
+  --body-file - \
+  --publish < post.md
+```
+
+Add `--dry-run` to inspect the post without creating it, or `--diff` to print the content before
+creation.
+
+### Safely edit a post
+
+`get --json` returns the post and its ETag. Pass that ETag back with `--if-match` to avoid
+overwriting an edit made after the post was fetched:
+
+```sh
+bun run blog:prod get my-post --json > /tmp/my-post.json
+jq -r '.post.markdown' /tmp/my-post.json > /tmp/my-post.md
+
+# Edit /tmp/my-post.md, then update only if the original revision is still current.
+bun run blog:prod update my-post \
+  --body-file /tmp/my-post.md \
+  --if-match "$(jq -r '.etag' /tmp/my-post.json)" \
+  --diff
+```
+
+Other useful forms:
+
+```sh
+# Print only Markdown, suitable for a pipe or redirect.
+bun run blog:prod get my-post --body-only
+
+# Preview metadata and Markdown changes without writing.
+bun run blog:prod update my-post --body-file post.md --dry-run
+
+# Publish or return a post to draft state.
+bun run blog:prod update my-post --publish
+bun run blog:prod update my-post --unpublish
+
+# Back up every post to iCloud Documents on macOS.
+bun run blog:prod backup
+```
+
+Run `bun run blog --help` for the complete command and option list.
+
+## Checks
+
+```sh
+bun run test
+bun run lint
+bun run format:check
+bun run build
+```
+
+`bun run build` runs the production Vite build and `tsc --noEmit`. Lefthook runs formatting and
+type-aware linting before each commit.
+
+## Deployment
+
+Pushing `main` triggers Cloudflare Workers Builds. A successful
+`Workers Builds: solberg-blog` check is the production deployment signal.
+
+```sh
+git push origin main
+
+gh api "repos/jokull/blog/commits/$(git rev-parse HEAD)/check-runs" \
+  --jq '.check_runs[] | {name, status, conclusion, details_url}'
+```
+
+A failed build leaves the previous production deployment active. Manual deployment is also
+available:
+
+```sh
+bun run deploy
+```
+
+## Repository map
+
+- [`src/routes`](./src/routes) — TanStack Start file routes and API endpoints
+- [`app`](./app) — shared page, layout, editor, and admin components rendered by the current routes
+- [`cli`](./cli) — authenticated blog CLI and GitHub device-flow login
+- [`lib/api.ts`](./lib/api.ts) — Hono post, note, category, and CLI-auth API
+- [`schema.ts`](./schema.ts) and [`migrations`](./migrations) — D1 schema and forward migrations
+- [`src/kitty`](./src/kitty) — Kitty theme editor, parser, gallery, and RPC implementation
+- [`components`](./components) — shared UI and data visualizations
