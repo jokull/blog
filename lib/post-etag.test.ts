@@ -14,8 +14,12 @@ describe("post ETags", () => {
 		expect(matchesPostEtag("*", '"post-12"')).toBe(true);
 	});
 
-	it("rejects stale and weak ETags", () => {
+	it("accepts Cloudflare's weak form of the current ETag", () => {
+		expect(matchesPostEtag('W/"post-12"', '"post-12"')).toBe(true);
+		expect(matchesPostEtag('"post-12"', 'W/"post-12"')).toBe(true);
+	});
+
+	it("rejects stale ETags", () => {
 		expect(matchesPostEtag('"post-11"', '"post-12"')).toBe(false);
-		expect(matchesPostEtag('W/"post-12"', '"post-12"')).toBe(false);
 	});
 });
