@@ -62,13 +62,14 @@ export const deleteCategory = createServerFn({ method: "POST" })
 export const togglePostPublished = createServerFn({ method: "POST" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
-		const [{ requireAuth }, { db }, { Post }, { eq }, { revalidatePath }] = await Promise.all([
-			import("@/auth"),
-			import("@/db"),
-			import("@/schema"),
-			import("drizzle-orm"),
-			import("@/src/lib/revalidate"),
-		]);
+		const [{ requireAuth }, { db }, { Post }, { eq, sql }, { revalidatePath }] =
+			await Promise.all([
+				import("@/auth"),
+				import("@/db"),
+				import("@/schema"),
+				import("drizzle-orm"),
+				import("@/src/lib/revalidate"),
+			]);
 		await requireAuth();
 
 		const post = await db.query.Post.findFirst({
@@ -82,6 +83,7 @@ export const togglePostPublished = createServerFn({ method: "POST" })
 			.set({
 				publicAt: post.publicAt ? null : new Date(),
 				modifiedAt: new Date(),
+				revision: sql`${Post.revision} + 1`,
 			})
 			.where(eq(Post.slug, data.slug));
 
@@ -93,13 +95,14 @@ export const togglePostPublished = createServerFn({ method: "POST" })
 export const updatePostCategory = createServerFn({ method: "POST" })
 	.validator((data: { slug: string; categorySlug: string | null }) => data)
 	.handler(async ({ data }) => {
-		const [{ requireAuth }, { db }, { Post }, { eq }, { revalidatePath }] = await Promise.all([
-			import("@/auth"),
-			import("@/db"),
-			import("@/schema"),
-			import("drizzle-orm"),
-			import("@/src/lib/revalidate"),
-		]);
+		const [{ requireAuth }, { db }, { Post }, { eq, sql }, { revalidatePath }] =
+			await Promise.all([
+				import("@/auth"),
+				import("@/db"),
+				import("@/schema"),
+				import("drizzle-orm"),
+				import("@/src/lib/revalidate"),
+			]);
 		await requireAuth();
 
 		// Validate category exists if not null
@@ -115,6 +118,7 @@ export const updatePostCategory = createServerFn({ method: "POST" })
 			.set({
 				categorySlug: data.categorySlug,
 				modifiedAt: new Date(),
+				revision: sql`${Post.revision} + 1`,
 			})
 			.where(eq(Post.slug, data.slug));
 

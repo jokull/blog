@@ -23,6 +23,7 @@ export const Post = sqliteTable("post", {
 		.$default(() => new Date()),
 	publishedAt: integer("published_at", { mode: "timestamp" }).notNull(),
 	modifiedAt: integer("modified_at", { mode: "timestamp" }),
+	revision: integer("revision").default(1).notNull(),
 	locale: text("locale", { enum: ["is", "en"] })
 		.default("en")
 		.notNull(),

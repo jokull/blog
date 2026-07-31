@@ -3,7 +3,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+import { createTwoFilesPatch } from "diff";
 import { z } from "zod";
+import { matchesPostEtag } from "../lib/post-etag";
 import { safeFetchJson, safeZodParse } from "../lib/safe-utils";
 import { clearToken, getValidToken, login } from "./auth";
 import { API_BASE, createClient } from "./client";
@@ -27,6 +29,11 @@ const { positionals, values } = parseArgs({
 		category: { type: "string", short: "c" },
 		locale: { type: "string", short: "l" },
 		"hero-image": { type: "string" },
+		"body-only": { type: "boolean" },
+		"dry-run": { type: "boolean" },
+		"if-match": { type: "string" },
+		diff: { type: "boolean" },
+		json: { type: "boolean" },
 		publish: { type: "boolean" },
 		unpublish: { type: "boolean" },
 		description: { type: "string", short: "d" },
@@ -69,31 +76,177 @@ Options for create:
   -s, --slug         Post slug (required)
   -t, --title        Post title (required)
   -b, --body         Post body (markdown)
-  -f, --body-file    Read body from file
+  -f, --body-file    Read body from file (use - for stdin)
   -c, --category     Category slug
   -l, --locale       Locale (en or is, default: en)
       --hero-image   Hero image URL
+      --publish      Publish immediately (default: draft)
+      --diff         Show the content to be created
+      --dry-run      Show the content without creating the post
+
+Options for get:
+      --body-only    Print only the Markdown body
+      --json         Print the post and ETag as JSON
 
 Options for update:
   -t, --title        New title
   -b, --body         New body (markdown)
-  -f, --body-file    Read body from file
+  -f, --body-file    Read body from file (use - for stdin)
   -c, --category     Category slug
   -l, --locale       Locale (en or is)
       --hero-image   Hero image URL
       --publish      Publish the post
       --unpublish    Unpublish the post
+      --if-match     Only update the ETag returned by get --json
+      --diff         Show the changes before updating
+      --dry-run      Show the changes without updating
 
 Examples:
   bun run blog login
   bun run blog list
   bun run blog get my-post
   bun run blog create --slug my-post --title "My Post" --body "# Hello"
-  bun run blog create --slug my-post --title "My Post" --body-file ./post.md
+  bun run blog create --slug my-post --title "My Post" --body-file - --publish < post.md
+  bun run blog get my-post --json
+  bun run blog get my-post --body-only > post.md
+  bun run blog update my-post --body-file - --diff < post.md
+  bun run blog update my-post --body-file post.md --if-match '"post-3"'
   bun run blog update my-post --publish
   bun run blog update my-post --title "New Title"
   bun run blog delete my-post
 `);
+}
+
+function readBodyInput(body: string | undefined, bodyFile: string | undefined): string | undefined {
+	if (body !== undefined && bodyFile !== undefined) {
+		console.error("Use either --body or --body-file, not both.");
+		process.exit(1);
+	}
+
+	if (bodyFile === undefined) return body;
+
+	try {
+		return readFileSync(bodyFile === "-" ? 0 : bodyFile, "utf-8");
+	} catch {
+		const source = bodyFile === "-" ? "stdin" : bodyFile;
+		console.error(`Failed to read body from ${source}`);
+		process.exit(1);
+	}
+}
+
+function assertPublishOptionsAreCompatible() {
+	if (values.publish && values.unpublish) {
+		console.error("Use either --publish or --unpublish, not both.");
+		process.exit(1);
+	}
+}
+
+type PostSnapshot = {
+	title: string;
+	markdown: string;
+	locale: "en" | "is";
+	categorySlug: string | null;
+	heroImage: string | null;
+	publicAt: string | null;
+};
+
+type PostUpdate = {
+	title?: string;
+	markdown?: string;
+	locale?: "en" | "is";
+	categorySlug?: string | null;
+	heroImage?: string | null;
+	publish?: boolean;
+};
+
+function displayValue(value: string | null): string {
+	return value ?? "(none)";
+}
+
+function printCreateDiff(
+	slug: string,
+	post: Pick<PostSnapshot, "title" | "markdown" | "locale" | "categorySlug" | "heroImage">,
+	publish: boolean,
+) {
+	console.log(`Create ${slug}`);
+	console.log(`  Title: ${post.title}`);
+	console.log(`  Status: ${publish ? "published" : "draft"}`);
+	console.log(`  Locale: ${post.locale}`);
+	console.log(`  Category: ${displayValue(post.categorySlug)}`);
+	console.log(`  Hero image: ${displayValue(post.heroImage)}`);
+	console.log("");
+	process.stdout.write(
+		createTwoFilesPatch("/dev/null", `${slug}.md`, "", post.markdown, "", "", { context: 3 }),
+	);
+}
+
+function printUpdateDiff(
+	slug: string,
+	current: PostSnapshot,
+	update: PostUpdate,
+	shouldPrint: boolean,
+): boolean {
+	const metadataChanges: Array<[label: string, before: string, after: string]> = [];
+
+	if (update.title !== undefined && update.title !== current.title) {
+		metadataChanges.push(["Title", current.title, update.title]);
+	}
+	if (update.locale !== undefined && update.locale !== current.locale) {
+		metadataChanges.push(["Locale", current.locale, update.locale]);
+	}
+	if (update.categorySlug !== undefined && update.categorySlug !== current.categorySlug) {
+		metadataChanges.push([
+			"Category",
+			displayValue(current.categorySlug),
+			displayValue(update.categorySlug),
+		]);
+	}
+	if (update.heroImage !== undefined && update.heroImage !== current.heroImage) {
+		metadataChanges.push([
+			"Hero image",
+			displayValue(current.heroImage),
+			displayValue(update.heroImage),
+		]);
+	}
+	if (update.publish !== undefined && update.publish !== (current.publicAt !== null)) {
+		metadataChanges.push([
+			"Status",
+			current.publicAt === null ? "draft" : "published",
+			update.publish ? "published" : "draft",
+		]);
+	}
+
+	const markdownChanged = update.markdown !== undefined && update.markdown !== current.markdown;
+	if (metadataChanges.length === 0 && !markdownChanged) {
+		if (shouldPrint) console.log("No changes.");
+		return false;
+	}
+
+	if (shouldPrint && metadataChanges.length > 0) {
+		console.log("Metadata:");
+		for (const [label, before, after] of metadataChanges) {
+			console.log(`  ${label}: ${before} -> ${after}`);
+		}
+	}
+
+	if (shouldPrint && markdownChanged) {
+		if (metadataChanges.length > 0) console.log("");
+		process.stdout.write(
+			createTwoFilesPatch(
+				`${slug}.md`,
+				`${slug}.md`,
+				current.markdown,
+				update.markdown!,
+				"",
+				"",
+				{
+					context: 3,
+				},
+			),
+		);
+	}
+
+	return true;
 }
 
 async function requireAuth(): Promise<string> {
@@ -167,6 +320,11 @@ async function handleList() {
 }
 
 async function handleGet(slug: string) {
+	if (values["body-only"] && values.json) {
+		console.error("Use either --body-only or --json, not both.");
+		process.exit(1);
+	}
+
 	const token = await requireAuth();
 	const client = createClient(token);
 
@@ -190,6 +348,18 @@ async function handleGet(slug: string) {
 	}
 
 	const post = data.post;
+	const etag = res.headers.get("ETag");
+
+	if (values["body-only"]) {
+		process.stdout.write(post.markdown);
+		return;
+	}
+
+	if (values.json) {
+		console.log(JSON.stringify({ etag, post }, null, 2));
+		return;
+	}
+
 	console.log(`
 Title:      ${post.title}
 Slug:       ${post.slug}
@@ -200,6 +370,7 @@ Hero Image: ${post.heroImage ?? "None"}
 Created:    ${post.createdAt ? new Date(post.createdAt).toLocaleString() : "N/A"}
 Published:  ${post.publishedAt ? new Date(post.publishedAt).toLocaleString() : "N/A"}
 Modified:   ${post.modifiedAt ? new Date(post.modifiedAt).toLocaleString() : "N/A"}
+ETag:       ${etag ?? "N/A"}
 
 ─────────────────────────────────────────────────────────────────────────────────
 ${post.markdown}
@@ -207,16 +378,18 @@ ${post.markdown}
 }
 
 async function handleCreate() {
-	const token = await requireAuth();
-	const client = createClient(token);
-
 	const slug = values.slug;
 	const title = values.title;
-	let body = values.body;
-	const bodyFile = values["body-file"];
 	const category = values.category;
 	const locale = parseLocale(values.locale);
 	const heroImage = values["hero-image"];
+	const shouldPublish = values.publish ?? false;
+
+	assertPublishOptionsAreCompatible();
+	if (values.unpublish) {
+		console.error("--unpublish is not valid when creating a post.");
+		process.exit(1);
+	}
 
 	if (!slug) {
 		console.error("Missing required option: --slug");
@@ -227,26 +400,27 @@ async function handleCreate() {
 		process.exit(1);
 	}
 
-	if (bodyFile) {
-		try {
-			body = readFileSync(bodyFile, "utf-8");
-		} catch {
-			console.error(`Failed to read file: ${bodyFile}`);
-			process.exit(1);
-		}
-	}
+	const body = readBodyInput(values.body, values["body-file"]) ?? `# ${title}\n\n`;
+	const createData = {
+		slug,
+		title,
+		markdown: body,
+		locale: locale ?? "en",
+		categorySlug: category ?? null,
+		heroImage: heroImage ?? null,
+		publish: shouldPublish,
+	} as const;
 
-	body ??= `# ${title}\n\n`;
+	if (values.diff || values["dry-run"]) {
+		printCreateDiff(slug, createData, shouldPublish);
+	}
+	if (values["dry-run"]) return;
+
+	const token = await requireAuth();
+	const client = createClient(token);
 
 	const res = await client.api.posts.$post({
-		json: {
-			slug,
-			title,
-			markdown: body,
-			locale: locale ?? "en",
-			categorySlug: category ?? null,
-			heroImage: heroImage ?? null,
-		},
+		json: createData,
 	});
 
 	if (!res.ok) {
@@ -258,39 +432,23 @@ async function handleCreate() {
 		process.exit(1);
 	}
 
-	console.log(`Post created: ${slug}`);
+	console.log(`Post created: ${slug} (${shouldPublish ? "published" : "draft"})`);
+	const etag = res.headers.get("ETag");
+	if (etag) console.log(`ETag: ${etag}`);
 }
 
 async function handleUpdate(slug: string) {
-	const token = await requireAuth();
-	const client = createClient(token);
-
 	const title = values.title;
-	let body = values.body;
-	const bodyFile = values["body-file"];
+	const body = readBodyInput(values.body, values["body-file"]);
 	const category = values.category;
 	const locale = parseLocale(values.locale);
 	const heroImage = values["hero-image"];
 	const shouldPublish = values.publish;
 	const shouldUnpublish = values.unpublish;
 
-	if (bodyFile) {
-		try {
-			body = readFileSync(bodyFile, "utf-8");
-		} catch {
-			console.error(`Failed to read file: ${bodyFile}`);
-			process.exit(1);
-		}
-	}
+	assertPublishOptionsAreCompatible();
 
-	const updateData: {
-		title?: string;
-		markdown?: string;
-		locale?: "en" | "is";
-		categorySlug?: string | null;
-		heroImage?: string | null;
-		publish?: boolean;
-	} = {};
+	const updateData: PostUpdate = {};
 
 	if (title !== undefined) updateData.title = title;
 	if (body !== undefined) updateData.markdown = body;
@@ -305,12 +463,56 @@ async function handleUpdate(slug: string) {
 		process.exit(1);
 	}
 
-	const res = await client.api.posts[":slug"].$patch({
-		param: { slug },
-		json: updateData,
-	});
+	const token = await requireAuth();
+	const client = createClient(token);
+	const currentRes = await client.api.posts[":slug"].$get({ param: { slug } });
+	if (!currentRes.ok) {
+		console.error(
+			currentRes.status === 404
+				? `Post not found: ${slug}`
+				: `Failed to fetch post: ${currentRes.status}`,
+		);
+		process.exit(1);
+	}
+
+	const currentData = await currentRes.json();
+	if ("error" in currentData) {
+		console.error("Error:", currentData.error);
+		process.exit(1);
+	}
+
+	const currentEtag = currentRes.headers.get("ETag");
+	if (!currentEtag) {
+		console.error("The server did not return an ETag; refusing an unsafe update.");
+		process.exit(1);
+	}
+
+	const requestedEtag = values["if-match"];
+	if (requestedEtag && !matchesPostEtag(requestedEtag, currentEtag)) {
+		console.error(`Post has changed (expected ${requestedEtag}, current ${currentEtag}).`);
+		console.error("Fetch it again and reapply your changes.");
+		process.exit(1);
+	}
+
+	const shouldPrintDiff = Boolean(values.diff ?? values["dry-run"]);
+	const hasChanges = printUpdateDiff(slug, currentData.post, updateData, shouldPrintDiff);
+	if (!hasChanges && !shouldPrintDiff) console.log("No changes.");
+	if (!hasChanges || values["dry-run"]) return;
+
+	const res = await client.api.posts[":slug"].$patch(
+		{
+			param: { slug },
+			json: updateData,
+		},
+		{ headers: { "If-Match": requestedEtag ?? currentEtag } },
+	);
 
 	if (!res.ok) {
+		if (res.status === 412) {
+			console.error("Post changed while the update was in progress.");
+			console.error("Fetch it again and reapply your changes.");
+			process.exit(1);
+		}
 		console.error("Failed to update post:", res.status);
 		const data = await res.json();
 		if ("error" in data) {
@@ -320,6 +522,8 @@ async function handleUpdate(slug: string) {
 	}
 
 	console.log(`Post updated: ${slug}`);
+	const etag = res.headers.get("ETag");
+	if (etag) console.log(`ETag: ${etag}`);
 }
 
 async function handleDelete(slug: string) {

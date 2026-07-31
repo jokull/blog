@@ -20,7 +20,7 @@ export const previewPost = createServerFn({ method: "POST" })
 		}) => data,
 	)
 	.handler(async ({ data }) => {
-		const [{ requireAuth }, { db }, { eq }, { extractFirstImage }, { revalidatePath }] =
+		const [{ requireAuth }, { db }, { eq, sql }, { extractFirstImage }, { revalidatePath }] =
 			await Promise.all([
 				import("@/auth"),
 				import("@/db"),
@@ -37,7 +37,11 @@ export const previewPost = createServerFn({ method: "POST" })
 
 		await db
 			.update(Post)
-			.set({ previewMarkdown: data.previewMarkdown, heroImage })
+			.set({
+				previewMarkdown: data.previewMarkdown,
+				heroImage,
+				revision: sql`${Post.revision} + 1`,
+			})
 			.where(eq(Post.slug, data.slug));
 		revalidatePath("/(admin)/[slug]/editor", "page");
 	});
@@ -45,7 +49,7 @@ export const previewPost = createServerFn({ method: "POST" })
 export const togglePublishPost = createServerFn({ method: "POST" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
-		const [{ requireAuth }, { db }, { eq }, { extractFirstImage }, { revalidatePath }] =
+		const [{ requireAuth }, { db }, { eq, sql }, { extractFirstImage }, { revalidatePath }] =
 			await Promise.all([
 				import("@/auth"),
 				import("@/db"),
@@ -69,6 +73,8 @@ export const togglePublishPost = createServerFn({ method: "POST" })
 				markdown: newMarkdown,
 				previewMarkdown: null,
 				heroImage,
+				modifiedAt: new Date(),
+				revision: sql`${Post.revision} + 1`,
 			})
 			.where(eq(Post.slug, data.slug));
 
@@ -87,7 +93,7 @@ export const updatePost = createServerFn({ method: "POST" })
 		) => data,
 	)
 	.handler(async ({ data }) => {
-		const [{ requireAuth }, { db }, { eq }, { extractFirstImage }, { revalidatePath }] =
+		const [{ requireAuth }, { db }, { eq, sql }, { extractFirstImage }, { revalidatePath }] =
 			await Promise.all([
 				import("@/auth"),
 				import("@/db"),
@@ -111,6 +117,7 @@ export const updatePost = createServerFn({ method: "POST" })
 				previewMarkdown: null,
 				heroImage,
 				modifiedAt: new Date(),
+				revision: sql`${Post.revision} + 1`,
 			})
 			.where(eq(Post.slug, data.slug));
 

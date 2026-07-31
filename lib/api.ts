@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Context, Env, Next } from "hono";
 import { Hono } from "hono";
 import { z } from "zod/v4";
@@ -7,6 +7,7 @@ import { getSession, whoami } from "@/auth";
 import { createCliToken, verifyCliToken } from "@/lib/cli-token";
 import { db } from "@/db";
 import { env } from "@/env";
+import { createPostEtag, matchesPostEtag } from "@/lib/post-etag";
 import { Note, Post } from "@/schema";
 
 const app = new Hono<Env>().basePath("/api");
@@ -56,6 +57,7 @@ const CreatePostSchema = z.object({
 	locale: z.enum(["en", "is"]).default("en"),
 	categorySlug: z.string().nullable().optional(),
 	heroImage: z.string().nullable().optional(),
+	publish: z.boolean().optional(),
 });
 
 const UpdatePostSchema = z.object({
@@ -111,26 +113,49 @@ const route = app
 			where: { slug },
 		});
 		if (!post) return c.json({ error: "Not found" }, 404);
+		c.header("ETag", createPostEtag(post.revision));
+		c.header("Cache-Control", "no-store");
 		return c.json({ post });
 	})
 	.post("/posts", authMiddleware, zValidator("json", CreatePostSchema), async (c) => {
 		const data = c.req.valid("json");
-		await db.insert(Post).values({
-			slug: data.slug,
-			title: data.title,
-			markdown: data.markdown,
-			locale: data.locale,
-			categorySlug: data.categorySlug ?? null,
-			heroImage: data.heroImage ?? null,
-			publishedAt: new Date(),
-		});
+		const now = new Date();
+		const [post] = await db
+			.insert(Post)
+			.values({
+				slug: data.slug,
+				title: data.title,
+				markdown: data.markdown,
+				locale: data.locale,
+				categorySlug: data.categorySlug ?? null,
+				heroImage: data.heroImage ?? null,
+				publishedAt: now,
+				publicAt: data.publish ? now : null,
+			})
+			.returning({ revision: Post.revision });
+		c.header("ETag", createPostEtag(post.revision));
 		return c.json({ success: true, slug: data.slug });
 	})
 	.patch("/posts/:slug", authMiddleware, zValidator("json", UpdatePostSchema), async (c) => {
 		const slug = c.req.param("slug");
 		const data = c.req.valid("json");
+		const ifMatch = c.req.header("If-Match");
+		if (!ifMatch) {
+			return c.json({ error: "If-Match header required" }, 428);
+		}
 
-		const updateData: Record<string, unknown> = { modifiedAt: new Date() };
+		const current = await db.query.Post.findFirst({ where: { slug } });
+		if (!current) return c.json({ error: "Not found" }, 404);
+
+		const currentEtag = createPostEtag(current.revision);
+		if (!matchesPostEtag(ifMatch, currentEtag)) {
+			return c.json({ error: "Post has changed", etag: currentEtag }, 412);
+		}
+
+		const updateData: Record<string, unknown> = {
+			modifiedAt: new Date(),
+			revision: sql`${Post.revision} + 1`,
+		};
 		if (data.title !== undefined) updateData.title = data.title;
 		if (data.markdown !== undefined) updateData.markdown = data.markdown;
 		if (data.locale !== undefined) updateData.locale = data.locale;
@@ -139,7 +164,16 @@ const route = app
 		if (data.publish === true) updateData.publicAt = new Date();
 		if (data.publish === false) updateData.publicAt = null;
 
-		await db.update(Post).set(updateData).where(eq(Post.slug, slug));
+		const result = await db
+			.update(Post)
+			.set(updateData)
+			.where(and(eq(Post.slug, slug), eq(Post.revision, current.revision)));
+
+		if (result.meta.changes === 0) {
+			return c.json({ error: "Post has changed" }, 412);
+		}
+
+		c.header("ETag", createPostEtag(current.revision + 1));
 		return c.json({ success: true });
 	})
 	.delete("/posts/:slug", authMiddleware, async (c) => {
