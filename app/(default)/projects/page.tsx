@@ -32,7 +32,8 @@ const icelandProjects: Project[] = [
 	},
 	{
 		name: "orflaedi.is",
-		description: "Finder for used and new car parts in Iceland.",
+		description:
+			"Icelandic e-bike listings in one place — find retailers and models, and compare prices.",
 		href: "https://www.orflaedi.is",
 		repo: "https://github.com/jokull/orflaedi",
 	},
