@@ -1,5 +1,5 @@
-import { z } from "zod/v4";
-import { env } from "@/env";
+import { env } from "cloudflare:workers";
+import * as v from "valibot";
 
 async function getKey(): Promise<CryptoKey> {
 	const encoder = new TextEncoder();
@@ -60,7 +60,7 @@ export async function verifyCliToken(token: string): Promise<string | null> {
 	const valid = await crypto.subtle.verify("HMAC", key, sigBuffer, encoder.encode(payload));
 	if (!valid) return null;
 
-	const result = z.object({ sub: z.string() }).safeParse(JSON.parse(payload));
+	const result = v.safeParse(v.object({ sub: v.string() }), JSON.parse(payload));
 	if (!result.success) return null;
-	return result.data.sub;
+	return result.output.sub;
 }

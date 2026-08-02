@@ -1,10 +1,9 @@
 /**
- * SERVER-ONLY: request context, layer middleware, handlers, the router, and
- * the fetch-handler mount. This module closes over the D1 binding and the
- * iron-session secret. Nothing in the browser graph may reach it — its only
- * importers are the `/api/rpc` server route and the `createServerFn`
- * prefetchers in ssr.ts, both of which TanStack Start strips from the client
- * build.
+ * SERVER-ONLY: the kitty handlers. This module closes over the D1 binding and
+ * the iron-session secret. Nothing in the browser graph may reach it — it is
+ * reachable only from src/rpc/server.ts, which the `/api/rpc` route and the
+ * `createServerFn` prefetchers in ssr.ts import, and which TanStack Start
+ * strips from the client build.
  *
  * Every handler here was a `throw new Error("...")` in app/kitty/mutations.ts.
  * They return declared failures now, so the union a component can be asked to
@@ -12,9 +11,9 @@
  */
 import { eq } from "drizzle-orm";
 import { err, gen, ok, tryPromise } from "result-rpc";
-import { createFetchHandler, createServerClient, serverRpc } from "result-rpc/server";
-import { getGithubUser, getSession, isAdmin } from "@/auth";
-import { db } from "@/db";
+import { getGithubUser } from "@/auth";
+import type { Viewer } from "@/src/rpc/auth";
+import { requireViewer, server, session } from "@/src/rpc/server-base";
 import { KittyTheme } from "@/schema";
 import {
 	communityBySlugContract,
@@ -24,41 +23,14 @@ import {
 	forkThemeContract,
 	myThemesContract,
 	publishedThemesContract,
-	sessionContract,
 	themeByIdContract,
 	togglePublishContract,
 	updateThemeContract,
-	viewerContract,
 } from "./contract";
 import { communityErrors } from "./errors";
-import { SessionLayer, ViewerLayer, type Viewer } from "./layers";
 import { defaultThemeColors } from "./lib/default-theme";
 import { parseThemeConfig, themeIndexEntries } from "./lib/theme-parser";
 import { KittyThemeModel, type SavedTheme } from "./models";
-
-/** Process/request services. The viewer arrives via the session layer. */
-export interface AppContext {
-	readonly db: typeof db;
-}
-
-const server = serverRpc.context<AppContext>();
-
-/**
- * Reads the iron-session cookie. Declared with no errors, so it always
- * establishes — a signed-out visitor is `viewer: null`, not a failure.
- */
-const session = SessionLayer.middleware(server, async () => {
-	const cookie = await getSession();
-	if (!cookie.githubUsername) return ok(null);
-	return ok({ username: cookie.githubUsername, isAdmin: await isAdmin() });
-});
-
-/**
- * The refinement. Passing `session` bundles the parent, so a single
- * `.use(requireViewer)` pulls the whole chain in dependency order and
- * contributes `auth/required` to the procedure's declared union.
- */
-const requireViewer = ViewerLayer.middleware(server, session);
 
 const generateSlug = (name: string) =>
 	`${name
@@ -124,8 +96,12 @@ const byId = server
 const create = server
 	.implement(createThemeContract)
 	.use(requireViewer)
-	.handler(async ({ input, context }) => {
+	.handler(async ({ input, errors, context }) => {
+		// The author's avatar and id are stamped onto the row, so a GitHub outage
+		// is a declared, retryable failure rather than an unhandled throw.
 		const author = await getGithubUser(context.viewer.username);
+		if (!author.ok) return err(errors.authorUnavailable());
+
 		const [row] = await context.db
 			.insert(KittyTheme)
 			.values({
@@ -133,9 +109,9 @@ const create = server
 				name: input.name,
 				blurb: input.blurb,
 				colors: input.colors,
-				authorGithubId: author.id,
-				authorGithubUsername: author.login,
-				authorAvatarUrl: author.avatar_url,
+				authorGithubId: author.value.id,
+				authorGithubUsername: author.value.login,
+				authorAvatarUrl: author.value.avatar_url,
 				isPublished: false,
 			})
 			.returning();
@@ -188,6 +164,8 @@ const fork = server
 		if (!original.isPublished) return err(errors.forkUnpublished({ themeId: input.id }));
 
 		const author = await getGithubUser(context.viewer.username);
+		if (!author.ok) return err(errors.authorUnavailable());
+
 		const [row] = await context.db
 			.insert(KittyTheme)
 			.values({
@@ -195,9 +173,9 @@ const fork = server
 				name: `${original.name} (Remix)`,
 				blurb: original.blurb,
 				colors: original.colors,
-				authorGithubId: author.id,
-				authorGithubUsername: author.login,
-				authorAvatarUrl: author.avatar_url,
+				authorGithubId: author.value.id,
+				authorGithubUsername: author.value.login,
+				authorAvatarUrl: author.value.avatar_url,
 				forkedFromId: original.id,
 				isPublished: false,
 			})
@@ -273,35 +251,16 @@ const communityBySlug = server
 		});
 	});
 
-export const router = server.router({
-	session: SessionLayer.implement(server, sessionContract, session),
-	viewer: ViewerLayer.implement(server, viewerContract, requireViewer),
-	themes: { published, mine, byId, create, update, togglePublish, fork, remove },
-	community: { list: communityList, bySlug: communityBySlug },
-});
+/** Composed into the app router by src/rpc/server.ts. */
+export const themesRouter = {
+	published,
+	mine,
+	byId,
+	create,
+	update,
+	togglePublish,
+	fork,
+	remove,
+};
 
-export const createContext = (): AppContext => ({ db });
-
-/**
- * In-process caller for server routes that are not the RPC endpoint — OG image
- * generation and SEO head resolution. It keeps everything that decides whether
- * a call is correct (middleware, validation, codecs, private-error
- * sanitization) and drops only the transport, so these callers get the same
- * visibility rules as the browser rather than a second, divergent query.
- */
-export const kittyServerClient = () => createServerClient(router, { context: createContext() });
-
-/**
- * Mounted at POST /api/rpc by src/routes/api.rpc.ts. The library default is
- * `/rpc` and Start's server routes live under `/api`, so both ends are set
- * explicitly — here, and on `fetchTransport({ url })` in rpc-client.ts.
- */
-export const rpcHandler = createFetchHandler({
-	router,
-	createContext,
-	endpoint: "/api/rpc",
-	onInternalError: ({ incidentId, procedurePath, cause }) => {
-		// oxlint-disable-next-line no-console -- defects belong in the Worker log.
-		console.error("[rpc]", incidentId, procedurePath, cause);
-	},
-});
+export const communityRouter = { list: communityList, bySlug: communityBySlug };

@@ -1,18 +1,17 @@
-import { Result } from "better-result";
-import { z } from "zod";
-import { env } from "@/env";
-import { safeFetchJson, safeZodParse, type FetchJsonError, type ZodParseError } from "./safe-utils";
+import { env } from "cloudflare:workers";
+import { andThen, map, type Result } from "result-rpc";
+import * as v from "valibot";
+import { safeFetchJson, safeParse, type FetchJsonError, type SchemaError } from "./safe-utils";
 
 const API_ENDPOINT = "https://api.onedollarstats.com/api";
 const SITE = "solberg.is";
 
-// Zod schemas
-const dateRangeSchema = z.union([
-	z.enum(["day", "7d", "30d", "6mo", "12mo", "year", "all"]),
-	z.tuple([z.string(), z.string()]),
+const dateRangeSchema = v.union([
+	v.picklist(["day", "7d", "30d", "6mo", "12mo", "year", "all"]),
+	v.tuple([v.string(), v.string()]),
 ]);
 
-const metricSchema = z.enum([
+const metricSchema = v.picklist([
 	"visitors",
 	"visits",
 	"pageviews",
@@ -22,48 +21,46 @@ const metricSchema = z.enum([
 	"events",
 ]);
 
-const oneDollarStatsResponseSchema = z.object({
-	results: z.array(
-		z.object({
-			dimensions: z.array(z.string()),
-			metrics: z.array(z.number()),
+const oneDollarStatsResponseSchema = v.object({
+	results: v.array(
+		v.object({
+			dimensions: v.array(v.string()),
+			metrics: v.array(v.number()),
 		}),
 	),
-	meta: z.object({
-		imports_included: z.boolean().optional(),
-		imports_skip_reason: z.string().optional(),
-		imports_warning: z.string().optional(),
-		metric_warnings: z
-			.record(z.string(), z.object({ code: z.string(), warning: z.string() }))
-			.optional(),
-		time_labels: z.array(z.string()).optional(),
-		total_rows: z.number().optional(),
+	meta: v.object({
+		imports_included: v.optional(v.boolean()),
+		imports_skip_reason: v.optional(v.string()),
+		imports_warning: v.optional(v.string()),
+		metric_warnings: v.optional(
+			v.record(v.string(), v.object({ code: v.string(), warning: v.string() })),
+		),
+		time_labels: v.optional(v.array(v.string())),
+		total_rows: v.optional(v.number()),
 	}),
-	query: z.record(z.string(), z.unknown()),
+	query: v.record(v.string(), v.unknown()),
 });
 
-const dailyVisitSchema = z.object({
-	date: z.string(),
-	visitors: z.number(),
-	visits: z.number(),
-	pageviews: z.number(),
+const dailyVisitSchema = v.object({
+	date: v.string(),
+	visitors: v.number(),
+	visits: v.number(),
+	pageviews: v.number(),
 });
 
-const statsSchema = z.object({
-	visitors: z.number(),
-	visits: z.number(),
-	pageviews: z.number(),
+const statsSchema = v.object({
+	visitors: v.number(),
+	visits: v.number(),
+	pageviews: v.number(),
 });
 
-// Types inferred from schemas
-type DateRange = z.infer<typeof dateRangeSchema>;
-type Metric = z.infer<typeof metricSchema>;
-type OneDollarStatsResponse = z.infer<typeof oneDollarStatsResponseSchema>;
-export type DailyVisit = z.infer<typeof dailyVisitSchema>;
-export type Stats = z.infer<typeof statsSchema>;
+type DateRange = v.InferOutput<typeof dateRangeSchema>;
+type Metric = v.InferOutput<typeof metricSchema>;
+type OneDollarStatsResponse = v.InferOutput<typeof oneDollarStatsResponseSchema>;
+export type DailyVisit = v.InferOutput<typeof dailyVisitSchema>;
+export type Stats = v.InferOutput<typeof statsSchema>;
 
-// Error types
-type OneDollarStatsError = FetchJsonError | ZodParseError;
+type OneDollarStatsError = FetchJsonError | SchemaError;
 
 interface OneDollarStatsRequest {
 	site_id: string;
@@ -106,8 +103,7 @@ export class OneDollarStatsClient {
 				site_id: this.siteId,
 			}),
 		});
-		if (fetchResult.isErr()) return Result.err(fetchResult.error);
-		return safeZodParse(oneDollarStatsResponseSchema)(fetchResult.value);
+		return andThen(fetchResult, safeParse(oneDollarStatsResponseSchema));
 	}
 
 	/**
@@ -122,7 +118,7 @@ export class OneDollarStatsClient {
 			dimensions: ["time:day"],
 			order_by: [["time:day", "asc"]],
 		});
-		return result.map((response) =>
+		return map(result, (response) =>
 			response.results.map((r) => ({
 				date: r.dimensions[0],
 				visitors: r.metrics[0],
@@ -144,7 +140,7 @@ export class OneDollarStatsClient {
 			dimensions: ["time:week"],
 			order_by: [["time:week", "asc"]],
 		});
-		return result.map((response) =>
+		return map(result, (response) =>
 			response.results.map((r) => ({
 				date: r.dimensions[0],
 				visitors: r.metrics[0],
@@ -162,7 +158,7 @@ export class OneDollarStatsClient {
 			metrics: ["visitors", "visits", "pageviews"],
 			date_range: dateRange,
 		});
-		return result.map((response) => {
+		return map(result, (response) => {
 			if (response.results.length === 0) {
 				return { visitors: 0, visits: 0, pageviews: 0 };
 			}
@@ -184,12 +180,12 @@ export class OneDollarStatsClient {
 			order_by: [["pageviews", "desc"]],
 			pagination: { limit: 500 },
 		});
-		return result.map((response) => {
-			const map = new Map<string, number>();
+		return map(result, (response) => {
+			const byPath = new Map<string, number>();
 			for (const r of response.results) {
-				map.set(r.dimensions[0], r.metrics[0]);
+				byPath.set(r.dimensions[0], r.metrics[0]);
 			}
-			return map;
+			return byPath;
 		});
 	}
 }

@@ -1,33 +1,25 @@
 /**
- * The shared contract: the ONLY result-rpc surface browser code may import.
+ * The kitty half of the contract: the ONLY result-rpc surface browser code may
+ * import for the theme browser.
  *
  * It carries codecs, error definitions and invalidation maps — no handlers, no
- * Drizzle driver, no session secret. `AppContext` comes in type-only from the
- * server half and is erased at build. Importing `rpc-server.ts` from anything
+ * Drizzle driver, no session secret. Importing `rpc-server.ts` from anything
  * the browser bundles would ship the D1 binding and every handler closure;
  * bundlers do not tree-shake that away.
+ *
+ * These procedures are composed into the app-wide contract by src/rpc/contract.
  */
-import { pickErrors, rpc, wire } from "result-rpc";
-import { authErrors, communityErrors, themeErrors } from "./errors";
-import { SessionLayer, ViewerLayer } from "./layers";
+import { pickErrors, wire } from "result-rpc";
+import { app } from "@/src/rpc/app";
+import { signInErrors } from "@/src/rpc/auth";
+import { communityErrors, themeErrors } from "./errors";
 import {
 	CommunityThemeCodec,
 	CommunityThemeDetailCodec,
 	KittyThemeView,
 	ThemeColorsCodec,
 } from "./models";
-import type { AppContext } from "./rpc-server";
 import { ThemeBlurbSchema, ThemeNameSchema } from "./schemas";
-
-export const app = rpc.context<AppContext>();
-
-/**
- * The layers' context procedures. Their handlers are derived from the same
- * declaration as the server middleware, so the endpoint cannot disagree with
- * the middleware about either the value or its union.
- */
-export const sessionContract = SessionLayer.contract(app);
-export const viewerContract = ViewerLayer.contract(app);
 
 /** Everything published, for the sidebar's Published tab. Public. */
 export const publishedThemesContract = app
@@ -41,13 +33,13 @@ export const myThemesContract = app
 	.procedure()
 	.input(wire.object({}))
 	.output(wire.array(KittyThemeView))
-	.errors(authErrors)
+	.errors(signInErrors)
 	.query();
 
 /**
  * A single theme. Unpublished themes are `theme/not-found` to anyone who is
- * neither the owner nor an admin — the same answer the old code gave by
- * returning `null`, but now it is a declared outcome rather than an absence.
+ * neither the owner nor an admin — a declared outcome rather than an absence,
+ * and one that does not disclose that the row exists.
  */
 export const themeByIdContract = app
 	.procedure()
@@ -59,15 +51,15 @@ export const themeByIdContract = app
 /**
  * The metadata fields adopt the same Valibot schemas the form runs, via
  * `wire.standard`. So "a theme must have a name" is declared once and enforced
- * at both boundaries — previously `wire.string` accepted `""` and an empty
- * name could be saved.
+ * at both boundaries, rather than only in the form — a bare `wire.string` would
+ * accept `""` from anything that skipped it.
  *
  * The stable `id`s participate in the contract digest: bump them whenever the
  * accepted shape or semantics change, so skewed clients are detected.
  */
 const themeDraftInput = {
 	name: wire.standard(ThemeNameSchema, { id: "theme-name/v1" }),
-	blurb: wire.union([wire.standard(ThemeBlurbSchema, { id: "theme-blurb/v1" }), wire.null]),
+	blurb: wire.nullable(wire.standard(ThemeBlurbSchema, { id: "theme-blurb/v1" })),
 	colors: ThemeColorsCodec,
 };
 
@@ -80,7 +72,7 @@ export const createThemeContract = app
 	.procedure()
 	.input(wire.object(themeDraftInput))
 	.output(KittyThemeView)
-	.errors(authErrors)
+	.errors({ ...signInErrors, ...pickErrors(themeErrors, "authorUnavailable") })
 	.affects(myThemesContract)
 	.mutation();
 
@@ -88,7 +80,7 @@ export const updateThemeContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number, ...themeDraftInput }))
 	.output(KittyThemeView)
-	.errors({ ...authErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
+	.errors({ ...signInErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
 	.mutation();
 
 /** Publishing changes list membership, so the published list is invalidated. */
@@ -96,7 +88,7 @@ export const togglePublishContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number }))
 	.output(KittyThemeView)
-	.errors({ ...authErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
+	.errors({ ...signInErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
 	.affects(publishedThemesContract)
 	.mutation();
 
@@ -105,8 +97,8 @@ export const forkThemeContract = app
 	.input(wire.object({ id: wire.number }))
 	.output(KittyThemeView)
 	.errors({
-		...authErrors,
-		...pickErrors(themeErrors, "notFound", "forkUnpublished"),
+		...signInErrors,
+		...pickErrors(themeErrors, "notFound", "forkUnpublished", "authorUnavailable"),
 	})
 	.affects(myThemesContract)
 	.mutation();
@@ -119,7 +111,7 @@ export const deleteThemeContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number }))
 	.output(wire.object({ id: wire.number }))
-	.errors({ ...authErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
+	.errors({ ...signInErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
 	.affects(publishedThemesContract)
 	.affects(myThemesContract)
 	.mutation();
@@ -139,21 +131,24 @@ export const communityBySlugContract = app
 	.errors(communityErrors)
 	.query();
 
-export const kittyContract = app.contract({
-	session: sessionContract,
-	viewer: viewerContract,
-	themes: {
-		published: publishedThemesContract,
-		mine: myThemesContract,
-		byId: themeByIdContract,
-		create: createThemeContract,
-		update: updateThemeContract,
-		togglePublish: togglePublishContract,
-		fork: forkThemeContract,
-		remove: deleteThemeContract,
-	},
-	community: {
-		list: communityListContract,
-		bySlug: communityBySlugContract,
-	},
-});
+/**
+ * Plain records, not `app.contract(...)`: the root contract is built once in
+ * src/rpc/contract.ts so there is exactly one digest and one browser client.
+ * Namespace names are kept at the top level (`themes`, `community`) so every
+ * existing call site still reads `client.themes.byId`.
+ */
+export const themesContract = {
+	published: publishedThemesContract,
+	mine: myThemesContract,
+	byId: themeByIdContract,
+	create: createThemeContract,
+	update: updateThemeContract,
+	togglePublish: togglePublishContract,
+	fork: forkThemeContract,
+	remove: deleteThemeContract,
+};
+
+export const communityContract = {
+	list: communityListContract,
+	bySlug: communityBySlugContract,
+};

@@ -3,7 +3,7 @@
  *
  * TanStack Start loaders are ISOMORPHIC: they run on the server for the
  * document request and in the BROWSER on every client-side navigation. A
- * loader that imported ./rpc-server directly would typecheck, work in dev SSR,
+ * loader that imported the server module directly would typecheck, work in dev SSR,
  * and then ship the D1 binding and the session secret to the browser the first
  * time someone navigated within the site. There is no `'use client'` wall
  * here — `createServerFn` is the wall, and Start compiles these handler bodies
@@ -17,7 +17,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createQueryRuntime } from "result-rpc/query";
 import { createServerClient } from "result-rpc/server";
-import { createContext, router } from "./rpc-server";
+import { createContext, router } from "@/src/rpc/server";
 
 const buildRuntime = () => {
 	const serverClient = createServerClient(router, { context: createContext() });

@@ -1,8 +1,6 @@
-import { getGithubUser, getSession, isAdmin } from "@/auth";
-import { CommentsSection } from "@/components/comments-section";
+import { env } from "cloudflare:workers";
 import { ClientErrorBoundary } from "@/components/error-boundary";
 import { db } from "@/db";
-import { env } from "@/env";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
@@ -10,10 +8,11 @@ import { throwNotFound } from "@/src/lib/router-control";
 import { cache } from "react";
 // safe-mdx renders MDX without eval/new Function — required on Cloudflare Workers where
 // @mdx-js/mdx's run() is blocked (EvalError: Code generation from strings disallowed).
-// Regression: MDX expressions and inline JS in posts no longer evaluate. Custom JSX
-// components (Card, Tool, etc.) still work via the components map.
+// Limitation that follows: MDX expressions and inline JS in posts do not evaluate. Custom
+// JSX components (Card, Tool, etc.) work, via the components map.
 import { SafeMdxRenderer } from "safe-mdx";
 import { mdxParse } from "safe-mdx/parse";
+import { Comments } from "@/src/blog/components/comments/comments";
 import { ClipboardCopyButton } from "./_components/clipboard-copy-button";
 
 // This enables dynamic rendering for comments
@@ -87,56 +86,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 	const post = await getPost(slug);
 
 	// Get user session and admin status
-	const session = await getSession();
-	const isAdminUser = await isAdmin();
-
-	let user = null;
-	if (session.githubUsername) {
-		try {
-			const githubUser = await getGithubUser(session.githubUsername);
-			user = {
-				email: "",
-				githubId: githubUser.id,
-				githubUsername: githubUser.login,
-				name: githubUser.name ?? githubUser.login,
-				avatarUrl: githubUser.avatar_url,
-			};
-		} catch (error) {
-			console.error("[github] Failed to fetch user:", error);
-		}
-	}
-
-	// Fetch comments for this post
-	const comments = await db.query.Comment.findMany({
-		where: { postSlug: slug },
-		orderBy: { createdAt: "asc" }, // Oldest first (chronological order)
-	});
-
-	// Pre-render markdown content for each comment
-	const commentsWithRenderedContent = comments.map((comment) => {
-		let renderedContent: React.ReactElement | null = null;
-
-		try {
-			const mdast = mdxParse(comment.content);
-			renderedContent = (
-				<SafeMdxRenderer mdast={mdast} markdown={comment.content} components={components} />
-			);
-		} catch {
-			renderedContent = null;
-		}
-
-		return {
-			...comment,
-			renderedContent,
-		};
-	});
-
-	// Get visible comment count
-	const visibleComments = commentsWithRenderedContent.filter(
-		(comment) => !comment.isHidden || isAdminUser,
-	);
-	const commentCount = visibleComments.length;
-
 	let mdx: React.ReactElement | null = null;
 	try {
 		const mdast = mdxParse(post.markdown);
@@ -169,14 +118,16 @@ ${post.markdown}`;
 			<ClientErrorBoundary>{mdx}</ClientErrorBoundary>
 
 			<div className="mt-12 max-w-xl border-t pt-8">
-				<CommentsSection
-					postSlug={slug}
-					user={user}
-					comments={visibleComments}
-					commentCount={commentCount}
-					isAdmin={isAdminUser}
-					currentUsername={session.githubUsername}
-				/>
+				{/*
+				 * The comment thread owns its own reads and writes and loads
+				 * cold. It is deliberately NOT prefetched here: this page is a
+				 * server component rendered through the legacy RSC shim, and
+				 * reaching the router from that environment drags the whole
+				 * server graph into the RSC dependency optimizer. Comments live
+				 * below the fold, so the island fetching on mount costs nothing
+				 * anyone sees — and it keeps the article a pure renderer.
+				 */}
+				<Comments postSlug={slug} />
 			</div>
 		</div>
 	);

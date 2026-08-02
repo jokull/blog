@@ -1,96 +1,120 @@
-import { Result, TaggedError } from "better-result";
-import type { z, ZodSchema } from "zod";
-
-export class FetchError extends TaggedError("FetchError")<{
-	message: string;
-	cause: unknown;
-}>() {}
-
-export class HttpError extends TaggedError("HttpError")<{
-	message: string;
-	status: number;
-	headers: Headers;
-	json?: unknown;
-}>() {}
-
-export class ParseError extends TaggedError("ParseError")<{
-	message: string;
-	cause: unknown;
-}>() {}
-
-export class ZodParseError extends TaggedError("ZodParseError")<{
-	message: string;
-	errors: z.ZodError;
-}>() {}
-
-export type FetchJsonError = FetchError | HttpError | ParseError;
-
 /**
- * Safe wrapper around Zod schema parsing that returns a Result type
- * instead of throwing errors.
+ * The outbound-HTTP boundary, as Results.
+ *
+ * Built on `result-rpc`'s `Result`, the same dialect the wire uses — it is a
+ * general-purpose value type, not something that only exists between a handler
+ * and a client — so a failure from `safeFetchJson` composes with `gen`,
+ * `matchError` and an RPC handler's own error union with no translation step.
+ *
+ * Every error here is `visibility: "private"`. Private errors are server-side
+ * composition currency: the framework refuses to put them on the wire, so a
+ * handler has to fold one into a declared public tag before returning it. That
+ * is what stops a GitHub 404 from leaking out of this blog as a `fetch/status`
+ * the browser was never told about.
  */
-export function safeZodParse<TSchema extends ZodSchema>(
-	schema: TSchema,
-): (data: unknown) => Result<z.infer<TSchema>, ZodParseError> {
-	return (data: unknown) => {
-		const result = schema.safeParse(data);
-		return result.success
-			? Result.ok(result.data)
-			: Result.err(
-					new ZodParseError({ message: result.error.message, errors: result.error }),
-				);
-	};
-}
+import {
+	defineErrors,
+	err,
+	gen,
+	ok,
+	tryPromise,
+	validateStandard,
+	wire,
+	type Result,
+	type StandardSchemaV1,
+} from "result-rpc";
 
-/**
- * Safe wrapper around fetch that returns a Result with typed errors.
- */
+const messageOf = (cause: unknown) => (cause instanceof Error ? cause.message : String(cause));
+
+export const fetchErrors = defineErrors("fetch", {
+	/** The request never completed: DNS, TLS, timeout, abort. */
+	unreachable: {
+		data: wire.object({ url: wire.string, message: wire.string }),
+		visibility: "private",
+		retry: "transient",
+	},
+	/** A response arrived, but not a 2xx. */
+	status: {
+		data: wire.object({ url: wire.string, status: wire.number }),
+		visibility: "private",
+	},
+	/** A 2xx arrived whose body would not parse as JSON. */
+	malformed: {
+		data: wire.object({ url: wire.string, message: wire.string }),
+		visibility: "private",
+	},
+});
+
+export const schemaErrors = defineErrors("schema", {
+	invalid: {
+		data: wire.object({ issues: wire.array(wire.string) }),
+		visibility: "private",
+	},
+});
+
+export type FetchError = ReturnType<typeof fetchErrors.unreachable>;
+export type FetchJsonError = ReturnType<(typeof fetchErrors)[keyof typeof fetchErrors]>;
+export type SchemaError = ReturnType<typeof schemaErrors.invalid>;
+
+/** Safe fetch: a transport failure becomes a value rather than a rejection. */
 export async function safeFetch(
 	input: URL | string,
 	init?: RequestInit,
 ): Promise<Result<Response, FetchError>> {
-	return Result.tryPromise({
-		try: () => fetch(input, init),
-		catch: (cause) =>
-			new FetchError({
-				message: cause instanceof Error ? cause.message : String(cause),
-				cause,
-			}),
-	});
+	return tryPromise(
+		() => fetch(input, init),
+		(cause) =>
+			fetchErrors.unreachable({ url: String(input), message: messageOf(cause) }, { cause }),
+	);
 }
 
 /**
- * Safe wrapper around fetch + JSON parsing with typed errors.
+ * Fetch plus JSON, with the three failure modes named separately — a caller
+ * that wants to retry only on `fetch/unreachable` can, and one that does not
+ * care collapses them with a single `matchError`.
  */
 export async function safeFetchJson<T = unknown>(
 	input: URL | string,
 	init?: RequestInit,
 ): Promise<Result<T, FetchJsonError>> {
-	const fetchResult = await safeFetch(input, init);
-	if (fetchResult.isErr()) return fetchResult;
+	return gen(async function* () {
+		const response = yield* await safeFetch(input, init);
 
-	const response = fetchResult.value;
+		if (!response.ok) {
+			return yield* err(fetchErrors.status({ url: String(input), status: response.status }));
+		}
 
-	if (!response.ok) {
-		const json: unknown = await response.json().catch(() => undefined);
-		return Result.err(
-			new HttpError({
-				message: `HTTP ${response.status}`,
-				status: response.status,
-				headers: response.headers,
-				json,
-			}),
+		return yield* await tryPromise(
+			// `Response.json()` is generic in the workers types, so `T` is supplied
+			// by inference rather than an assertion.
+			() => response.json<T>(),
+			(cause) =>
+				fetchErrors.malformed({ url: String(input), message: messageOf(cause) }, { cause }),
 		);
-	}
-
-	return Result.tryPromise({
-		// `Response.json()` is generic in the current workers types, so `T` is
-		// supplied by inference rather than an assertion.
-		try: () => response.json<T>(),
-		catch: (cause) =>
-			new ParseError({
-				message: cause instanceof Error ? cause.message : String(cause),
-				cause,
-			}),
 	});
+}
+
+/**
+ * Schema validation as a Result-returning step, for use with `andThen`/`gen`.
+ *
+ * Takes any Standard Schema rather than a Zod schema specifically. In practice
+ * that means Valibot — the same schemas feed Formisch and `wire.standard` — but
+ * nothing here is bound to a vendor, which is the point of routing through
+ * `validateStandard`.
+ */
+export function safeParse<TOutput>(
+	schema: StandardSchemaV1<unknown, TOutput>,
+): (data: unknown) => Result<TOutput, SchemaError> {
+	return (data: unknown) => {
+		const validated = validateStandard(schema, data);
+		return validated.ok
+			? ok(validated.value)
+			: err(
+					schemaErrors.invalid({
+						issues: Object.entries(validated.fields).flatMap(([field, messages]) =>
+							messages.map((message) => `${field || "(root)"}: ${message}`),
+						),
+					}),
+				);
+	};
 }

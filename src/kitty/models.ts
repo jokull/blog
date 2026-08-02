@@ -27,11 +27,11 @@ export const KittyThemeModel = defineModel("kitty-theme", {
 		authorGithubUsername: wire.string,
 		authorAvatarUrl: wire.string,
 		isPublished: wire.boolean,
-		forkedFromId: wire.union([wire.number, wire.null]),
-		blurb: wire.union([wire.string, wire.null]),
+		forkedFromId: wire.nullable(wire.number),
+		blurb: wire.nullable(wire.string),
 		colors: ThemeColorsCodec,
 		createdAt: wire.date,
-		modifiedAt: wire.union([wire.date, wire.null]),
+		modifiedAt: wire.nullable(wire.date),
 	},
 }).$satisfies<typeof KittyTheme.$inferSelect>();
 
@@ -51,9 +51,9 @@ export const CommunityThemeCodec = wire.object({
 	slug: wire.string,
 	file: wire.string,
 	name: wire.string,
-	author: wire.union([wire.string, wire.null]),
-	blurb: wire.union([wire.string, wire.null]),
-	isDark: wire.union([wire.boolean, wire.null]),
+	author: wire.nullable(wire.string),
+	blurb: wire.nullable(wire.string),
+	isDark: wire.nullable(wire.boolean),
 });
 export type CommunityTheme = InputOf<typeof CommunityThemeCodec>;
 

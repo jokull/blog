@@ -23,9 +23,15 @@ export const Route = createFileRoute("/callback")({
 					const tokens = await github.validateAuthorizationCode(code);
 					const accessToken = tokens.accessToken();
 					const user = await whoami(accessToken);
+					if (!user.ok) {
+						return Response.json(
+							{ error: "GitHub rejected the token", detail: user.error.data },
+							{ status: 502 },
+						);
+					}
 
 					const session = await getSession();
-					session.githubUsername = user.login;
+					session.githubUsername = user.value.login;
 					await session.save();
 
 					const redirectUrl = nextUrl ? decodeURIComponent(nextUrl) : "/";

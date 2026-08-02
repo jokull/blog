@@ -11,7 +11,7 @@ import { defaultThemeColors } from "../lib/default-theme";
 import type { ThemeView } from "../lib/types";
 import type { CommunityTheme } from "../models";
 import { client } from "../rpc-client";
-import { SessionShell, SignInShell, dispatch, signIn } from "../shells";
+import { SessionShell, SignInShell, signIn } from "../shells";
 import { isSidebarTab, useKittyContext } from "./kitty-context";
 import { ThemeLink } from "./theme-link";
 
@@ -86,13 +86,11 @@ export function ThemeSidebar() {
 	// anonymous click fails with `auth/required`, the shell claims it and
 	// redirects, and this continuation never runs.
 	const handleCreateNew = () => {
-		dispatch(
-			createTheme.mutate({
-				name: "Untitled Theme",
-				blurb: null,
-				colors: defaultThemeColors,
-			}),
-		);
+		createTheme.mutate({
+			name: "Untitled Theme",
+			blurb: null,
+			colors: defaultThemeColors,
+		});
 	};
 
 	return (

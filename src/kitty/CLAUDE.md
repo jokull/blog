@@ -67,19 +67,25 @@ because distinguishing them would disclose existence.
 ### Shells own failure classes
 
 ```
-BoundaryProvider   transport pauses · defects escalate · stale reloads
-  SessionShell     provides viewer: Viewer | null, claims nothing
-    SignInShell    claims auth/required, reacts with the OAuth redirect
+BoundaryProvider   transport pauses · defects escalate · stale reloads   __root.tsx
+  SessionShell     provides viewer: Viewer | null, claims nothing        kitty.route.tsx
+    SignInShell    claims auth/required, reacts with the OAuth redirect  kitty.route.tsx
 ```
 
-Mounted in `src/routes/kitty.route.tsx`. Because `SignInShell` claims
+`BoundaryProvider` and the RPC client are app-wide and live in `__root.tsx`;
+`kitty.route.tsx` mounts only the two identity layers. It stops at `SignInShell`
+— mounting `AdminShell` would subtract `auth/forbidden` from every union below
+and break the exhaustive switches in the child routes.
+
+Because `SignInShell` claims
 `auth/required`, components use `SignInShell.useQuery` / `.useMutation` and the
 tag is _subtracted from the union_ — a call site cannot branch on "signed out",
 and does not need an `if (!viewer)` guard before mutating.
 
-Consequence: `mutate()` rejects with a **control signal** when a shell claims
-the outcome. Use `dispatch()` from `shells.ts` for fire-and-forget calls; it
-swallows `claimed` and `cancelled` and surfaces anything else.
+Consequence: use `mutate()` for fire-and-forget calls — it returns void and
+never rejects. `mutateAsync()` returns the `Result` and rejects with the
+`claimed`/`cancelled` control signals when a shell claims the outcome, so reach
+for it only where the outcome is awaited.
 
 ### Entities do the invalidation
 
@@ -108,8 +114,8 @@ ships nothing.
 - `ThemeView` (lib/types.ts) — what the editor renders, including things that
   were never saved (a community import, the default palette). `id: number | null`.
 
-Keep them distinct. The old code used one interface with a nullable id for
-both, which is why the editor was full of `currentTheme.id!`.
+Keep them distinct. One interface with a nullable id for both would put a
+`currentTheme.id!` at every save site in the editor.
 
 ## Adding a 22nd colour
 

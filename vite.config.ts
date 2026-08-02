@@ -11,9 +11,11 @@ const safeMdxDynamicEsmStub = fileURLToPath(
 );
 
 export default defineConfig({
-	optimizeDeps: {
-		exclude: ["safe-mdx"],
-	},
+	// No client `optimizeDeps` entry for `safe-mdx`: nothing in the browser graph
+	// reaches it. Posts and comment bodies are both rendered on the server (see
+	// `src/blog/comment-markdown.ts`), so the client never needs the CJS-interop
+	// `include: ["fault", "format"]` that bundling safe-mdx would demand. If those
+	// entries become necessary again, something has crossed back over.
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL(".", import.meta.url)),
@@ -50,7 +52,14 @@ export default defineConfig({
 	environments: {
 		rsc: {
 			optimizeDeps: {
-				exclude: ["safe-mdx"],
+				// `@tanstack/start-server-core` resolves `#tanstack-router-entry`
+				// and `#tanstack-start-entry`, subpath imports the Start plugin
+				// supplies through Vite's resolver. The dep optimizer runs on
+				// rolldown, which does not see those, so prebundling it fails with
+				// "Package import specifier is not defined" and every route
+				// rendered through it 500s. Excluding it leaves the resolution
+				// to Vite, where it works.
+				exclude: ["safe-mdx", "@tanstack/start-server-core"],
 				include: ["boolbase", "cssom", "eval-estree-expression", "extend"],
 			},
 			build: {

@@ -1,33 +1,12 @@
 /**
- * The browser client — built from the CONTRACT, never the router.
+ * The kitty components' handle on the app-wide client.
  *
- * result-rpc ships a real runtime value to the browser (unlike tRPC, which
- * ships only a type), so what this file imports decides what bundles.
- * Importing ./rpc-server here would ship the D1 binding, the iron-session
- * secret and every handler closure to every visitor, and no bundler would
- * tree-shake it away.
+ * There is one client for the whole app (see src/rpc/client.ts — result-rpc
+ * registers it globally, so there can only be one). This re-export lets kitty
+ * call sites read `import { client } from "../rpc-client"` and keeps the
+ * client-boundary warning attached to the module they actually import.
  *
- * `url` matches the `endpoint` set on createFetchHandler: Start's server
- * routes live under /api, so both ends say /api/rpc rather than the library
- * default /rpc.
+ * Never re-export anything from src/rpc/server here.
  */
-import { createBrowserClient, fetchTransport } from "result-rpc/client";
-import { kittyContract } from "./contract";
-
-export const client = createBrowserClient({
-	contract: kittyContract,
-	transport: fetchTransport({ url: "/api/rpc" }),
-});
-
-export type KittyClient = typeof client;
-
-/**
- * TanStack-style registration: `useResultClient()` and the deferred
- * `select:` in layerShell both resolve to this client with no call-site
- * generic.
- */
-declare module "result-rpc/react" {
-	interface Register {
-		client: KittyClient;
-	}
-}
+export { client } from "@/src/rpc/client";
+export type { AppClient } from "@/src/rpc/client";

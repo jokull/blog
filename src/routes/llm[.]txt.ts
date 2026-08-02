@@ -1,7 +1,7 @@
+import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import { groupBy, pipe } from "remeda";
 import { db } from "@/db";
-import { env } from "@/env";
 
 export const Route = createFileRoute("/llm.txt")({
 	server: {

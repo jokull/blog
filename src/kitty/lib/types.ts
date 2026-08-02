@@ -4,10 +4,10 @@
  * themes that were never saved (a community import, the default palette), and
  * those genuinely have no database identity.
  *
- * That is why `ThemeView.id` is nullable while `SavedTheme.id` is not. The old
- * code used one interface with `id: number | null` for both, so every
- * persisted theme carried a null check it could never fail — and the six
- * `currentTheme.id!` assertions in kitty-editor.tsx were the cost.
+ * That is why `ThemeView.id` is nullable while `SavedTheme.id` is not. Keep them
+ * apart: one interface with `id: number | null` for both would make every
+ * persisted theme carry a null check it can never fail, paid for with a
+ * `currentTheme.id!` at each save site.
  */
 import type { OklchColor, SavedTheme, ThemeColors } from "../models";
 

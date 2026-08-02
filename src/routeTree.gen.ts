@@ -22,8 +22,6 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UiRouteImport } from './routes/ui'
 import { Route as Char123slugChar125DotmdRouteImport } from './routes/{$slug}[.]md'
-import { Route as SlugEditorRouteImport } from './routes/$slug.editor'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as ApiDevAuthRouteImport } from './routes/api/dev-auth'
 import { Route as ApiRpcRouteImport } from './routes/api/rpc'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -100,16 +98,6 @@ const Char123slugChar125DotmdRoute = Char123slugChar125DotmdRouteImport.update({
   path: '/{$slug}.md',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SlugEditorRoute = SlugEditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
-  getParentRoute: () => SlugRoute,
-} as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiDevAuthRoute = ApiDevAuthRouteImport.update({
   id: '/api/dev-auth',
   path: '/api/dev-auth',
@@ -166,7 +154,7 @@ const OgKittyCommunityChar123slugChar125DotpngRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/kitty': typeof KittyRouteRouteWithChildren
-  '/$slug': typeof SlugRouteWithChildren
+  '/$slug': typeof SlugRoute
   '/admin': typeof AdminRoute
   '/callback': typeof CallbackRoute
   '/feed.xml': typeof FeedDotxmlRoute
@@ -177,8 +165,6 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ui': typeof UiRoute
   '/{$slug}.md': typeof Char123slugChar125DotmdRoute
-  '/$slug/editor': typeof SlugEditorRoute
-  '/api/$': typeof ApiSplatRoute
   '/api/dev-auth': typeof ApiDevAuthRoute
   '/api/rpc': typeof ApiRpcRoute
   '/auth/login': typeof AuthLoginRoute
@@ -192,7 +178,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$slug': typeof SlugRouteWithChildren
+  '/$slug': typeof SlugRoute
   '/admin': typeof AdminRoute
   '/callback': typeof CallbackRoute
   '/feed.xml': typeof FeedDotxmlRoute
@@ -203,8 +189,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ui': typeof UiRoute
   '/{$slug}.md': typeof Char123slugChar125DotmdRoute
-  '/$slug/editor': typeof SlugEditorRoute
-  '/api/$': typeof ApiSplatRoute
   '/api/dev-auth': typeof ApiDevAuthRoute
   '/api/rpc': typeof ApiRpcRoute
   '/auth/login': typeof AuthLoginRoute
@@ -220,7 +204,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/kitty': typeof KittyRouteRouteWithChildren
-  '/$slug': typeof SlugRouteWithChildren
+  '/$slug': typeof SlugRoute
   '/admin': typeof AdminRoute
   '/callback': typeof CallbackRoute
   '/feed.xml': typeof FeedDotxmlRoute
@@ -231,8 +215,6 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ui': typeof UiRoute
   '/{$slug}.md': typeof Char123slugChar125DotmdRoute
-  '/$slug/editor': typeof SlugEditorRoute
-  '/api/$': typeof ApiSplatRoute
   '/api/dev-auth': typeof ApiDevAuthRoute
   '/api/rpc': typeof ApiRpcRoute
   '/auth/login': typeof AuthLoginRoute
@@ -260,8 +242,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ui'
     | '/{$slug}.md'
-    | '/$slug/editor'
-    | '/api/$'
     | '/api/dev-auth'
     | '/api/rpc'
     | '/auth/login'
@@ -286,8 +266,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ui'
     | '/{$slug}.md'
-    | '/$slug/editor'
-    | '/api/$'
     | '/api/dev-auth'
     | '/api/rpc'
     | '/auth/login'
@@ -313,8 +291,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ui'
     | '/{$slug}.md'
-    | '/$slug/editor'
-    | '/api/$'
     | '/api/dev-auth'
     | '/api/rpc'
     | '/auth/login'
@@ -330,7 +306,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   KittyRouteRoute: typeof KittyRouteRouteWithChildren
-  SlugRoute: typeof SlugRouteWithChildren
+  SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRoute
   CallbackRoute: typeof CallbackRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
@@ -341,7 +317,6 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UiRoute: typeof UiRoute
   Char123slugChar125DotmdRoute: typeof Char123slugChar125DotmdRoute
-  ApiSplatRoute: typeof ApiSplatRoute
   ApiDevAuthRoute: typeof ApiDevAuthRoute
   ApiRpcRoute: typeof ApiRpcRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -444,20 +419,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123slugChar125DotmdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$slug/editor': {
-      id: '/$slug/editor'
-      path: '/editor'
-      fullPath: '/$slug/editor'
-      preLoaderRoute: typeof SlugEditorRouteImport
-      parentRoute: typeof SlugRoute
-    }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/dev-auth': {
       id: '/api/dev-auth'
       path: '/api/dev-auth'
@@ -547,20 +508,10 @@ const KittyRouteRouteWithChildren = KittyRouteRoute._addFileChildren(
   KittyRouteRouteChildren,
 )
 
-interface SlugRouteChildren {
-  SlugEditorRoute: typeof SlugEditorRoute
-}
-
-const SlugRouteChildren: SlugRouteChildren = {
-  SlugEditorRoute: SlugEditorRoute,
-}
-
-const SlugRouteWithChildren = SlugRoute._addFileChildren(SlugRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   KittyRouteRoute: KittyRouteRouteWithChildren,
-  SlugRoute: SlugRouteWithChildren,
+  SlugRoute: SlugRoute,
   AdminRoute: AdminRoute,
   CallbackRoute: CallbackRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
@@ -571,7 +522,6 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UiRoute: UiRoute,
   Char123slugChar125DotmdRoute: Char123slugChar125DotmdRoute,
-  ApiSplatRoute: ApiSplatRoute,
   ApiDevAuthRoute: ApiDevAuthRoute,
   ApiRpcRoute: ApiRpcRoute,
   AuthLoginRoute: AuthLoginRoute,

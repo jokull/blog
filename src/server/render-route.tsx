@@ -6,8 +6,6 @@ type RenderRequest =
 	| { route: "notes"; search?: { cursor?: string } }
 	| { route: "projects" }
 	| { route: "post"; slug: string }
-	| { route: "admin" }
-	| { route: "editor"; slug: string }
 	| { route: "ui" };
 
 function promise<T>(value: T) {
@@ -60,28 +58,6 @@ export const renderLegacyRoute = createServerFn({ method: "GET" })
 					<DefaultLayout>
 						<BlogPostPage params={promise({ slug: data.slug })} />
 					</DefaultLayout>,
-				);
-			}
-			case "admin": {
-				const [{ default: AdminLayout }, { default: AdminPage }] = await Promise.all([
-					import("../../app/(admin)/layout"),
-					import("../../app/admin/page"),
-				]);
-				return renderServerComponent(
-					<AdminLayout>
-						<AdminPage />
-					</AdminLayout>,
-				);
-			}
-			case "editor": {
-				const [{ default: AdminLayout }, { default: EditorPage }] = await Promise.all([
-					import("../../app/(admin)/layout"),
-					import("../../app/(admin)/[slug]/editor/page"),
-				]);
-				return renderServerComponent(
-					<AdminLayout>
-						<EditorPage params={promise({ slug: data.slug })} />
-					</AdminLayout>,
 				);
 			}
 			case "ui": {

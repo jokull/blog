@@ -1,13 +1,12 @@
 /**
  * Parsing for the upstream kovidgoyal/kitty-themes repository.
  *
- * The fetching that used to live here moved into the `community.*` procedures
- * in ../rpc-server.ts, where the failures are declared instead of thrown past
- * a `catch { console.error }`. What remains is pure: hex -> OKLCH, the
- * `themes.json` index shape, and the `.conf` grammar.
+ * Pure parsing only: hex -> OKLCH, the `themes.json` index shape, and the
+ * `.conf` grammar. Fetching belongs to the `community.*` procedures in
+ * ../rpc-server.ts, where the failures are declared rather than thrown.
  */
 import { oklch } from "culori";
-import { z } from "zod";
+import * as v from "valibot";
 import type { CommunityTheme } from "../models";
 import { isColorKey, type ColorKey, type OklchColor, type ThemeColors } from "./types";
 
@@ -37,15 +36,15 @@ export function hexToOklchColor(hex: string): OklchColor {
 	};
 }
 
-const themeIndexSchema = z.array(
-	z.object({
-		name: z.string(),
-		file: z.string(),
-		is_dark: z.boolean().optional(),
-		author: z.string().optional(),
-		blurb: z.string().optional(),
-		license: z.string().optional(),
-		upstream: z.string().optional(),
+const themeIndexSchema = v.array(
+	v.object({
+		name: v.string(),
+		file: v.string(),
+		is_dark: v.optional(v.boolean()),
+		author: v.optional(v.string()),
+		blurb: v.optional(v.string()),
+		license: v.optional(v.string()),
+		upstream: v.optional(v.string()),
 	}),
 );
 
@@ -55,7 +54,7 @@ const themeIndexSchema = z.array(
  * to `null` because the wire distinguishes them.
  */
 export function themeIndexEntries(payload: unknown): CommunityTheme[] {
-	return themeIndexSchema.parse(payload).map((entry) => ({
+	return v.parse(themeIndexSchema, payload).map((entry) => ({
 		slug: communityFileToSlug(entry.file),
 		file: entry.file,
 		name: entry.name,

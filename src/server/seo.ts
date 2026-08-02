@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { kittyServerClient } from "@/src/kitty/rpc-server";
+import { appServerClient } from "@/src/rpc/server";
 import { db } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { homeHead, pageHead, postHead } from "@/src/lib/seo";
@@ -33,7 +33,7 @@ export const getKittyThemeHead = createServerFn({ method: "GET" })
 	.validator((data: { id: string }) => data)
 	.handler(async ({ data }) => {
 		const id = Number(data.id);
-		const result = Number.isInteger(id) ? await kittyServerClient().themes.byId({ id }) : null;
+		const result = Number.isInteger(id) ? await appServerClient().themes.byId({ id }) : null;
 		const theme = result?.ok ? result.value : null;
 		const title = theme
 			? `${theme.authorGithubUsername ? `${theme.name} by ${theme.authorGithubUsername}` : theme.name} | Kitty Theme Builder`
@@ -51,7 +51,7 @@ export const getKittyThemeHead = createServerFn({ method: "GET" })
 export const getCommunityKittyThemeHead = createServerFn({ method: "GET" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
-		const index = await kittyServerClient().community.list({});
+		const index = await appServerClient().community.list({});
 		const theme = index.ok
 			? (index.value.find((entry) => entry.slug === data.slug) ?? null)
 			: null;

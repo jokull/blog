@@ -1,19 +1,20 @@
-import { z } from "zod";
-import { safeFetchJson, safeZodParse } from "@/lib/safe-utils";
+import { getOrElse, andThen } from "result-rpc";
+import * as v from "valibot";
+import { safeFetchJson, safeParse } from "@/lib/safe-utils";
 
-const showSchema = z.object({
-	title: z.string(),
-	thumb: z.string(),
-	poster: z.string(),
+const showSchema = v.object({
+	title: v.string(),
+	thumb: v.string(),
+	poster: v.string(),
 });
 
-const showsSchema = z.array(showSchema);
+const showsSchema = v.array(showSchema);
 
 export async function RecentShows() {
 	const result = await safeFetchJson("https://personal.plex.uno/recent-shows", {
 		signal: AbortSignal.timeout(3000),
 	});
-	const shows = result.andThen(safeZodParse(showsSchema)).unwrapOr([]);
+	const shows = getOrElse(andThen(result, safeParse(showsSchema)), () => []);
 
 	return (
 		<div className="-mx-6 flex gap-3 overflow-y-auto px-6 sm:grid sm:grid-cols-3 md:grid-cols-5 *:shrink-0 sm:*:w-auto">

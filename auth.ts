@@ -1,7 +1,7 @@
+import { env } from "cloudflare:workers";
 import { GitHub, generateState } from "arctic";
 import { getIronSession } from "iron-session";
 import { getCookie, getRequestHeader, setCookie } from "@tanstack/react-start/server";
-import { env } from "@/env";
 import { fetchAuthenticatedUser, fetchGithubUser } from "@/lib/github";
 import { throwRedirect } from "@/src/lib/router-control";
 
@@ -15,7 +15,7 @@ export async function requireAuth(currentUrl?: string) {
 	const session = await getSession();
 	if (!session.githubUsername) {
 		// In development, redirect to dev auth route handler
-		if (env.NODE_ENV === "development") {
+		if (import.meta.env.DEV) {
 			throwRedirect({ href: `/api/dev-auth?next=${encodeURIComponent(currentUrl ?? "/")}` });
 		}
 
@@ -84,7 +84,7 @@ export async function getSession() {
 		cookieName: "auth",
 		password: env.GITHUB_CLIENT_SECRET,
 		cookieOptions: {
-			secure: env.NODE_ENV === "production",
+			secure: !import.meta.env.DEV,
 			httpOnly: true,
 			path: "/",
 			maxAge: 60 * 60 * 24 * 365,

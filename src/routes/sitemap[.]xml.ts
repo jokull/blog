@@ -1,6 +1,6 @@
+import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import { db } from "@/db";
-import { env } from "@/env";
 
 export const Route = createFileRoute("/sitemap.xml")({
 	server: {

@@ -1,6 +1,9 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import cn from "clsx";
+import { ResultRpcProvider } from "result-rpc/react";
 import { asHead, siteHead } from "@/src/lib/seo";
+import { client } from "@/src/rpc/client";
+import { BoundaryProvider } from "@/src/rpc/shells";
 import "../../app/globals.css";
 
 export const Route = createRootRoute({
@@ -30,6 +33,24 @@ export const Route = createRootRoute({
 	component: RootComponent,
 });
 
+/**
+ * The root owns the RPC transport, and nothing else about RPC.
+ *
+ * One client and one runtime for the whole app, so every subtree — including
+ * the comment island, which mounts inside an RSC payload rather than the route
+ * tree — reads and writes the same cache. `ResultRpcProvider` builds its
+ * runtime in a ref, so SSR gets a fresh one per request and no cache is ever
+ * shared between readers.
+ *
+ * `BoundaryProvider` belongs here for the same reason: transport pauses,
+ * defect escalation and stale reloads are properties of the connection, not of
+ * any one page, and none of them fetch anything.
+ *
+ * Identity deliberately does NOT live here. `SessionShell.Provider` issues a
+ * `session` query on mount and renders its fallback until that query succeeds,
+ * so mounting it at the root would put a blocking round trip in front of every
+ * public page. It is mounted by the subtrees that actually need a viewer.
+ */
 function RootComponent() {
 	return (
 		<html lang="en" className="touch-manipulation">
@@ -44,7 +65,11 @@ function RootComponent() {
 					"antialiased",
 				)}
 			>
-				<Outlet />
+				<ResultRpcProvider client={client}>
+					<BoundaryProvider>
+						<Outlet />
+					</BoundaryProvider>
+				</ResultRpcProvider>
 				<Scripts />
 			</body>
 		</html>

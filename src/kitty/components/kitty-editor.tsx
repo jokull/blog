@@ -6,7 +6,7 @@ import type { ColorKey, OklchColor, ThemeColors, ThemeView } from "../lib/types"
 import { KittyThemeModel } from "../models";
 import { client } from "../rpc-client";
 import { ThemeMetaSchema, toThemeInput } from "../schemas";
-import { SessionShell, SignInShell, dispatch } from "../shells";
+import { SessionShell, SignInShell } from "../shells";
 import { EditorToolbar, type EditorMode } from "./editor-toolbar";
 import { useKittyContext } from "./kitty-context";
 import { ThemeEditor } from "./theme-editor";
@@ -68,10 +68,9 @@ export function KittyEditor({
 	};
 
 	/**
-	 * Attribution for a forked theme. This replaced a `useEffect` that fired a
-	 * bare fetch and dropped the result on the floor if it failed; it is a
-	 * cached query now, and if the source theme is already in the cache
-	 * (because it is in the sidebar) it costs no request at all.
+	 * Attribution for a forked theme. A cached query rather than a fetch in an
+	 * effect: failures are a declared state, and if the source theme is already
+	 * in the cache (because it is in the sidebar) it costs no request at all.
 	 */
 	const forkedFrom = SignInShell.useQuery(
 		client.themes.byId,
@@ -170,7 +169,7 @@ export function KittyEditor({
 	 */
 	const handleSubmit = (meta: { name: string; blurb: string }) => {
 		if (themeId === null) return;
-		dispatch(save.mutate({ id: themeId, ...toThemeInput(meta), colors }));
+		save.mutate({ id: themeId, ...toThemeInput(meta), colors });
 	};
 
 	const requestSave = useCallback(() => {
@@ -212,27 +211,23 @@ export function KittyEditor({
 	 */
 	const handleFork = () => {
 		if (isCommunityTheme || themeId === null) {
-			dispatch(
-				create.mutate({
-					name: `${typedName} (Remix)`.slice(0, 60),
-					blurb: typedBlurb === "" ? null : typedBlurb,
-					colors,
-				}),
-			);
+			create.mutate({
+				name: `${typedName} (Remix)`.slice(0, 60),
+				blurb: typedBlurb === "" ? null : typedBlurb,
+				colors,
+			});
 			return;
 		}
-		dispatch(fork.mutate({ id: themeId }));
+		fork.mutate({ id: themeId });
 	};
 
 	const handleCreateNew = () => {
-		dispatch(
-			create.mutate({ name: "Untitled Theme", blurb: null, colors: defaultThemeColors }),
-		);
+		create.mutate({ name: "Untitled Theme", blurb: null, colors: defaultThemeColors });
 	};
 
 	const handleDelete = () => {
 		if (themeId === null) return;
-		dispatch(remove.mutate({ id: themeId }));
+		remove.mutate({ id: themeId });
 	};
 
 	const handleColorChange = (colorKey: ColorKey, newColor: OklchColor) => {
@@ -269,7 +264,7 @@ export function KittyEditor({
 					void router.push("/kitty");
 				}}
 				onPublish={() => {
-					if (themeId !== null) dispatch(togglePublish.mutate({ id: themeId }));
+					if (themeId !== null) togglePublish.mutate({ id: themeId });
 				}}
 				onFork={handleFork}
 				onDelete={handleDelete}

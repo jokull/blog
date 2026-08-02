@@ -430,6 +430,63 @@ pre {
 	--shiki-background: transparent;
 }
 
+/*
+ * Comment bodies are rendered on the server by `src/blog/comment-markdown.ts`
+ * using `@tanstack/highlight`, which emits `th-*` classes instead of shiki's
+ * inline styles. Mapping them onto the same variables the post renderer already
+ * uses is what makes a code fence in a comment look like a code fence in a
+ * post — there is exactly one palette, declared above.
+ */
+.comment-body {
+	/*
+	 * A post's code fence is a React component with a frame and a copy button.
+	 * A comment's is markup from a string, so it gets the frame and nothing
+	 * else — enough to read as a code block, not enough to compete with the
+	 * post above it.
+	 */
+	pre.tm-code {
+		margin: 0.75rem 0;
+		padding: 0.75rem 0.875rem;
+		border: 1px solid var(--color-blue-border);
+		background: transparent;
+		font-size: 0.9em;
+	}
+	pre.tm-code code {
+		font-weight: 400;
+	}
+
+	.th-comment {
+		color: var(--shiki-token-comment);
+	}
+	.th-keyword,
+	.th-operator,
+	.th-command {
+		color: var(--shiki-token-keyword);
+	}
+	.th-function,
+	.th-tag,
+	.th-selector {
+		color: var(--shiki-token-function);
+	}
+	.th-string,
+	.th-attr {
+		color: var(--shiki-token-string);
+	}
+	.th-number,
+	.th-literal,
+	.th-type,
+	.th-property {
+		color: var(--shiki-token-constant);
+	}
+	.th-variable,
+	.th-meta {
+		color: var(--shiki-token-parameter);
+	}
+	.th-link {
+		color: var(--shiki-token-link);
+	}
+}
+
 code span {
 	transition: color 0.2s;
 }

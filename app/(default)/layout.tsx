@@ -1,5 +1,4 @@
 import Navbar from "@/components/navbar";
-import { env } from "@/env";
 
 export default function RootLayout({
 	children,
@@ -18,9 +17,9 @@ export default function RootLayout({
 					</article>
 				</main>
 			</div>
-			{env.NODE_ENV === "production" ? (
+			{import.meta.env.DEV ? null : (
 				<script defer src="https://assets.onedollarstats.com/stonks.js" />
-			) : null}
+			)}
 		</div>
 	);
 }

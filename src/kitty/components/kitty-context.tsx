@@ -1,16 +1,12 @@
 /**
  * UI-only state for the theme browser.
  *
- * What used to live here — `publishedThemes`, `userThemes`, `communityThemes`,
- * `username`, `isAdmin`, `refreshThemes()` — is gone. Every one of those was
- * server data threaded down as props from the RSC layout, plus a manual
- * `router.refresh()` to re-fetch it after each write. The query cache owns
- * that now: lists come from `useResultQuery`, the viewer comes from
- * `SessionShell`, and mutations returning the entity patch cached rows by
- * identity — so there is nothing left to refresh by hand.
+ * No server data belongs here. Lists come from `useResultQuery`, the viewer
+ * comes from `SessionShell`, and mutations returning the entity patch cached
+ * rows by identity, so there is nothing to thread down or refresh by hand.
  *
- * What remains is genuinely local: which sidebar tab is open, and whether the
- * editor is holding unsaved edits.
+ * What this context holds is genuinely local: which sidebar tab is open, and
+ * whether the editor is holding unsaved edits.
  */
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 

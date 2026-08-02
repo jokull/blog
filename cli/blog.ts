@@ -1,24 +1,40 @@
 #!/usr/bin/env bun
 /* eslint-disable no-console */
+/**
+ * The blog CLI, on result-rpc.
+ *
+ * These commands call the same procedures the dashboard calls, so
+ * `blog update --publish` and a click on the dashboard switch are literally the
+ * same code path. Bodies are edited with `blog edit`, which opens $EDITOR — a
+ * better markdown editor than a browser textarea, and one that needs no draft
+ * column to survive a reload.
+ *
+ * Failures stay tagged values the whole way. cli/failures.ts holds the single
+ * exhaustive projection to English — the compiler enforces a handler per tag,
+ * so adding an error to a contract breaks the build rather than degrading into
+ * an unexplained exit code.
+ */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { createTwoFilesPatch } from "diff";
-import { z } from "zod";
-import { matchesPostEtag } from "../lib/post-etag";
-import { safeFetchJson, safeZodParse } from "../lib/safe-utils";
+import * as v from "valibot";
+import { createPostEtag, matchesPostEtag } from "../lib/post-etag";
+import {
+	CategorySlugSchema,
+	LocaleSchema,
+	NoteIdSchema,
+	PostSlugSchema,
+	PostTitleSchema,
+} from "../src/blog/schemas";
 import { clearToken, getValidToken, login } from "./auth";
-import { API_BASE, createClient } from "./client";
-
-function parseLocale(value: string | undefined): "en" | "is" | undefined {
-	if (value === "en" || value === "is") return value;
-	return undefined;
-}
+import { editInEditor } from "./editor";
+import { createDescribe } from "./failures";
+import { API_BASE, createClient, type BlogClient } from "./client";
 
 const ICLOUD_DOCUMENTS = `${process.env.HOME}/Library/Mobile Documents/com~apple~CloudDocs/Documents`;
 const BACKUP_DIR = join(ICLOUD_DOCUMENTS, "blog-backup");
 
-// Parse command line arguments
 const { positionals, values } = parseArgs({
 	allowPositionals: true,
 	options: {
@@ -55,6 +71,7 @@ Commands:
   whoami             Show authenticated user
   list               List all posts
   get <slug>         View post details
+  edit <slug>        Open the post body in $EDITOR and save it back
   create             Create a new post
   update <slug>      Update an existing post
   delete <slug>      Delete a post
@@ -88,6 +105,12 @@ Options for get:
       --body-only    Print only the Markdown body
       --json         Print the post and ETag as JSON
 
+Options for edit:
+      --diff         Show the changes before saving
+      --dry-run      Show the changes without saving
+      --publish      Also publish the post afterwards
+      --unpublish    Also unpublish the post afterwards
+
 Options for update:
   -t, --title        New title
   -b, --body         New body (markdown)
@@ -109,6 +132,8 @@ Examples:
   bun run blog create --slug my-post --title "My Post" --body-file - --publish < post.md
   bun run blog get my-post --json
   bun run blog get my-post --body-only > post.md
+  bun run blog edit my-post
+  EDITOR="code -w" bun run blog edit my-post
   bun run blog update my-post --body-file - --diff < post.md
   bun run blog update my-post --body-file post.md --if-match '"post-3"'
   bun run blog update my-post --publish
@@ -117,38 +142,64 @@ Examples:
 `);
 }
 
+function die(message: string): never {
+	console.error(message);
+	process.exit(1);
+}
+
+/**
+ * The exhaustive projection from tagged failure to message. See cli/failures.ts
+ * — the compiler enforces that every tag in the contract has a handler, and
+ * each handler sees its own `data` type.
+ */
+const describe = createDescribe(API_BASE);
+
+/**
+ * Unwrap a Result or exit with the described failure.
+ *
+ * This is the only place a failure stops being a value. Everything upstream —
+ * the handler, the wire, the client — carries it as data with its payload
+ * intact, which is why `describe` can say "you had revision 3, the server has
+ * 5" instead of "412".
+ */
+function expect<T, E extends Parameters<typeof describe>[0]>(
+	result: { ok: true; value: T } | { ok: false; error: E },
+): T {
+	if (!result.ok) die(describe(result.error));
+	return result.value;
+}
+
+/** Validate one argv value against the schema the server enforces anyway. */
+function check<TSchema extends v.GenericSchema>(
+	schema: TSchema,
+	value: unknown,
+	label: string,
+): v.InferOutput<TSchema> {
+	const result = v.safeParse(schema, value);
+	if (!result.success) {
+		die(`${label}: ${result.issues.map((issue) => issue.message).join(", ")}`);
+	}
+	return result.output;
+}
+
 function readBodyInput(body: string | undefined, bodyFile: string | undefined): string | undefined {
 	if (body !== undefined && bodyFile !== undefined) {
-		console.error("Use either --body or --body-file, not both.");
-		process.exit(1);
+		die("Use either --body or --body-file, not both.");
 	}
-
 	if (bodyFile === undefined) return body;
 
 	try {
 		return readFileSync(bodyFile === "-" ? 0 : bodyFile, "utf-8");
 	} catch {
-		const source = bodyFile === "-" ? "stdin" : bodyFile;
-		console.error(`Failed to read body from ${source}`);
-		process.exit(1);
+		die(`Failed to read body from ${bodyFile === "-" ? "stdin" : bodyFile}`);
 	}
 }
 
 function assertPublishOptionsAreCompatible() {
 	if (values.publish && values.unpublish) {
-		console.error("Use either --publish or --unpublish, not both.");
-		process.exit(1);
+		die("Use either --publish or --unpublish, not both.");
 	}
 }
-
-type PostSnapshot = {
-	title: string;
-	markdown: string;
-	locale: "en" | "is";
-	categorySlug: string | null;
-	heroImage: string | null;
-	publicAt: string | null;
-};
 
 type PostUpdate = {
 	title?: string;
@@ -159,13 +210,26 @@ type PostUpdate = {
 	publish?: boolean;
 };
 
-function displayValue(value: string | null): string {
-	return value ?? "(none)";
-}
+type PostSnapshot = {
+	title: string;
+	markdown: string;
+	locale: "en" | "is";
+	categorySlug: string | null;
+	heroImage: string | null;
+	publicAt: Date | null;
+};
+
+const displayValue = (value: string | null) => value ?? "(none)";
 
 function printCreateDiff(
 	slug: string,
-	post: Pick<PostSnapshot, "title" | "markdown" | "locale" | "categorySlug" | "heroImage">,
+	post: {
+		title: string;
+		markdown: string;
+		locale: string;
+		categorySlug: string | null;
+		heroImage: string | null;
+	},
 	publish: boolean,
 ) {
 	console.log(`Create ${slug}`);
@@ -236,7 +300,7 @@ function printUpdateDiff(
 				`${slug}.md`,
 				`${slug}.md`,
 				current.markdown,
-				update.markdown!,
+				update.markdown ?? "",
 				"",
 				"",
 				{
@@ -249,24 +313,16 @@ function printUpdateDiff(
 	return true;
 }
 
-async function requireAuth(): Promise<string> {
-	const token = await getValidToken(API_BASE);
-	if (!token) {
-		console.error("Not authenticated. Run 'bun run blog login' first.");
-		process.exit(1);
-	}
-	return token;
+function authed(): BlogClient {
+	const token = getValidToken();
+	if (!token) die("Not authenticated. Run 'bun run blog login' first.");
+	return createClient(token);
 }
 
 async function handleLogin() {
 	console.log("Starting authentication...");
-	try {
-		await login(API_BASE);
-		console.log("Successfully authenticated!");
-	} catch (error) {
-		console.error("Login failed:", error);
-		process.exit(1);
-	}
+	expect(await login());
+	console.log("Successfully authenticated!");
 }
 
 function handleLogout() {
@@ -274,86 +330,64 @@ function handleLogout() {
 	console.log("Logged out successfully.");
 }
 
-const githubUserSchema = z.object({
-	login: z.string(),
-	name: z.string().nullable(),
-});
-
+/**
+ * Asks the blog, not GitHub.
+ *
+ * The stored credential is a signed CLI token, which GitHub never issued and
+ * cannot validate — presenting it to api.github.com would report a 401 as
+ * "Failed to reach GitHub".
+ *
+ * Asking the server is also the more useful question. What you want to know is
+ * whether this CLI session still works against *this* deployment, and that is
+ * precisely what the `session` procedure answers.
+ */
 async function handleWhoami() {
-	const token = await requireAuth();
-	const result = await safeFetchJson("https://api.github.com/user", {
-		headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
-	});
-	const user = result.andThen(safeZodParse(githubUserSchema)).unwrap("Failed to fetch user");
-	console.log(`Logged in as ${user.login}${user.name ? ` (${user.name})` : ""}`);
+	if (!getValidToken()) die("Not authenticated. Run 'bun run blog login' first.");
+
+	const viewer = expect(await authed().session({}));
+	if (viewer === null) {
+		die(`Session rejected by ${API_BASE}. Run 'bun run blog login' again.`);
+	}
+
+	console.log(
+		`Logged in as ${viewer.username}${viewer.isAdmin ? " (admin)" : ""} at ${API_BASE}`,
+	);
 }
 
 async function handleList() {
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.posts.$get();
-	if (!res.ok) {
-		console.error("Failed to fetch posts:", res.status);
-		process.exit(1);
-	}
-
-	const data = await res.json();
-	if ("error" in data) {
-		console.error("Error:", data.error);
-		process.exit(1);
-	}
+	const posts = expect(await authed().posts.list({}));
 
 	console.log("\nPosts:");
 	console.log("─".repeat(80));
-
-	for (const post of data.posts) {
+	for (const post of posts) {
 		const status = post.publicAt ? "published" : "draft";
-		const date = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "N/A";
+		const date = post.publishedAt.toLocaleDateString();
 		console.log(
 			`[${status.padEnd(9)}] ${post.slug.padEnd(30)} ${post.title.slice(0, 30).padEnd(30)} ${date}`,
 		);
 	}
-
 	console.log("─".repeat(80));
-	console.log(`Total: ${data.posts.length} posts`);
+	console.log(`Total: ${posts.length} posts`);
 }
 
 async function handleGet(slug: string) {
 	if (values["body-only"] && values.json) {
-		console.error("Use either --body-only or --json, not both.");
-		process.exit(1);
+		die("Use either --body-only or --json, not both.");
 	}
 
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.posts[":slug"].$get({
-		param: { slug },
-	});
-
-	if (!res.ok) {
-		if (res.status === 404) {
-			console.error(`Post not found: ${slug}`);
-		} else {
-			console.error("Failed to fetch post:", res.status);
-		}
-		process.exit(1);
-	}
-
-	const data = await res.json();
-	if ("error" in data) {
-		console.error("Error:", data.error);
-		process.exit(1);
-	}
-
-	const post = data.post;
-	const etag = res.headers.get("ETag");
+	const post = expect(await authed().posts.bySlug({ slug }));
 
 	if (values["body-only"]) {
 		process.stdout.write(post.markdown);
 		return;
 	}
+
+	/**
+	 * The ETag is a display format derived from `revision`, printed because
+	 * `--if-match` accepts it. The concurrency check itself rides the wire as
+	 * `expectedRevision`, not as a transport header.
+	 */
+	const etag = createPostEtag(post.revision);
 
 	if (values.json) {
 		console.log(JSON.stringify({ etag, post }, null, 2));
@@ -367,261 +401,228 @@ Status:     ${post.publicAt ? "Published" : "Draft"}
 Locale:     ${post.locale}
 Category:   ${post.categorySlug ?? "None"}
 Hero Image: ${post.heroImage ?? "None"}
-Created:    ${post.createdAt ? new Date(post.createdAt).toLocaleString() : "N/A"}
-Published:  ${post.publishedAt ? new Date(post.publishedAt).toLocaleString() : "N/A"}
-Modified:   ${post.modifiedAt ? new Date(post.modifiedAt).toLocaleString() : "N/A"}
-ETag:       ${etag ?? "N/A"}
+Created:    ${post.createdAt.toLocaleString()}
+Published:  ${post.publishedAt.toLocaleString()}
+Modified:   ${post.modifiedAt ? post.modifiedAt.toLocaleString() : "N/A"}
+ETag:       ${etag}
 
 ─────────────────────────────────────────────────────────────────────────────────
 ${post.markdown}
 `);
 }
 
-async function handleCreate() {
-	const slug = values.slug;
-	const title = values.title;
-	const category = values.category;
-	const locale = parseLocale(values.locale);
-	const heroImage = values["hero-image"];
-	const shouldPublish = values.publish ?? false;
-
+/**
+ * `blog edit <slug>` — the way post bodies are edited.
+ *
+ * Fetch, open in $EDITOR, save what comes back. The revision read before the
+ * editor opened is the one sent with the write, so a `blog update` or a
+ * dashboard change that landed while the buffer was open is a
+ * `post/stale-revision` rather than a silent overwrite — which matters more
+ * here than anywhere else, because an editor session can stay open for an hour.
+ */
+async function handleEdit(slug: string) {
 	assertPublishOptionsAreCompatible();
-	if (values.unpublish) {
-		console.error("--unpublish is not valid when creating a post.");
-		process.exit(1);
+
+	const client = authed();
+	const post = expect(await client.posts.bySlug({ slug }));
+
+	const edited = expect(await editInEditor(slug, post.markdown));
+	const changed = edited !== post.markdown;
+
+	const publish = values.publish ? true : values.unpublish ? false : undefined;
+	const willTogglePublish = publish !== undefined && publish !== (post.publicAt !== null);
+
+	if (!changed && !willTogglePublish) {
+		console.log("No changes.");
+		return;
 	}
 
-	if (!slug) {
-		console.error("Missing required option: --slug");
-		process.exit(1);
-	}
-	if (!title) {
-		console.error("Missing required option: --title");
-		process.exit(1);
-	}
-
-	const body = readBodyInput(values.body, values["body-file"]) ?? `# ${title}\n\n`;
-	const createData = {
-		slug,
-		title,
-		markdown: body,
-		locale: locale ?? "en",
-		categorySlug: category ?? null,
-		heroImage: heroImage ?? null,
-		publish: shouldPublish,
-	} as const;
-
-	if (values.diff || values["dry-run"]) {
-		printCreateDiff(slug, createData, shouldPublish);
+	if ((values.diff ?? values["dry-run"]) && changed) {
+		process.stdout.write(
+			createTwoFilesPatch(`${slug}.md`, `${slug}.md`, post.markdown, edited, "", "", {
+				context: 3,
+			}),
+		);
 	}
 	if (values["dry-run"]) return;
 
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.posts.$post({
-		json: createData,
-	});
-
-	if (!res.ok) {
-		console.error("Failed to create post:", res.status);
-		const data = await res.json();
-		if ("error" in data) {
-			console.error("Error:", data.error);
-		}
-		process.exit(1);
+	let latest = post;
+	if (changed) {
+		latest = expect(
+			await client.posts.update({
+				slug,
+				expectedRevision: post.revision,
+				markdown: edited,
+			}),
+		);
 	}
 
-	console.log(`Post created: ${slug} (${shouldPublish ? "published" : "draft"})`);
-	const etag = res.headers.get("ETag");
-	if (etag) console.log(`ETag: ${etag}`);
+	if (willTogglePublish) {
+		// `willTogglePublish` is only true when `publish` is defined, but the
+		// compiler cannot see through the two-step derivation.
+		latest = expect(await client.posts.setPublished({ slug, published: publish }));
+	}
+
+	console.log(`Post updated: ${slug}`);
+	console.log(`ETag: ${createPostEtag(latest.revision)}`);
+}
+
+async function handleCreate() {
+	assertPublishOptionsAreCompatible();
+	if (values.unpublish) die("--unpublish is not valid when creating a post.");
+	if (!values.slug) die("Missing required option: --slug");
+	if (!values.title) die("Missing required option: --title");
+
+	const slug = check(PostSlugSchema, values.slug, "--slug");
+	const title = check(PostTitleSchema, values.title, "--title");
+	const locale =
+		values.locale === undefined ? "en" : check(LocaleSchema, values.locale, "--locale");
+	const categorySlug =
+		values.category === undefined || values.category === ""
+			? null
+			: check(CategorySlugSchema, values.category, "--category");
+	const shouldPublish = values.publish ?? false;
+	const markdown = readBodyInput(values.body, values["body-file"]) ?? `# ${title}\n\n`;
+	const heroImage = values["hero-image"] ?? null;
+
+	if (values.diff || values["dry-run"]) {
+		printCreateDiff(slug, { title, markdown, locale, categorySlug, heroImage }, shouldPublish);
+	}
+	if (values["dry-run"]) return;
+
+	const post = expect(
+		await authed().posts.create({
+			slug,
+			title,
+			markdown,
+			locale,
+			categorySlug,
+			heroImage,
+			publish: shouldPublish,
+		}),
+	);
+
+	console.log(`Post created: ${post.slug} (${post.publicAt ? "published" : "draft"})`);
+	console.log(`ETag: ${createPostEtag(post.revision)}`);
 }
 
 async function handleUpdate(slug: string) {
-	const title = values.title;
-	const body = readBodyInput(values.body, values["body-file"]);
-	const category = values.category;
-	const locale = parseLocale(values.locale);
-	const heroImage = values["hero-image"];
-	const shouldPublish = values.publish;
-	const shouldUnpublish = values.unpublish;
-
 	assertPublishOptionsAreCompatible();
 
-	const updateData: PostUpdate = {};
+	const update: PostUpdate = {};
+	if (values.title !== undefined) update.title = check(PostTitleSchema, values.title, "--title");
+	const body = readBodyInput(values.body, values["body-file"]);
+	if (body !== undefined) update.markdown = body;
+	if (values.locale !== undefined) update.locale = check(LocaleSchema, values.locale, "--locale");
+	if (values.category !== undefined) {
+		update.categorySlug =
+			values.category === ""
+				? null
+				: check(CategorySlugSchema, values.category, "--category");
+	}
+	if (values["hero-image"] !== undefined) {
+		update.heroImage = values["hero-image"] === "" ? null : values["hero-image"];
+	}
+	if (values.publish) update.publish = true;
+	if (values.unpublish) update.publish = false;
 
-	if (title !== undefined) updateData.title = title;
-	if (body !== undefined) updateData.markdown = body;
-	if (locale !== undefined) updateData.locale = locale;
-	if (category !== undefined) updateData.categorySlug = category || null;
-	if (heroImage !== undefined) updateData.heroImage = heroImage || null;
-	if (shouldPublish) updateData.publish = true;
-	if (shouldUnpublish) updateData.publish = false;
-
-	if (Object.keys(updateData).length === 0) {
-		console.error("No updates specified. Use --help to see available options.");
-		process.exit(1);
+	if (Object.keys(update).length === 0) {
+		die("No updates specified. Use --help to see available options.");
 	}
 
-	const token = await requireAuth();
-	const client = createClient(token);
-	const currentRes = await client.api.posts[":slug"].$get({ param: { slug } });
-	if (!currentRes.ok) {
-		console.error(
-			currentRes.status === 404
-				? `Post not found: ${slug}`
-				: `Failed to fetch post: ${currentRes.status}`,
-		);
-		process.exit(1);
-	}
-
-	const currentData = await currentRes.json();
-	if ("error" in currentData) {
-		console.error("Error:", currentData.error);
-		process.exit(1);
-	}
-
-	const currentEtag = currentRes.headers.get("ETag");
-	if (!currentEtag) {
-		console.error("The server did not return an ETag; refusing an unsafe update.");
-		process.exit(1);
-	}
+	const client = authed();
+	const current = expect(await client.posts.bySlug({ slug }));
+	const currentEtag = createPostEtag(current.revision);
 
 	const requestedEtag = values["if-match"];
 	if (requestedEtag && !matchesPostEtag(requestedEtag, currentEtag)) {
 		console.error(`Post has changed (expected ${requestedEtag}, current ${currentEtag}).`);
-		console.error("Fetch it again and reapply your changes.");
-		process.exit(1);
+		die("Fetch it again and reapply your changes.");
 	}
 
 	const shouldPrintDiff = Boolean(values.diff ?? values["dry-run"]);
-	const hasChanges = printUpdateDiff(slug, currentData.post, updateData, shouldPrintDiff);
+	const hasChanges = printUpdateDiff(slug, current, update, shouldPrintDiff);
 	if (!hasChanges && !shouldPrintDiff) console.log("No changes.");
 	if (!hasChanges || values["dry-run"]) return;
 
-	const res = await client.api.posts[":slug"].$patch(
-		{
-			param: { slug },
-			json: updateData,
-		},
-		{ headers: { "If-Match": requestedEtag ?? currentEtag } },
-	);
+	let latest = current;
 
-	if (!res.ok) {
-		if (res.status === 412) {
-			console.error("Post changed while the update was in progress.");
-			console.error("Fetch it again and reapply your changes.");
-			process.exit(1);
-		}
-		console.error("Failed to update post:", res.status);
-		const data = await res.json();
-		if ("error" in data) {
-			console.error("Error:", data.error);
-		}
-		process.exit(1);
+	// Column writes and publishing are separate procedures on purpose:
+	// publishing is not a column assignment, it promotes the draft and
+	// re-extracts the hero image. The dashboard calls the same pair.
+	const hasColumnChanges =
+		update.title !== undefined ||
+		update.markdown !== undefined ||
+		update.locale !== undefined ||
+		update.categorySlug !== undefined ||
+		update.heroImage !== undefined;
+
+	if (hasColumnChanges) {
+		latest = expect(
+			await client.posts.update({
+				slug,
+				expectedRevision: current.revision,
+				title: update.title,
+				markdown: update.markdown,
+				locale: update.locale,
+				categorySlug: update.categorySlug,
+				heroImage: update.heroImage,
+			}),
+		);
+	}
+
+	if (update.publish !== undefined && update.publish !== (latest.publicAt !== null)) {
+		latest = expect(await client.posts.setPublished({ slug, published: update.publish }));
 	}
 
 	console.log(`Post updated: ${slug}`);
-	const etag = res.headers.get("ETag");
-	if (etag) console.log(`ETag: ${etag}`);
+	console.log(`ETag: ${createPostEtag(latest.revision)}`);
 }
 
 async function handleDelete(slug: string) {
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.posts[":slug"].$delete({
-		param: { slug },
-	});
-
-	if (!res.ok) {
-		console.error("Failed to delete post:", res.status);
-		const data = await res.json();
-		if ("error" in data) {
-			console.error("Error:", data.error);
-		}
-		process.exit(1);
-	}
-
+	expect(await authed().posts.remove({ slug }));
 	console.log(`Post deleted: ${slug}`);
 }
 
 async function handleCategories() {
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.categories.$get();
-	if (!res.ok) {
-		console.error("Failed to fetch categories:", res.status);
-		process.exit(1);
-	}
-
-	const data = await res.json();
-	if ("error" in data) {
-		console.error("Error:", data.error);
-		process.exit(1);
-	}
+	const categories = expect(await authed().categories.list({}));
 
 	console.log("\nCategories:");
 	console.log("─".repeat(40));
-
-	for (const category of data.categories) {
+	for (const category of categories) {
 		console.log(`${category.slug.padEnd(20)} ${category.label}`);
 	}
-
 	console.log("─".repeat(40));
-	console.log(`Total: ${data.categories.length} categories`);
+	console.log(`Total: ${categories.length} categories`);
 }
 
 async function handleBackup() {
-	// Check if iCloud Documents folder exists
 	if (!existsSync(ICLOUD_DOCUMENTS)) {
 		console.error("iCloud Documents folder not found at:");
 		console.error(ICLOUD_DOCUMENTS);
-		console.error("\nMake sure iCloud Drive is enabled and Documents sync is on.");
-		process.exit(1);
+		die("\nMake sure iCloud Drive is enabled and Documents sync is on.");
 	}
-
-	const token = await requireAuth();
-	const client = createClient(token);
 
 	console.log("Fetching posts...");
+	// `posts.export` rather than `posts.list`: the list projection deliberately
+	// leaves the bodies out, and a backup is exactly the case that wants them.
+	const posts = expect(await authed().posts.export({}));
 
-	const res = await client.api.posts.$get();
-	if (!res.ok) {
-		console.error("Failed to fetch posts:", res.status);
-		process.exit(1);
-	}
-
-	const data = await res.json();
-	if ("error" in data) {
-		console.error("Error:", data.error);
-		process.exit(1);
-	}
-
-	const posts = data.posts;
 	if (posts.length === 0) {
 		console.log("No posts to backup.");
 		return;
 	}
 
-	// Create timestamped backup folder
-	const timestamp = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+	const timestamp = new Date().toISOString().split("T")[0];
 	const backupPath = join(BACKUP_DIR, timestamp);
-
-	if (!existsSync(BACKUP_DIR)) {
-		mkdirSync(BACKUP_DIR, { recursive: true });
-	}
-	if (!existsSync(backupPath)) {
-		mkdirSync(backupPath, { recursive: true });
-	}
+	if (!existsSync(BACKUP_DIR)) mkdirSync(BACKUP_DIR, { recursive: true });
+	if (!existsSync(backupPath)) mkdirSync(backupPath, { recursive: true });
 
 	console.log(`\nBacking up ${posts.length} posts to:`);
 	console.log(backupPath);
 	console.log("");
 
 	for (const post of posts) {
-		// Create YAML frontmatter
 		const frontmatter = [
 			"---",
 			`title: ${JSON.stringify(post.title)}`,
@@ -630,19 +631,16 @@ async function handleBackup() {
 			`status: ${post.publicAt ? "published" : "draft"}`,
 			post.categorySlug ? `category: ${post.categorySlug}` : null,
 			post.heroImage ? `heroImage: ${JSON.stringify(post.heroImage)}` : null,
-			post.createdAt ? `createdAt: ${new Date(post.createdAt).toISOString()}` : null,
-			post.publishedAt ? `publishedAt: ${new Date(post.publishedAt).toISOString()}` : null,
-			post.modifiedAt ? `modifiedAt: ${new Date(post.modifiedAt).toISOString()}` : null,
+			`createdAt: ${post.createdAt.toISOString()}`,
+			`publishedAt: ${post.publishedAt.toISOString()}`,
+			post.modifiedAt ? `modifiedAt: ${post.modifiedAt.toISOString()}` : null,
 			"---",
 		]
 			.filter(Boolean)
 			.join("\n");
 
-		const content = `${frontmatter}\n\n${post.markdown}`;
 		const filename = `${post.slug}.md`;
-		const filepath = join(backupPath, filename);
-
-		writeFileSync(filepath, content, "utf-8");
+		writeFileSync(join(backupPath, filename), `${frontmatter}\n\n${post.markdown}`, "utf-8");
 		console.log(`  ${filename}`);
 	}
 
@@ -650,117 +648,50 @@ async function handleBackup() {
 }
 
 async function handleNoteList() {
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.notes.all.$get();
-	if (!res.ok) {
-		console.error("Failed to fetch notes:", res.status);
-		process.exit(1);
-	}
-
-	const data = await res.json();
-	if ("error" in data) {
-		console.error("Error:", data.error);
-		process.exit(1);
-	}
+	const notes = expect(await authed().notes.list({}));
 
 	console.log("\nNotes:");
 	console.log("─".repeat(80));
-
-	for (const note of data.notes) {
+	for (const note of notes) {
 		const status = note.publishedAt ? "published" : "draft";
-		const desc = (note.description ?? "").slice(0, 50);
-		console.log(`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${desc}`);
+		console.log(
+			`[${status.padEnd(9)}] ${note.id.padEnd(22)} ${(note.description ?? "").slice(0, 50)}`,
+		);
 	}
-
 	console.log("─".repeat(80));
-	console.log(`Total: ${data.notes.length} notes`);
+	console.log(`Total: ${notes.length} notes`);
 }
 
-async function handleNoteAdd(id: string) {
-	const token = await requireAuth();
-	const client = createClient(token);
+async function handleNoteAdd(rawId: string) {
+	assertPublishOptionsAreCompatible();
+	const id = check(NoteIdSchema, rawId, "note id");
 
-	const description = values.description;
-	const shouldPublish = values.publish;
-
-	const res = await client.api.notes.$post({
-		json: {
+	expect(
+		await authed().notes.create({
 			id,
-			description,
-			publish: shouldPublish,
-		},
-	});
-
-	if (!res.ok) {
-		console.error("Failed to add note:", res.status);
-		const data = await res.json();
-		if ("error" in data) {
-			console.error("Error:", data.error);
-		}
-		process.exit(1);
-	}
-
+			description: values.description ?? null,
+			publish: values.publish ?? false,
+		}),
+	);
 	console.log(`Note added: ${id}`);
 }
 
 async function handleNoteUpdate(id: string) {
-	const token = await requireAuth();
-	const client = createClient(token);
+	assertPublishOptionsAreCompatible();
 
 	const description = values.description;
-	const shouldPublish = values.publish;
-	const shouldUnpublish = values.unpublish;
+	const publish = values.publish ? true : values.unpublish ? false : undefined;
 
-	const updateData: {
-		description?: string;
-		publish?: boolean;
-	} = {};
-
-	if (description !== undefined) updateData.description = description;
-	if (shouldPublish) updateData.publish = true;
-	if (shouldUnpublish) updateData.publish = false;
-
-	if (Object.keys(updateData).length === 0) {
-		console.error("No updates specified. Use --help to see available options.");
-		process.exit(1);
+	if (description === undefined && publish === undefined) {
+		die("No updates specified. Use --help to see available options.");
 	}
 
-	const res = await client.api.notes[":id"].$patch({
-		param: { id },
-		json: updateData,
-	});
-
-	if (!res.ok) {
-		console.error("Failed to update note:", res.status);
-		const data = await res.json();
-		if ("error" in data) {
-			console.error("Error:", data.error);
-		}
-		process.exit(1);
-	}
-
+	expect(await authed().notes.update({ id, description, publish }));
 	console.log(`Note updated: ${id}`);
 }
 
 async function handleNoteDelete(id: string) {
-	const token = await requireAuth();
-	const client = createClient(token);
-
-	const res = await client.api.notes[":id"].$delete({
-		param: { id },
-	});
-
-	if (!res.ok) {
-		console.error("Failed to delete note:", res.status);
-		const data = await res.json();
-		if ("error" in data) {
-			console.error("Error:", data.error);
-		}
-		process.exit(1);
-	}
-
+	expect(await authed().notes.remove({ id }));
 	console.log(`Note deleted: ${id}`);
 }
 
@@ -784,27 +715,22 @@ async function main() {
 			await handleList();
 			break;
 		case "get":
-			if (!args[0]) {
-				console.error("Missing slug. Usage: bun run blog get <slug>");
-				process.exit(1);
-			}
+			if (!args[0]) die("Missing slug. Usage: bun run blog get <slug>");
 			await handleGet(args[0]);
+			break;
+		case "edit":
+			if (!args[0]) die("Missing slug. Usage: bun run blog edit <slug>");
+			await handleEdit(args[0]);
 			break;
 		case "create":
 			await handleCreate();
 			break;
 		case "update":
-			if (!args[0]) {
-				console.error("Missing slug. Usage: bun run blog update <slug> [options]");
-				process.exit(1);
-			}
+			if (!args[0]) die("Missing slug. Usage: bun run blog update <slug> [options]");
 			await handleUpdate(args[0]);
 			break;
 		case "delete":
-			if (!args[0]) {
-				console.error("Missing slug. Usage: bun run blog delete <slug>");
-				process.exit(1);
-			}
+			if (!args[0]) die("Missing slug. Usage: bun run blog delete <slug>");
 			await handleDelete(args[0]);
 			break;
 		case "categories":
@@ -814,36 +740,25 @@ async function main() {
 			await handleBackup();
 			break;
 		case "note": {
-			const noteCommand = args[0];
-			switch (noteCommand) {
+			switch (args[0]) {
 				case "list":
 					await handleNoteList();
 					break;
 				case "add":
-					if (!args[1]) {
-						console.error("Missing id. Usage: bun run blog note add <id> [options]");
-						process.exit(1);
-					}
+					if (!args[1]) die("Missing id. Usage: bun run blog note add <id> [options]");
 					await handleNoteAdd(args[1]);
 					break;
 				case "update":
-					if (!args[1]) {
-						console.error("Missing id. Usage: bun run blog note update <id> [options]");
-						process.exit(1);
-					}
+					if (!args[1]) die("Missing id. Usage: bun run blog note update <id> [options]");
 					await handleNoteUpdate(args[1]);
 					break;
 				case "delete":
-					if (!args[1]) {
-						console.error("Missing id. Usage: bun run blog note delete <id>");
-						process.exit(1);
-					}
+					if (!args[1]) die("Missing id. Usage: bun run blog note delete <id>");
 					await handleNoteDelete(args[1]);
 					break;
 				default:
-					console.error(`Unknown note command: ${noteCommand}`);
-					console.error("Available: list, add, update, delete");
-					process.exit(1);
+					console.error(`Unknown note command: ${args[0]}`);
+					die("Available: list, add, update, delete");
 			}
 			break;
 		}

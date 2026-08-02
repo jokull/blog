@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { kittyServerClient } from "@/src/kitty/rpc-server";
+import { appServerClient } from "@/src/rpc/server";
 import { ogImage } from "@/src/lib/og";
 
 export const Route = createFileRoute("/og/kitty/community/{$slug}.png")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				const index = await kittyServerClient().community.list({});
+				const index = await appServerClient().community.list({});
 				if (!index.ok) return new Response("Unavailable", { status: 503 });
 
 				const theme = index.value.find((entry) => entry.slug === params.slug);
