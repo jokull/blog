@@ -23,7 +23,7 @@ export const Route = createFileRoute("/callback")({
 					const tokens = await github.validateAuthorizationCode(code);
 					const accessToken = tokens.accessToken();
 					const user = await whoami(accessToken);
-					if (!user.ok) {
+					if (user.isErr()) {
 						return Response.json(
 							{ error: "GitHub rejected the token", detail: user.error.data },
 							{ status: 502 },

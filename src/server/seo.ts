@@ -34,7 +34,7 @@ export const getKittyThemeHead = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		const id = Number(data.id);
 		const result = Number.isInteger(id) ? await appServerClient().themes.byId({ id }) : null;
-		const theme = result?.ok ? result.value : null;
+		const theme = result?.isOk() ? result.value : null;
 		const title = theme
 			? `${theme.authorGithubUsername ? `${theme.name} by ${theme.authorGithubUsername}` : theme.name} | Kitty Theme Builder`
 			: "Theme Not Found | Kitty Theme Builder";
@@ -52,7 +52,7 @@ export const getCommunityKittyThemeHead = createServerFn({ method: "GET" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
 		const index = await appServerClient().community.list({});
-		const theme = index.ok
+		const theme = index.isOk()
 			? (index.value.find((entry) => entry.slug === data.slug) ?? null)
 			: null;
 		const label = theme?.author ? `${theme.name} by ${theme.author}` : theme?.name;

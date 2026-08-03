@@ -9,8 +9,9 @@
  * They return declared failures now, so the union a component can be asked to
  * render is exactly the union this file can produce.
  */
+import { Result as BetterResult } from "better-result";
 import { eq } from "drizzle-orm";
-import { err, gen, ok, tryPromise } from "result-rpc";
+import { err, gen, ok } from "result-rpc";
 import { getGithubUser } from "@/auth";
 import type { Viewer } from "@/src/rpc/auth";
 import { requireViewer, server, session } from "@/src/rpc/server-base";
@@ -100,7 +101,7 @@ const create = server
 		// The author's avatar and id are stamped onto the row, so a GitHub outage
 		// is a declared, retryable failure rather than an unhandled throw.
 		const author = await getGithubUser(context.viewer.username);
-		if (!author.ok) return err(errors.authorUnavailable());
+		if (author.isErr()) return err(errors.authorUnavailable());
 
 		const [row] = await context.db
 			.insert(KittyTheme)
@@ -164,7 +165,7 @@ const fork = server
 		if (!original.isPublished) return err(errors.forkUnpublished({ themeId: input.id }));
 
 		const author = await getGithubUser(context.viewer.username);
-		if (!author.ok) return err(errors.authorUnavailable());
+		if (author.isErr()) return err(errors.authorUnavailable());
 
 		const [row] = await context.db
 			.insert(KittyTheme)
@@ -200,28 +201,28 @@ const remove = server
 const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master";
 
 /**
- * `tryPromise` is the border checkpoint: fetch's TypeError and JSON's
- * SyntaxError must become tagged values here or they escape as defects. All of
- * them collapse to one declared tag, because a component rendering the
+ * `BetterResult.tryPromise` is the border checkpoint: fetch's TypeError and
+ * JSON's SyntaxError must become tagged values here or they escape as defects.
+ * All of them collapse to one declared tag, because a component rendering the
  * community list cannot act differently on "offline" versus "malformed JSON".
  */
 const fetchIndex = () =>
 	gen(async function* () {
-		const response = yield* await tryPromise(
-			() => fetch(`${UPSTREAM}/themes.json`),
-			() => communityErrors.unavailable(),
-		);
+		const response = yield* await BetterResult.tryPromise({
+			try: () => fetch(`${UPSTREAM}/themes.json`),
+			catch: () => communityErrors.unavailable(),
+		});
 		if (!response.ok) return yield* err(communityErrors.unavailable());
-		const payload = yield* await tryPromise(
-			() => response.json(),
-			() => communityErrors.unavailable(),
-		);
-		return themeIndexEntries(payload);
+		const payload = yield* await BetterResult.tryPromise({
+			try: () => response.json(),
+			catch: () => communityErrors.unavailable(),
+		});
+		return ok(themeIndexEntries(payload));
 	});
 
 const communityList = server.implement(communityListContract).handler(async () => {
 	const index = await fetchIndex();
-	if (!index.ok) return err(index.error);
+	if (index.isErr()) return err(index.error);
 	return ok(index.value);
 });
 
@@ -229,20 +230,20 @@ const communityBySlug = server
 	.implement(communityBySlugContract)
 	.handler(async ({ input, errors }) => {
 		const index = await fetchIndex();
-		if (!index.ok) return err(index.error);
+		if (index.isErr()) return err(index.error);
 
 		const meta = index.value.find((entry) => entry.slug === input.slug);
 		if (!meta) return err(errors.notFound({ slug: input.slug }));
 
-		const config = await tryPromise(
-			async () => {
+		const config = await BetterResult.tryPromise({
+			try: async () => {
 				const response = await fetch(`${UPSTREAM}/${meta.file}`);
 				if (!response.ok) throw new Error(`upstream ${response.status}`);
 				return response.text();
 			},
-			() => errors.unavailable(),
-		);
-		if (!config.ok) return err(config.error);
+			catch: () => errors.unavailable(),
+		});
+		if (config.isErr()) return err(config.error);
 
 		// Merged over the default so all 21 colours are always present.
 		return ok({

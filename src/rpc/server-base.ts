@@ -48,7 +48,7 @@ async function viewerFromBearer(token: string): Promise<Viewer | null> {
 	// the layer above decides whether anonymous is allowed here. This path is the
 	// raw GitHub token `blog login` holds for the single call that exchanges it.
 	const user = await whoami(token);
-	return user.ok ? asViewer(user.value.login) : null;
+	return user.isOk() ? asViewer(user.value.login) : null;
 }
 
 /**

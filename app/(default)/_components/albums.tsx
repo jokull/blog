@@ -1,4 +1,4 @@
-import { getOrElse, andThen } from "result-rpc";
+import { andThen, unwrapOr } from "result-rpc";
 import * as v from "valibot";
 import { safeFetchJson, safeParse } from "@/lib/safe-utils";
 
@@ -14,7 +14,7 @@ export async function Albums() {
 	const result = await safeFetchJson("https://personal.plex.uno/random-albums", {
 		signal: AbortSignal.timeout(3000),
 	});
-	const albums = getOrElse(andThen(result, safeParse(albumsSchema)), () => []);
+	const albums = unwrapOr(andThen(result, safeParse(albumsSchema)), []);
 
 	return (
 		<div className="-mx-6">

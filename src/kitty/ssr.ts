@@ -57,7 +57,7 @@ export const prefetchKittyTheme = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		const { serverClient, runtime } = buildRuntime();
 		const result = await runtime.prefetch(serverClient.themes.byId, { id: data.id });
-		return { cache: runtime.dehydrate(), missing: !result.ok };
+		return { cache: runtime.dehydrate(), missing: result.isErr() };
 	});
 
 export const prefetchCommunityTheme = createServerFn({ method: "GET" })
@@ -74,6 +74,6 @@ export const prefetchCommunityTheme = createServerFn({ method: "GET" })
 			// the client starts the query cold and its `retry: "transient"`
 			// policy gets a live attempt — better than freezing one request's
 			// bad luck into the HTML.
-			missing: !detail.ok && detail.error._tag === "community/not-found",
+			missing: detail.isErr() && detail.error._tag === "community/not-found",
 		};
 	});

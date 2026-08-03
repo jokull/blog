@@ -12,7 +12,7 @@ export const Route = createFileRoute("/og/kitty/{$id}.png")({
 				// The same procedure the browser calls, so an unpublished theme
 				// stays hidden here too — no second visibility rule to keep in sync.
 				const theme = await appServerClient().themes.byId({ id });
-				if (!theme.ok) return new Response("Not Found", { status: 404 });
+				if (theme.isErr()) return new Response("Not Found", { status: 404 });
 
 				return ogImage({
 					title: theme.value.authorGithubUsername

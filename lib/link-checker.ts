@@ -98,7 +98,7 @@ export async function checkPostLinks(
 					signal: AbortSignal.timeout(5000),
 					redirect: "follow",
 				});
-				if (!result.ok) return { url, status: "error" as const };
+				if (result.isErr()) return { url, status: "error" as const };
 				return { url, status: result.value.status };
 			}),
 		);

@@ -10,7 +10,7 @@ import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { defineErrors, err, ok, wire, type Result } from "result-rpc";
+import { defineErrors, err, isErr, ok, wire, type Result } from "result-rpc";
 
 export const editorErrors = defineErrors("editor", {
 	/** No `$VISUAL`, no `$EDITOR`, and no `vi` on PATH. */
@@ -63,7 +63,7 @@ export async function editInEditor(
 		});
 	});
 
-	if (!exit.ok) return exit;
+	if (isErr(exit)) return exit;
 	// A non-zero exit is how `vi`'s `:cq` and most editors say "discard this".
 	if (exit.value !== 0) return err(editorErrors.aborted({ command, code: exit.value }));
 

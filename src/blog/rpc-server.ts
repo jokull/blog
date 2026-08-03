@@ -181,7 +181,7 @@ const createPost = server
 				.returning(),
 		);
 
-		if (!inserted.ok) {
+		if (inserted.isErr()) {
 			return matchError(inserted.error, {
 				"db/unique-violation": () => err(errors.slugTaken({ slug: input.slug })),
 				"db/foreign-key-violation": () =>
@@ -344,7 +344,7 @@ const createCategory = server
 				.returning(),
 		);
 
-		if (!inserted.ok) {
+		if (inserted.isErr()) {
 			return matchError(inserted.error, {
 				"db/unique-violation": () => err(errors.slugTaken({ slug: input.slug })),
 				"db/foreign-key-violation": () => err(errors.slugTaken({ slug: input.slug })),
@@ -403,7 +403,7 @@ const createNote = server
 				.returning(),
 		);
 
-		if (!inserted.ok) {
+		if (inserted.isErr()) {
 			return matchError(inserted.error, {
 				"db/unique-violation": () => err(errors.idTaken({ id: input.id })),
 				"db/foreign-key-violation": () => err(errors.idTaken({ id: input.id })),
@@ -482,7 +482,7 @@ const createComment = server
 		// outage is a declared, retryable failure rather than a thrown 500 that
 		// loses what the reader typed.
 		const author = await getGithubUser(context.viewer.username);
-		if (!author.ok) return err(errors.authorUnavailable());
+		if (author.isErr()) return err(errors.authorUnavailable());
 
 		const inserted = await tryDb(
 			context.db
@@ -497,7 +497,7 @@ const createComment = server
 				.returning(),
 		);
 
-		if (!inserted.ok) {
+		if (inserted.isErr()) {
 			return matchError(inserted.error, {
 				// `post_slug` is a foreign key, so "commenting on a post that was
 				// just deleted" is the database's answer rather than a pre-flight
@@ -594,7 +594,7 @@ const statsOverview = server
 
 		// One panel, one outcome: the dashboard renders "Failed to load stats"
 		// and cannot do anything different for a 500 than for a schema mismatch.
-		if (!daily.ok || !weekly.ok || !pageviews.ok) {
+		if (daily.isErr() || weekly.isErr() || pageviews.isErr()) {
 			return err(errors.unavailable());
 		}
 

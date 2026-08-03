@@ -7,7 +7,7 @@ export const Route = createFileRoute("/og/kitty/community/{$slug}.png")({
 		handlers: {
 			GET: async ({ params }) => {
 				const index = await appServerClient().community.list({});
-				if (!index.ok) return new Response("Unavailable", { status: 503 });
+				if (index.isErr()) return new Response("Unavailable", { status: 503 });
 
 				const theme = index.value.find((entry) => entry.slug === params.slug);
 				if (!theme) return new Response("Not Found", { status: 404 });

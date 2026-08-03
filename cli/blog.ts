@@ -18,6 +18,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { createTwoFilesPatch } from "diff";
+import { isErr, type Result } from "result-rpc";
 import * as v from "valibot";
 import { createPostEtag, matchesPostEtag } from "../lib/post-etag";
 import {
@@ -162,10 +163,8 @@ const describe = createDescribe(API_BASE);
  * intact, which is why `describe` can say "you had revision 3, the server has
  * 5" instead of "412".
  */
-function expect<T, E extends Parameters<typeof describe>[0]>(
-	result: { ok: true; value: T } | { ok: false; error: E },
-): T {
-	if (!result.ok) die(describe(result.error));
+function expect<T, E extends Parameters<typeof describe>[0]>(result: Result<T, E>): T {
+	if (isErr(result)) die(describe(result.error));
 	return result.value;
 }
 

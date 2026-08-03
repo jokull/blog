@@ -12,12 +12,16 @@
  * is what stops a GitHub 404 from leaking out of this blog as a `fetch/status`
  * the browser was never told about.
  */
+// `Result` is two things: result-rpc exports the *type* (error channel narrowed
+// to its tagged errors), better-result exports the *value* carrying `try` /
+// `tryPromise`. Importing both under one name is a collision, so the value is
+// aliased.
+import { Result as BetterResult } from "better-result";
 import {
 	defineErrors,
 	err,
 	gen,
 	ok,
-	tryPromise,
 	validateStandard,
 	wire,
 	type Result,
@@ -61,11 +65,11 @@ export async function safeFetch(
 	input: URL | string,
 	init?: RequestInit,
 ): Promise<Result<Response, FetchError>> {
-	return tryPromise(
-		() => fetch(input, init),
-		(cause) =>
+	return BetterResult.tryPromise({
+		try: () => fetch(input, init),
+		catch: (cause) =>
 			fetchErrors.unreachable({ url: String(input), message: messageOf(cause) }, { cause }),
-	);
+	});
 }
 
 /**
@@ -84,13 +88,15 @@ export async function safeFetchJson<T = unknown>(
 			return yield* err(fetchErrors.status({ url: String(input), status: response.status }));
 		}
 
-		return yield* await tryPromise(
+		const body = yield* await BetterResult.tryPromise({
 			// `Response.json()` is generic in the workers types, so `T` is supplied
 			// by inference rather than an assertion.
-			() => response.json<T>(),
-			(cause) =>
+			try: () => response.json<T>(),
+			catch: (cause) =>
 				fetchErrors.malformed({ url: String(input), message: messageOf(cause) }, { cause }),
-		);
+		});
+
+		return ok(body);
 	});
 }
 

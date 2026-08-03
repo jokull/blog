@@ -9,7 +9,8 @@
  * channel rather than a Result for our half and exceptions for GitHub's.
  */
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { defineErrors, err, gen, ok, wire, type Result } from "result-rpc";
+import type { InferErr } from "better-result";
+import { defineErrors, err, gen, isErr, mapError, ok, wire, type Result } from "result-rpc";
 import * as v from "valibot";
 import { safeFetchJson, safeParse } from "../lib/safe-utils";
 import { createClient, type BlogClient } from "./client";
@@ -20,11 +21,10 @@ import { createClient, type BlogClient } from "./client";
  * not widen to every tag in the app and `cli/failures.ts` stays honest about
  * what it has actually handled.
  */
-export type LoginFailure = Extract<
+export type LoginFailure = InferErr<
 	| Awaited<ReturnType<BlogClient["cli"]["oauthConfig"]>>
-	| Awaited<ReturnType<BlogClient["cli"]["exchangeToken"]>>,
-	{ ok: false }
->["error"];
+	| Awaited<ReturnType<BlogClient["cli"]["exchangeToken"]>>
+>;
 
 const SESSION_FILE = `${process.env.HOME}/.blog-cli-session`;
 
@@ -80,7 +80,7 @@ const TokenResponseSchema = v.object({
 type DeviceCode = v.InferOutput<typeof DeviceCodeSchema>;
 
 async function requestDeviceCode(clientId: string): Promise<Result<DeviceCode, DeviceFlowError>> {
-	return gen(async function* () {
+	const requested = await gen(async function* () {
 		const payload = yield* await safeFetchJson("https://github.com/login/device/code", {
 			method: "POST",
 			headers: {
@@ -89,12 +89,14 @@ async function requestDeviceCode(clientId: string): Promise<Result<DeviceCode, D
 			},
 			body: new URLSearchParams({ client_id: clientId, scope: "user:email" }),
 		});
-		return yield* safeParse(DeviceCodeSchema)(payload);
-	}).then((result) =>
-		// Both the fetch failure and the schema failure collapse to one tag: the
-		// operator cannot do anything different about "GitHub is down" and
-		// "GitHub answered something unexpected".
-		result.ok ? result : err(deviceFlowErrors.failed({ reason: describeIssue(result.error) })),
+		return ok(yield* safeParse(DeviceCodeSchema)(payload));
+	});
+
+	// Both the fetch failure and the schema failure collapse to one tag: the
+	// operator cannot do anything different about "GitHub is down" and
+	// "GitHub answered something unexpected".
+	return mapError(requested, (error) =>
+		deviceFlowErrors.failed({ reason: describeIssue(error) }),
 	);
 }
 
@@ -123,11 +125,11 @@ async function pollForGitHubToken(
 				grant_type: "urn:ietf:params:oauth:grant-type:device_code",
 			}),
 		});
-		if (!response.ok)
+		if (isErr(response))
 			return err(deviceFlowErrors.failed({ reason: describeIssue(response.error) }));
 
 		const parsed = safeParse(TokenResponseSchema)(response.value);
-		if (!parsed.ok)
+		if (isErr(parsed))
 			return err(deviceFlowErrors.failed({ reason: describeIssue(parsed.error) }));
 
 		const data = parsed.value;
@@ -195,6 +197,6 @@ export async function login(): Promise<Result<string, LoginFailure | DeviceFlowE
 		const exchanged = yield* await createClient(githubToken).cli.exchangeToken({});
 
 		writeToken(exchanged.token);
-		return exchanged.token;
+		return ok(exchanged.token);
 	});
 }
