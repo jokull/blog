@@ -98,13 +98,14 @@ back over.
 - Results are better-result `Ok`/`Err` instances. Narrow with `isOk()`/`isErr()`
   before touching `.value`/`.error`; destructuring a Result does not typecheck.
   Prefer `isErr()` over `!isOk()` so there is one spelling.
-- Standalone combinators (`ok`/`err`/`andThen`/`map`/`mapError`/`matchError`/
-  `unwrapOr`) come from `result-rpc`. The `Result` **value** — carrying `try` and
-  `tryPromise` — only exists in `better-result`, and collides with the `Result`
-  **type**, so it is imported aliased. `lib/safe-utils.ts` is the pattern.
+- Everything comes from `result-rpc` — combinators, `tryCatch`/`tryPromise`,
+  `InferErr`/`InferOk`. Nothing imports `better-result` directly even though it
+  is the foundation and a required peer.
+- `tryCatch`/`tryPromise` take better-result's object form,
+  `tryPromise({ try, catch })`, where `catch` returns the tagged error.
 - Inside `gen`, the body must **return a Result** — `return ok(x)`, not
-  `return x`. A bare return picks the wrong overload and the error surfaces
-  somewhere else entirely.
+  `return x`. A bare return picks the wrong overload, and the error surfaces on
+  a later line as `Property 'then' does not exist on type 'Result$1<…>'`.
 - `wire.nullable(X)` and `wire.enum([...])` both exist.
 - `mutate()` returns **void** and never rejects. `mutateAsync()` returns the
   `Result` and rejects with the `cancelled`/`claimed` control signals. Event

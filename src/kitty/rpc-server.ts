@@ -9,9 +9,8 @@
  * They return declared failures now, so the union a component can be asked to
  * render is exactly the union this file can produce.
  */
-import { Result as BetterResult } from "better-result";
 import { eq } from "drizzle-orm";
-import { err, gen, ok } from "result-rpc";
+import { err, gen, ok, tryPromise } from "result-rpc";
 import { getGithubUser } from "@/auth";
 import type { Viewer } from "@/src/rpc/auth";
 import { requireViewer, server, session } from "@/src/rpc/server-base";
@@ -201,19 +200,19 @@ const remove = server
 const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master";
 
 /**
- * `BetterResult.tryPromise` is the border checkpoint: fetch's TypeError and
+ * `tryPromise` is the border checkpoint: fetch's TypeError and
  * JSON's SyntaxError must become tagged values here or they escape as defects.
  * All of them collapse to one declared tag, because a component rendering the
  * community list cannot act differently on "offline" versus "malformed JSON".
  */
 const fetchIndex = () =>
 	gen(async function* () {
-		const response = yield* await BetterResult.tryPromise({
+		const response = yield* await tryPromise({
 			try: () => fetch(`${UPSTREAM}/themes.json`),
 			catch: () => communityErrors.unavailable(),
 		});
 		if (!response.ok) return yield* err(communityErrors.unavailable());
-		const payload = yield* await BetterResult.tryPromise({
+		const payload = yield* await tryPromise({
 			try: () => response.json(),
 			catch: () => communityErrors.unavailable(),
 		});
@@ -235,7 +234,7 @@ const communityBySlug = server
 		const meta = index.value.find((entry) => entry.slug === input.slug);
 		if (!meta) return err(errors.notFound({ slug: input.slug }));
 
-		const config = await BetterResult.tryPromise({
+		const config = await tryPromise({
 			try: async () => {
 				const response = await fetch(`${UPSTREAM}/${meta.file}`);
 				if (!response.ok) throw new Error(`upstream ${response.status}`);

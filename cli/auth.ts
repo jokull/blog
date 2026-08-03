@@ -9,8 +9,17 @@
  * channel rather than a Result for our half and exceptions for GitHub's.
  */
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import type { InferErr } from "better-result";
-import { defineErrors, err, gen, isErr, mapError, ok, wire, type Result } from "result-rpc";
+import {
+	defineErrors,
+	err,
+	gen,
+	isErr,
+	mapError,
+	ok,
+	wire,
+	type InferErr,
+	type Result,
+} from "result-rpc";
 import * as v from "valibot";
 import { safeFetchJson, safeParse } from "../lib/safe-utils";
 import { createClient, type BlogClient } from "./client";

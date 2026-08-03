@@ -47,7 +47,14 @@ VERSION=$(node -p 'require("./package.json").version')
 OUT="${TMPDIR:-/tmp}/result-rpc-smoke"
 mkdir -p "$OUT"
 npm pack --silent --pack-destination "$OUT" >/dev/null
-TARBALL="$OUT/result-rpc-$VERSION.tgz"
+
+# Stamp the filename with the tarball's own hash. bun keys its cache on path +
+# version, so rebuilding to a stable filename installs the *previous* contents
+# and the migration appears to fail against changes that are actually present.
+# Deleting node_modules/result-rpc does not help; only a new path does.
+HASH=$(shasum -a 256 "$OUT/result-rpc-$VERSION.tgz" | cut -c1-8)
+TARBALL="$OUT/result-rpc-$VERSION-$HASH.tgz"
+mv "$OUT/result-rpc-$VERSION.tgz" "$TARBALL"
 
 cd - >/dev/null
 # `bun add <tarball>` while `package.json` already names `result-rpc` fails with

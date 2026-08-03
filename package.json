@@ -57,7 +57,7 @@
 		"recharts": "^3.10.1",
 		"remark-gfm": "^4.0.1",
 		"remeda": "^2.39.0",
-		"result-rpc": "file:/private/tmp/claude-501/-Users-jokull-Code-blog/a3ff371e-b990-416a-98ca-cbed0ba7f65b/scratchpad/result-rpc-0.3.0.tgz",
+		"result-rpc": "file:/private/tmp/claude-501/-Users-jokull-Code-blog/a3ff371e-b990-416a-98ca-cbed0ba7f65b/scratchpad/result-rpc-0.3.0-cad916ce.tgz",
 		"rss": "^1.2.2",
 		"safe-mdx": "^1.11.5",
 		"shiki": "^4.3.1",
