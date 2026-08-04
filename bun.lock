@@ -36,7 +36,7 @@
         "recharts": "^3.10.1",
         "remark-gfm": "^4.0.1",
         "remeda": "^2.39.0",
-        "result-rpc": "file:/private/tmp/claude-501/-Users-jokull-Code-blog/a3ff371e-b990-416a-98ca-cbed0ba7f65b/scratchpad/result-rpc-0.3.0-cad916ce.tgz",
+        "result-rpc": "0.3.0",
         "rss": "^1.2.2",
         "safe-mdx": "^1.11.5",
         "shiki": "^4.3.1",
@@ -1316,7 +1316,7 @@
 
     "resolve-pkg-maps": ["resolve-pkg-maps@1.0.0", "", {}, "sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw=="],
 
-    "result-rpc": ["result-rpc@/private/tmp/claude-501/-Users-jokull-Code-blog/a3ff371e-b990-416a-98ca-cbed0ba7f65b/scratchpad/result-rpc-0.3.0-cad916ce.tgz", { "dependencies": { "@tanstack/query-core": "^5.101.4", "devalue": "5.8.2" }, "peerDependencies": { "better-result": "^3.0.0", "react": ">=18.3" } }, "sha512-BbhUx81ewB+1lpFFYmAw0aQrHpSKtbRukBCfU5V5rPc9ei4ijiksNfykxgNwRqjAiNl1C3UM2CkON9q05GJsMQ=="],
+    "result-rpc": ["result-rpc@0.3.0", "", { "dependencies": { "@tanstack/query-core": "^5.101.4", "devalue": "5.8.2" }, "peerDependencies": { "better-result": "^3.0.0", "react": ">=18.3" } }, "sha512-AmGD68DhMNOr1I6qNgsJsI0kbAk5GhZ5rq2l8UXzFv7c96p16FcG/jGsop72x0/f1QeHZ5qZ4+zVu9EyGWiitg=="],
 
     "rolldown": ["rolldown@1.2.1", "", { "dependencies": { "@oxc-project/types": "=0.142.0", "@rolldown/pluginutils": "^1.0.0" }, "optionalDependencies": { "@rolldown/binding-android-arm64": "1.2.1", "@rolldown/binding-darwin-arm64": "1.2.1", "@rolldown/binding-darwin-x64": "1.2.1", "@rolldown/binding-freebsd-x64": "1.2.1", "@rolldown/binding-linux-arm-gnueabihf": "1.2.1", "@rolldown/binding-linux-arm64-gnu": "1.2.1", "@rolldown/binding-linux-arm64-musl": "1.2.1", "@rolldown/binding-linux-ppc64-gnu": "1.2.1", "@rolldown/binding-linux-s390x-gnu": "1.2.1", "@rolldown/binding-linux-x64-gnu": "1.2.1", "@rolldown/binding-linux-x64-musl": "1.2.1", "@rolldown/binding-openharmony-arm64": "1.2.1", "@rolldown/binding-wasm32-wasi": "1.2.1", "@rolldown/binding-win32-arm64-msvc": "1.2.1", "@rolldown/binding-win32-x64-msvc": "1.2.1" }, "bin": { "rolldown": "./bin/cli.mjs" } }, "sha512-4FKJhg8d3OiyQOA6Q1Q0hoFFpW9/OoX+VsHzpECsdsIZoOArrAK90gl59YK/Z+gnDel45bgJZK03ozH/9bCqEw=="],
 
