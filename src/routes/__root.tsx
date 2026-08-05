@@ -1,6 +1,7 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import cn from "clsx";
 import { ResultRpcProvider } from "result-rpc/react";
+import { OfflineBanner } from "@/components/offline-banner";
 import { asHead, siteHead } from "@/src/lib/seo";
 import { client } from "@/src/rpc/client";
 import { BoundaryProvider } from "@/src/rpc/shells";
@@ -68,6 +69,10 @@ function RootComponent() {
 				<ResultRpcProvider client={client}>
 					<BoundaryProvider>
 						<Outlet />
+						{/* Global: covers /kitty, the blog and the admin console. It renders
+						 * nothing on the server (SSR snapshot is "online"), so hydration
+						 * is clean and it appears only once the browser's signal says so. */}
+						<OfflineBanner />
 					</BoundaryProvider>
 				</ResultRpcProvider>
 				<Scripts />
