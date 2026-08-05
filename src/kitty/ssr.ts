@@ -26,21 +26,24 @@ const buildRuntime = () => {
 
 /**
  * The /kitty layout loader: the session (so SessionShell resolves without
- * rendering a fallback) and the two sidebar lists. `mine` is prefetched
- * unconditionally — signed out it fails with `auth/required`, and failed
- * prefetches are deliberately not dehydrated, so the anonymous case costs an
- * in-process call and ships nothing.
+ * rendering a fallback) and the two sidebar lists. `mine` is prefetched only
+ * when the request carries a viewer — the sidebar gates the same query on
+ * `enabled: viewer !== null`, so the prefetch must not be a broader ask.
  *
- * Child routes prefetch only what they own; the boundaries merge into one
- * client runtime.
+ * That gating is not just politeness: prefetching `mine` anonymously fails
+ * with `auth/required`, and result-rpc dehydrates domain failures — replaying
+ * that failure on the client would trip SignInShell's login redirect on a
+ * page that is public when signed out.
  */
 export const prefetchKittyShell = createServerFn({ method: "GET" }).handler(async () => {
 	const { serverClient, runtime } = buildRuntime();
-	await Promise.all([
+	const [session] = await Promise.all([
 		runtime.prefetch(serverClient.session, {}),
 		runtime.prefetch(serverClient.themes.published, {}),
-		runtime.prefetch(serverClient.themes.mine, {}),
 	]);
+	if (session.isOk() && session.value !== null) {
+		await runtime.prefetch(serverClient.themes.mine, {});
+	}
 	return runtime.dehydrate();
 });
 
