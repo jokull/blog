@@ -10,13 +10,8 @@
 import { env } from "cloudflare:workers";
 import { and, eq, sql } from "drizzle-orm";
 import { err, ok } from "result-rpc";
-import {
-	tryDb,
-	isUniqueViolation,
-	isForeignKeyViolation,
-	isNotNullViolation,
-	isCheckViolation,
-} from "db-result";
+import { tryDb } from "db-result";
+import { matchErrorPartial } from "better-result";
 import { orThrow, rawDb } from "@/db";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
@@ -193,14 +188,19 @@ const createPost = server
 		);
 
 		if (inserted.isErr()) {
-			const cause = inserted.error;
-			if (isUniqueViolation(cause) || isNotNullViolation(cause) || isCheckViolation(cause)) {
-				return err(errors.slugTaken({ slug: input.slug }));
-			}
-			if (isForeignKeyViolation(cause)) {
-				return err(errors.notFound({ slug: input.categorySlug ?? "" }));
-			}
-			throw cause; // the defect channel: incidentId'd server/internal
+			return matchErrorPartial(
+				inserted.error,
+				{
+					"db/unique-violation": () => err(errors.slugTaken({ slug: input.slug })),
+					"db/not-null-violation": () => err(errors.slugTaken({ slug: input.slug })),
+					"db/check-violation": () => err(errors.slugTaken({ slug: input.slug })),
+					"db/foreign-key-violation": () =>
+						err(errors.notFound({ slug: input.categorySlug ?? "" })),
+				},
+				(cause) => {
+					throw cause; // the defect channel: incidentId'd server/internal
+				},
+			);
 		}
 
 		return ok(toPost(inserted.value[0]));
@@ -373,16 +373,18 @@ const createCategory = server
 		);
 
 		if (inserted.isErr()) {
-			const cause = inserted.error;
-			if (
-				isUniqueViolation(cause) ||
-				isForeignKeyViolation(cause) ||
-				isNotNullViolation(cause) ||
-				isCheckViolation(cause)
-			) {
-				return err(errors.slugTaken({ slug: input.slug }));
-			}
-			throw cause; // the defect channel: incidentId'd server/internal
+			return matchErrorPartial(
+				inserted.error,
+				{
+					"db/unique-violation": () => err(errors.slugTaken({ slug: input.slug })),
+					"db/foreign-key-violation": () => err(errors.slugTaken({ slug: input.slug })),
+					"db/not-null-violation": () => err(errors.slugTaken({ slug: input.slug })),
+					"db/check-violation": () => err(errors.slugTaken({ slug: input.slug })),
+				},
+				(cause) => {
+					throw cause; // the defect channel: incidentId'd server/internal
+				},
+			);
 		}
 
 		return ok(toCategory(inserted.value[0]));
@@ -439,16 +441,18 @@ const createNote = server
 		);
 
 		if (inserted.isErr()) {
-			const cause = inserted.error;
-			if (
-				isUniqueViolation(cause) ||
-				isForeignKeyViolation(cause) ||
-				isNotNullViolation(cause) ||
-				isCheckViolation(cause)
-			) {
-				return err(errors.idTaken({ id: input.id }));
-			}
-			throw cause; // the defect channel: incidentId'd server/internal
+			return matchErrorPartial(
+				inserted.error,
+				{
+					"db/unique-violation": () => err(errors.idTaken({ id: input.id })),
+					"db/foreign-key-violation": () => err(errors.idTaken({ id: input.id })),
+					"db/not-null-violation": () => err(errors.idTaken({ id: input.id })),
+					"db/check-violation": () => err(errors.idTaken({ id: input.id })),
+				},
+				(cause) => {
+					throw cause; // the defect channel: incidentId'd server/internal
+				},
+			);
 		}
 
 		return ok(toNote(inserted.value[0]));
@@ -538,20 +542,23 @@ const createComment = server
 		);
 
 		if (inserted.isErr()) {
-			const cause = inserted.error;
-			if (
-				isUniqueViolation(cause) ||
-				isForeignKeyViolation(cause) ||
-				isNotNullViolation(cause) ||
-				isCheckViolation(cause)
-			) {
-				// `post_slug` is a foreign key, so "commenting on a post that
-				// was just deleted" is the database's answer rather than a
-				// pre-flight SELECT that could go stale between check and
-				// insert.
-				return err(errors.notFound({ slug: input.postSlug }));
-			}
-			throw cause; // the defect channel: incidentId'd server/internal
+			return matchErrorPartial(
+				inserted.error,
+				{
+					"db/unique-violation": () => err(errors.notFound({ slug: input.postSlug })),
+					"db/foreign-key-violation": () =>
+						err(errors.notFound({ slug: input.postSlug })),
+					"db/not-null-violation": () => err(errors.notFound({ slug: input.postSlug })),
+					"db/check-violation": () => err(errors.notFound({ slug: input.postSlug })),
+					// `post_slug` is a foreign key, so "commenting on a post that
+					// was just deleted" is the database's answer rather than a
+					// pre-flight SELECT that could go stale between check and
+					// insert.
+				},
+				(cause) => {
+					throw cause; // the defect channel: incidentId'd server/internal
+				},
+			);
 		}
 
 		return ok(toComment(inserted.value[0]));
