@@ -1,5 +1,6 @@
 import { Theater } from "@/components/theater";
-import { db } from "@/db";
+import { tryDb } from "db-result";
+import { db, orThrow, rawDb } from "@/db";
 import { Comment } from "@/schema";
 import { eq, sql } from "drizzle-orm";
 import type { Metadata } from "@/src/lib/metadata";
@@ -17,9 +18,11 @@ export async function generateMetadata({
 	const { category } = await searchParams;
 
 	if (category) {
-		const cat = await db.query.Category.findFirst({
-			where: { slug: category },
-		});
+		const cat = orThrow(
+			await db.query.Category.findFirst({
+				where: { slug: category },
+			}),
+		);
 		if (cat) {
 			return {
 				title: `${cat.label} — Jökull Sólberg`,
@@ -65,23 +68,29 @@ function ShowsSkeleton() {
 
 export default async function Page() {
 	// Fetch all posts with category information
-	const posts = await db.query.Post.findMany({
-		where: { publicAt: { isNotNull: true } },
-		orderBy: { publishedAt: "desc" },
-	});
+	const posts = orThrow(
+		await db.query.Post.findMany({
+			where: { publicAt: { isNotNull: true } },
+			orderBy: { publishedAt: "desc" },
+		}),
+	);
 
 	// Fetch all categories
-	const categories = await db.query.Category.findMany();
+	const categories = orThrow(await db.query.Category.findMany());
 
 	// Get comment counts for all posts
-	const commentCounts = await db
-		.select({
-			postSlug: Comment.postSlug,
-			count: sql<number>`count(*)`.as("count"),
-		})
-		.from(Comment)
-		.where(eq(Comment.isHidden, false))
-		.groupBy(Comment.postSlug);
+	const commentCounts = orThrow(
+		await tryDb(
+			rawDb
+				.select({
+					postSlug: Comment.postSlug,
+					count: sql<number>`count(*)`.as("count"),
+				})
+				.from(Comment)
+				.where(eq(Comment.isHidden, false))
+				.groupBy(Comment.postSlug),
+		),
+	);
 
 	const commentCountsMap = commentCounts.reduce(
 		(acc, item) => {

@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { appServerClient } from "@/src/rpc/server";
-import { db } from "@/db";
+import { db, orThrow } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { homeHead, pageHead, postHead } from "@/src/lib/seo";
 
 export const getPostHead = createServerFn({ method: "GET" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
-		const post = await db.query.Post.findFirst({ where: { slug: data.slug } });
+		const post = orThrow(await db.query.Post.findFirst({ where: { slug: data.slug } }));
 		if (!post?.publicAt)
 			return pageHead({
 				title: "Not found",
@@ -21,10 +21,12 @@ export const getHomeHead = createServerFn({ method: "GET" })
 	.validator((data: { category?: string }) => data)
 	.handler(async ({ data }) => {
 		const category = data.category
-			? await db.query.Category.findFirst({
-					where: { slug: data.category },
-					columns: { slug: true, label: true },
-				})
+			? orThrow(
+					await db.query.Category.findFirst({
+						where: { slug: data.category },
+						columns: { slug: true, label: true },
+					}),
+				)
 			: null;
 		return homeHead(category);
 	});

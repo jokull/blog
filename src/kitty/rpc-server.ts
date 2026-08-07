@@ -12,6 +12,8 @@
 import { eq } from "drizzle-orm";
 import { err, gen, ok, tryPromise } from "result-rpc";
 import { getGithubUser } from "@/auth";
+import { tryDb } from "db-result";
+import { orThrow, rawDb } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
 import { requireViewer, server, session } from "@/src/rpc/server-base";
 import { KittyTheme } from "@/schema";
@@ -58,10 +60,12 @@ const canWrite = (row: typeof KittyTheme.$inferSelect, viewer: Viewer) =>
 	row.authorGithubUsername === viewer.username || viewer.isAdmin;
 
 const published = server.implement(publishedThemesContract).handler(async ({ context }) => {
-	const rows = await context.db.query.KittyTheme.findMany({
-		where: { isPublished: true },
-		orderBy: { createdAt: "desc" },
-	});
+	const rows = orThrow(
+		await context.db.query.KittyTheme.findMany({
+			where: { isPublished: true },
+			orderBy: { createdAt: "desc" },
+		}),
+	);
 	return ok(rows.map(toTheme));
 });
 
@@ -69,10 +73,12 @@ const mine = server
 	.implement(myThemesContract)
 	.use(requireViewer)
 	.handler(async ({ context }) => {
-		const rows = await context.db.query.KittyTheme.findMany({
-			where: { authorGithubUsername: context.viewer.username },
-			orderBy: { createdAt: "desc" },
-		});
+		const rows = orThrow(
+			await context.db.query.KittyTheme.findMany({
+				where: { authorGithubUsername: context.viewer.username },
+				orderBy: { createdAt: "desc" },
+			}),
+		);
 		return ok(rows.map(toTheme));
 	});
 
@@ -85,7 +91,9 @@ const byId = server
 	.implement(themeByIdContract)
 	.use(session)
 	.handler(async ({ input, errors, context }) => {
-		const row = await context.db.query.KittyTheme.findFirst({ where: { id: input.id } });
+		const row = orThrow(
+			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+		);
 		if (!row) return err(errors.notFound({ themeId: input.id }));
 		if (!row.isPublished && (context.viewer === null || !canWrite(row, context.viewer))) {
 			return err(errors.notFound({ themeId: input.id }));
@@ -102,19 +110,23 @@ const create = server
 		const author = await getGithubUser(context.viewer.username);
 		if (author.isErr()) return err(errors.authorUnavailable());
 
-		const [row] = await context.db
-			.insert(KittyTheme)
-			.values({
-				slug: generateSlug(input.name),
-				name: input.name,
-				blurb: input.blurb,
-				colors: input.colors,
-				authorGithubId: author.value.id,
-				authorGithubUsername: author.value.login,
-				authorAvatarUrl: author.value.avatar_url,
-				isPublished: false,
-			})
-			.returning();
+		const [row] = orThrow(
+			await tryDb(
+				rawDb
+					.insert(KittyTheme)
+					.values({
+						slug: generateSlug(input.name),
+						name: input.name,
+						blurb: input.blurb,
+						colors: input.colors,
+						authorGithubId: author.value.id,
+						authorGithubUsername: author.value.login,
+						authorAvatarUrl: author.value.avatar_url,
+						isPublished: false,
+					})
+					.returning(),
+			),
+		);
 		return ok(toTheme(row));
 	});
 
@@ -122,20 +134,26 @@ const update = server
 	.implement(updateThemeContract)
 	.use(requireViewer)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.KittyTheme.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ themeId: input.id }));
 		if (!canWrite(existing, context.viewer)) return err(errors.notOwner({ themeId: input.id }));
 
-		const [row] = await context.db
-			.update(KittyTheme)
-			.set({
-				name: input.name,
-				blurb: input.blurb,
-				colors: input.colors,
-				modifiedAt: new Date(),
-			})
-			.where(eq(KittyTheme.id, input.id))
-			.returning();
+		const [row] = orThrow(
+			await tryDb(
+				rawDb
+					.update(KittyTheme)
+					.set({
+						name: input.name,
+						blurb: input.blurb,
+						colors: input.colors,
+						modifiedAt: new Date(),
+					})
+					.where(eq(KittyTheme.id, input.id))
+					.returning(),
+			),
+		);
 		return ok(toTheme(row));
 	});
 
@@ -143,15 +161,21 @@ const togglePublish = server
 	.implement(togglePublishContract)
 	.use(requireViewer)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.KittyTheme.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ themeId: input.id }));
 		if (!canWrite(existing, context.viewer)) return err(errors.notOwner({ themeId: input.id }));
 
-		const [row] = await context.db
-			.update(KittyTheme)
-			.set({ isPublished: !existing.isPublished, modifiedAt: new Date() })
-			.where(eq(KittyTheme.id, input.id))
-			.returning();
+		const [row] = orThrow(
+			await tryDb(
+				rawDb
+					.update(KittyTheme)
+					.set({ isPublished: !existing.isPublished, modifiedAt: new Date() })
+					.where(eq(KittyTheme.id, input.id))
+					.returning(),
+			),
+		);
 		return ok(toTheme(row));
 	});
 
@@ -159,27 +183,33 @@ const fork = server
 	.implement(forkThemeContract)
 	.use(requireViewer)
 	.handler(async ({ input, errors, context }) => {
-		const original = await context.db.query.KittyTheme.findFirst({ where: { id: input.id } });
+		const original = orThrow(
+			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+		);
 		if (!original) return err(errors.notFound({ themeId: input.id }));
 		if (!original.isPublished) return err(errors.forkUnpublished({ themeId: input.id }));
 
 		const author = await getGithubUser(context.viewer.username);
 		if (author.isErr()) return err(errors.authorUnavailable());
 
-		const [row] = await context.db
-			.insert(KittyTheme)
-			.values({
-				slug: generateSlug(`${original.name} remix`),
-				name: `${original.name} (Remix)`,
-				blurb: original.blurb,
-				colors: original.colors,
-				authorGithubId: author.value.id,
-				authorGithubUsername: author.value.login,
-				authorAvatarUrl: author.value.avatar_url,
-				forkedFromId: original.id,
-				isPublished: false,
-			})
-			.returning();
+		const [row] = orThrow(
+			await tryDb(
+				rawDb
+					.insert(KittyTheme)
+					.values({
+						slug: generateSlug(`${original.name} remix`),
+						name: `${original.name} (Remix)`,
+						blurb: original.blurb,
+						colors: original.colors,
+						authorGithubId: author.value.id,
+						authorGithubUsername: author.value.login,
+						authorAvatarUrl: author.value.avatar_url,
+						forkedFromId: original.id,
+						isPublished: false,
+					})
+					.returning(),
+			),
+		);
 		return ok(toTheme(row));
 	});
 
@@ -187,11 +217,13 @@ const remove = server
 	.implement(deleteThemeContract)
 	.use(requireViewer)
 	.handler(async ({ input, errors, context, touch }) => {
-		const existing = await context.db.query.KittyTheme.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ themeId: input.id }));
 		if (!canWrite(existing, context.viewer)) return err(errors.notOwner({ themeId: input.id }));
 
-		await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id));
+		orThrow(await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id)));
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(KittyThemeModel, input.id);
 		return ok({ id: input.id });

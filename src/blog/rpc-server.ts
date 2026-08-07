@@ -9,8 +9,15 @@
  */
 import { env } from "cloudflare:workers";
 import { and, eq, sql } from "drizzle-orm";
-import { err, matchError, ok } from "result-rpc";
-import { tryDb } from "result-rpc/db";
+import { err, ok } from "result-rpc";
+import {
+	tryDb,
+	isUniqueViolation,
+	isForeignKeyViolation,
+	isNotNullViolation,
+	isCheckViolation,
+} from "db-result";
+import { orThrow, rawDb } from "@/db";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
 import { extractFirstImage } from "@/lib/mdx-image-extractor";
@@ -132,7 +139,9 @@ const listPosts = server
 	.implement(listPostsContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } });
+		const rows = orThrow(
+			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } }),
+		);
 		return ok(rows.map(toPostRow));
 	});
 
@@ -140,7 +149,9 @@ const exportPosts = server
 	.implement(exportPostsContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } });
+		const rows = orThrow(
+			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } }),
+		);
 		return ok(rows.map(toPost));
 	});
 
@@ -148,7 +159,7 @@ const postBySlug = server
 	.implement(postBySlugContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const row = await context.db.query.Post.findFirst({ where: { slug: input.slug } });
+		const row = orThrow(await context.db.query.Post.findFirst({ where: { slug: input.slug } }));
 		if (!row) return err(errors.notFound({ slug: input.slug }));
 		return ok(toPost(row));
 	});
@@ -165,7 +176,7 @@ const createPost = server
 		 * that could go stale between check and insert.
 		 */
 		const inserted = await tryDb(
-			context.db
+			rawDb
 				.insert(Post)
 				.values({
 					slug: input.slug,
@@ -182,16 +193,14 @@ const createPost = server
 		);
 
 		if (inserted.isErr()) {
-			return matchError(inserted.error, {
-				"db/unique-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/foreign-key-violation": () =>
-					err(errors.notFound({ slug: input.categorySlug ?? "" })),
-				"db/not-null-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/check-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/query-failure": (cause) => {
-					throw cause;
-				},
-			});
+			const cause = inserted.error;
+			if (isUniqueViolation(cause) || isNotNullViolation(cause) || isCheckViolation(cause)) {
+				return err(errors.slugTaken({ slug: input.slug }));
+			}
+			if (isForeignKeyViolation(cause)) {
+				return err(errors.notFound({ slug: input.categorySlug ?? "" }));
+			}
+			throw cause; // the defect channel: incidentId'd server/internal
 		}
 
 		return ok(toPost(inserted.value[0]));
@@ -201,7 +210,9 @@ const updatePost = server
 	.implement(updatePostContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.Post.findFirst({ where: { slug: input.slug } });
+		const existing = orThrow(
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } }),
+		);
 		if (!existing) return err(errors.notFound({ slug: input.slug }));
 		if (existing.revision !== input.expectedRevision) {
 			return err(
@@ -214,9 +225,11 @@ const updatePost = server
 		}
 
 		if (input.categorySlug != null) {
-			const category = await context.db.query.Category.findFirst({
-				where: { slug: input.categorySlug },
-			});
+			const category = orThrow(
+				await context.db.query.Category.findFirst({
+					where: { slug: input.categorySlug },
+				}),
+			);
 			if (!category) return err(errors.unknownCategory({ slug: input.categorySlug }));
 		}
 
@@ -241,20 +254,28 @@ const updatePost = server
 			}
 		}
 
-		const rows = await context.db
-			.update(Post)
-			.set({ ...patch, modifiedAt: new Date(), revision: sql`${Post.revision} + 1` })
-			// The revision is re-checked in the WHERE clause, not just above, so a
-			// writer that slipped in between the SELECT and here loses the race
-			// rather than being overwritten by it.
-			.where(and(eq(Post.slug, input.slug), eq(Post.revision, input.expectedRevision)))
-			.returning();
+		const rows = orThrow(
+			await tryDb(
+				rawDb
+					.update(Post)
+					.set({ ...patch, modifiedAt: new Date(), revision: sql`${Post.revision} + 1` })
+					// The revision is re-checked in the WHERE clause, not just above, so a
+					// writer that slipped in between the SELECT and here loses the race
+					// rather than being overwritten by it.
+					.where(
+						and(eq(Post.slug, input.slug), eq(Post.revision, input.expectedRevision)),
+					)
+					.returning(),
+			),
+		);
 
 		// Drizzle types `.returning()` as a non-empty tuple, so this has to be a
 		// length check: an empty result means the revision guard in the WHERE
 		// clause rejected the write, which is the whole point of it.
 		if (rows.length === 0) {
-			const current = await context.db.query.Post.findFirst({ where: { slug: input.slug } });
+			const current = orThrow(
+				await context.db.query.Post.findFirst({ where: { slug: input.slug } }),
+			);
 			if (!current) return err(errors.notFound({ slug: input.slug }));
 			return err(
 				errors.staleRevision({
@@ -280,7 +301,9 @@ const setPublished = server
 	.implement(setPublishedContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.Post.findFirst({ where: { slug: input.slug } });
+		const existing = orThrow(
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } }),
+		);
 		if (!existing) return err(errors.notFound({ slug: input.slug }));
 
 		// Absolute, not a toggle: asking for the state it is already in is a
@@ -292,18 +315,22 @@ const setPublished = server
 			: existing.markdown;
 		const heroImage = markdown ? await extractFirstImage(markdown) : existing.heroImage;
 
-		const rows = await context.db
-			.update(Post)
-			.set({
-				publicAt: input.published ? new Date() : null,
-				markdown,
-				previewMarkdown: null,
-				heroImage,
-				modifiedAt: new Date(),
-				revision: sql`${Post.revision} + 1`,
-			})
-			.where(eq(Post.slug, input.slug))
-			.returning();
+		const rows = orThrow(
+			await tryDb(
+				rawDb
+					.update(Post)
+					.set({
+						publicAt: input.published ? new Date() : null,
+						markdown,
+						previewMarkdown: null,
+						heroImage,
+						modifiedAt: new Date(),
+						revision: sql`${Post.revision} + 1`,
+					})
+					.where(eq(Post.slug, input.slug))
+					.returning(),
+			),
+		);
 
 		return ok(toPost(rows[0]));
 	});
@@ -312,10 +339,12 @@ const deletePost = server
 	.implement(deletePostContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context, touch }) => {
-		const existing = await context.db.query.Post.findFirst({ where: { slug: input.slug } });
+		const existing = orThrow(
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } }),
+		);
 		if (!existing) return err(errors.notFound({ slug: input.slug }));
 
-		await context.db.delete(Post).where(eq(Post.slug, input.slug));
+		orThrow(await context.db.delete(Post).where(eq(Post.slug, input.slug)));
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(PostModel, input.slug);
 		return ok({ slug: input.slug });
@@ -327,7 +356,9 @@ const listCategories = server
 	.implement(listCategoriesContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = await context.db.query.Category.findMany({ orderBy: { label: "asc" } });
+		const rows = orThrow(
+			await context.db.query.Category.findMany({ orderBy: { label: "asc" } }),
+		);
 		return ok(rows.map(toCategory));
 	});
 
@@ -338,22 +369,20 @@ const createCategory = server
 		// The slug pattern is enforced by the contract's `wire.standard`, so the
 		// only failure left is the one the database owns: the primary key.
 		const inserted = await tryDb(
-			context.db
-				.insert(Category)
-				.values({ slug: input.slug, label: input.label })
-				.returning(),
+			rawDb.insert(Category).values({ slug: input.slug, label: input.label }).returning(),
 		);
 
 		if (inserted.isErr()) {
-			return matchError(inserted.error, {
-				"db/unique-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/foreign-key-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/not-null-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/check-violation": () => err(errors.slugTaken({ slug: input.slug })),
-				"db/query-failure": (cause) => {
-					throw cause;
-				},
-			});
+			const cause = inserted.error;
+			if (
+				isUniqueViolation(cause) ||
+				isForeignKeyViolation(cause) ||
+				isNotNullViolation(cause) ||
+				isCheckViolation(cause)
+			) {
+				return err(errors.slugTaken({ slug: input.slug }));
+			}
+			throw cause; // the defect channel: incidentId'd server/internal
 		}
 
 		return ok(toCategory(inserted.value[0]));
@@ -363,18 +392,22 @@ const deleteCategory = server
 	.implement(deleteCategoryContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.Category.findFirst({ where: { slug: input.slug } });
+		const existing = orThrow(
+			await context.db.query.Category.findFirst({ where: { slug: input.slug } }),
+		);
 		if (!existing) return err(errors.notFound({ slug: input.slug }));
 
-		const counted = await context.db
-			.select({ count: sql<number>`count(*)` })
-			.from(Post)
-			.where(eq(Post.categorySlug, input.slug));
+		const counted = orThrow(
+			await context.db
+				.select({ count: sql<number>`count(*)` })
+				.from(Post)
+				.where(eq(Post.categorySlug, input.slug)),
+		);
 
 		const postCount = Number(counted[0]?.count ?? 0);
 		if (postCount > 0) return err(errors.inUse({ slug: input.slug, postCount }));
 
-		await context.db.delete(Category).where(eq(Category.slug, input.slug));
+		orThrow(await context.db.delete(Category).where(eq(Category.slug, input.slug)));
 		return ok({ slug: input.slug });
 	});
 
@@ -384,7 +417,9 @@ const listNotes = server
 	.implement(listNotesContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = await context.db.query.Note.findMany({ orderBy: { createdAt: "desc" } });
+		const rows = orThrow(
+			await context.db.query.Note.findMany({ orderBy: { createdAt: "desc" } }),
+		);
 		return ok(rows.map(toNote));
 	});
 
@@ -393,7 +428,7 @@ const createNote = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const inserted = await tryDb(
-			context.db
+			rawDb
 				.insert(Note)
 				.values({
 					id: input.id,
@@ -404,15 +439,16 @@ const createNote = server
 		);
 
 		if (inserted.isErr()) {
-			return matchError(inserted.error, {
-				"db/unique-violation": () => err(errors.idTaken({ id: input.id })),
-				"db/foreign-key-violation": () => err(errors.idTaken({ id: input.id })),
-				"db/not-null-violation": () => err(errors.idTaken({ id: input.id })),
-				"db/check-violation": () => err(errors.idTaken({ id: input.id })),
-				"db/query-failure": (cause) => {
-					throw cause;
-				},
-			});
+			const cause = inserted.error;
+			if (
+				isUniqueViolation(cause) ||
+				isForeignKeyViolation(cause) ||
+				isNotNullViolation(cause) ||
+				isCheckViolation(cause)
+			) {
+				return err(errors.idTaken({ id: input.id }));
+			}
+			throw cause; // the defect channel: incidentId'd server/internal
 		}
 
 		return ok(toNote(inserted.value[0]));
@@ -422,18 +458,18 @@ const updateNote = server
 	.implement(updateNoteContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.Note.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.Note.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ id: input.id }));
 
 		const patch: Partial<typeof Note.$inferInsert> = {};
 		if (input.description !== undefined) patch.description = input.description;
 		if (input.publish !== undefined) patch.publishedAt = input.publish ? new Date() : null;
 
-		const rows = await context.db
-			.update(Note)
-			.set(patch)
-			.where(eq(Note.id, input.id))
-			.returning();
+		const rows = orThrow(
+			await tryDb(rawDb.update(Note).set(patch).where(eq(Note.id, input.id)).returning()),
+		);
 
 		return ok(toNote(rows[0]));
 	});
@@ -442,10 +478,12 @@ const deleteNote = server
 	.implement(deleteNoteContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context, touch }) => {
-		const existing = await context.db.query.Note.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.Note.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ id: input.id }));
 
-		await context.db.delete(Note).where(eq(Note.id, input.id));
+		orThrow(await context.db.delete(Note).where(eq(Note.id, input.id)));
 		touch(NoteModel, input.id);
 		return ok({ id: input.id });
 	});
@@ -466,10 +504,12 @@ const listComments = server
 	.implement(listCommentsContract)
 	.use(session)
 	.handler(async ({ input, context }) => {
-		const rows = await context.db.query.Comment.findMany({
-			where: { postSlug: input.postSlug },
-			orderBy: { createdAt: "asc" },
-		});
+		const rows = orThrow(
+			await context.db.query.Comment.findMany({
+				where: { postSlug: input.postSlug },
+				orderBy: { createdAt: "asc" },
+			}),
+		);
 		const visible = context.viewer?.isAdmin ? rows : rows.filter((row) => !row.isHidden);
 		return ok(visible.map(toComment));
 	});
@@ -485,7 +525,7 @@ const createComment = server
 		if (author.isErr()) return err(errors.authorUnavailable());
 
 		const inserted = await tryDb(
-			context.db
+			rawDb
 				.insert(Comment)
 				.values({
 					postSlug: input.postSlug,
@@ -498,18 +538,20 @@ const createComment = server
 		);
 
 		if (inserted.isErr()) {
-			return matchError(inserted.error, {
-				// `post_slug` is a foreign key, so "commenting on a post that was
-				// just deleted" is the database's answer rather than a pre-flight
-				// SELECT that could go stale between check and insert.
-				"db/foreign-key-violation": () => err(errors.notFound({ slug: input.postSlug })),
-				"db/unique-violation": () => err(errors.notFound({ slug: input.postSlug })),
-				"db/not-null-violation": () => err(errors.notFound({ slug: input.postSlug })),
-				"db/check-violation": () => err(errors.notFound({ slug: input.postSlug })),
-				"db/query-failure": (cause) => {
-					throw cause;
-				},
-			});
+			const cause = inserted.error;
+			if (
+				isUniqueViolation(cause) ||
+				isForeignKeyViolation(cause) ||
+				isNotNullViolation(cause) ||
+				isCheckViolation(cause)
+			) {
+				// `post_slug` is a foreign key, so "commenting on a post that
+				// was just deleted" is the database's answer rather than a
+				// pre-flight SELECT that could go stale between check and
+				// insert.
+				return err(errors.notFound({ slug: input.postSlug }));
+			}
+			throw cause; // the defect channel: incidentId'd server/internal
 		}
 
 		return ok(toComment(inserted.value[0]));
@@ -519,15 +561,21 @@ const updateComment = server
 	.implement(updateCommentContract)
 	.use(requireViewer)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.Comment.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.Comment.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ id: input.id }));
 		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-		const rows = await context.db
-			.update(Comment)
-			.set({ content: input.content })
-			.where(eq(Comment.id, input.id))
-			.returning();
+		const rows = orThrow(
+			await tryDb(
+				rawDb
+					.update(Comment)
+					.set({ content: input.content })
+					.where(eq(Comment.id, input.id))
+					.returning(),
+			),
+		);
 
 		return ok(toComment(rows[0]));
 	});
@@ -536,14 +584,20 @@ const setCommentHidden = server
 	.implement(setCommentHiddenContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = await context.db.query.Comment.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.Comment.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ id: input.id }));
 
-		const rows = await context.db
-			.update(Comment)
-			.set({ isHidden: input.hidden })
-			.where(eq(Comment.id, input.id))
-			.returning();
+		const rows = orThrow(
+			await tryDb(
+				rawDb
+					.update(Comment)
+					.set({ isHidden: input.hidden })
+					.where(eq(Comment.id, input.id))
+					.returning(),
+			),
+		);
 
 		return ok(toComment(rows[0]));
 	});
@@ -552,11 +606,13 @@ const deleteComment = server
 	.implement(deleteCommentContract)
 	.use(requireViewer)
 	.handler(async ({ input, errors, context, touch }) => {
-		const existing = await context.db.query.Comment.findFirst({ where: { id: input.id } });
+		const existing = orThrow(
+			await context.db.query.Comment.findFirst({ where: { id: input.id } }),
+		);
 		if (!existing) return err(errors.notFound({ id: input.id }));
 		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-		await context.db.delete(Comment).where(eq(Comment.id, input.id));
+		orThrow(await context.db.delete(Comment).where(eq(Comment.id, input.id)));
 		touch(CommentModel, input.id);
 		return ok({ id: input.id });
 	});
@@ -567,7 +623,7 @@ const checkLinks = server
 	.implement(checkLinksContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const posts = await context.db.query.Post.findMany();
+		const posts = orThrow(await context.db.query.Post.findMany());
 		return ok(await checkPostLinks(posts, env.SITE_URL));
 	});
 

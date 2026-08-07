@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "@/db";
+import { db, orThrow } from "@/db";
 
 export const Route = createFileRoute("/{$slug}.md")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				const post = await db.query.Post.findFirst({
-					where: { slug: params.slug },
-				});
+				const post = orThrow(
+					await db.query.Post.findFirst({
+						where: { slug: params.slug },
+					}),
+				);
 
 				if (!post?.publicAt) {
 					return new Response("Not Found", { status: 404 });

@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { ClientErrorBoundary } from "@/components/error-boundary";
-import { db } from "@/db";
+import { db, orThrow } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 
 // Cache the database query for reuse
 const getPost = cache(async (slug: string) => {
-	const post = await db.query.Post.findFirst({ where: { slug } });
+	const post = orThrow(await db.query.Post.findFirst({ where: { slug } }));
 	if (!post) {
 		throwNotFound();
 	}
@@ -29,12 +29,14 @@ const getPost = cache(async (slug: string) => {
 
 // Generate all possible slug values at build time
 export async function generateStaticParams() {
-	const posts = await db.query.Post.findMany({
-		columns: {
-			slug: true,
-		},
-		where: { publicAt: { isNotNull: true } },
-	});
+	const posts = orThrow(
+		await db.query.Post.findMany({
+			columns: {
+				slug: true,
+			},
+			where: { publicAt: { isNotNull: true } },
+		}),
+	);
 
 	return posts.map((post) => ({
 		slug: post.slug,

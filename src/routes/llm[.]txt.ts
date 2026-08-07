@@ -1,16 +1,18 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import { groupBy, pipe } from "remeda";
-import { db } from "@/db";
+import { db, orThrow } from "@/db";
 
 export const Route = createFileRoute("/llm.txt")({
 	server: {
 		handlers: {
 			GET: async () => {
-				const posts = await db.query.Post.findMany({
-					where: { publicAt: { isNotNull: true } },
-					orderBy: { publishedAt: "desc" },
-				});
+				const posts = orThrow(
+					await db.query.Post.findMany({
+						where: { publicAt: { isNotNull: true } },
+						orderBy: { publishedAt: "desc" },
+					}),
+				);
 				const postsByYear = pipe(
 					posts,
 					groupBy((post) => post.publishedAt.getFullYear().toString()),

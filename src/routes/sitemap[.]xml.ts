@@ -1,15 +1,17 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "@/db";
+import { db, orThrow } from "@/db";
 
 export const Route = createFileRoute("/sitemap.xml")({
 	server: {
 		handlers: {
 			GET: async () => {
-				const posts = await db.query.Post.findMany({
-					where: { publicAt: { isNotNull: true } },
-					columns: { slug: true, publishedAt: true, modifiedAt: true },
-				});
+				const posts = orThrow(
+					await db.query.Post.findMany({
+						where: { publicAt: { isNotNull: true } },
+						columns: { slug: true, publishedAt: true, modifiedAt: true },
+					}),
+				);
 
 				const urls = [
 					{ loc: env.SITE_URL, lastmod: new Date(), changefreq: "weekly", priority: "1" },

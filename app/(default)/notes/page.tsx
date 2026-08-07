@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { db, orThrow } from "@/db";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
 import { Link } from "@/src/lib/navigation";
@@ -22,15 +22,17 @@ export default async function NotesPage({
 }) {
 	const { cursor } = await searchParams;
 
-	const notes = await db.query.Note.findMany({
-		where: {
-			publishedAt: cursor
-				? { isNotNull: true, lt: new Date(Number(cursor)) }
-				: { isNotNull: true },
-		},
-		orderBy: { publishedAt: "desc" },
-		limit: PAGE_SIZE + 1,
-	});
+	const notes = orThrow(
+		await db.query.Note.findMany({
+			where: {
+				publishedAt: cursor
+					? { isNotNull: true, lt: new Date(Number(cursor)) }
+					: { isNotNull: true },
+			},
+			orderBy: { publishedAt: "desc" },
+			limit: PAGE_SIZE + 1,
+		}),
+	);
 
 	const hasMore = notes.length > PAGE_SIZE;
 	const items = hasMore ? notes.slice(0, PAGE_SIZE) : notes;
