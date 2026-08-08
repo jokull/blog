@@ -72,15 +72,34 @@ export const rpcHandler = createFetchHandler({
 	endpoint: "/api/rpc",
 	createContext: ({ request }) => createContext(request.headers.get("authorization")),
 	onInternalError: ({ incidentId, procedurePath, cause }) => {
-		// A gen body's throw arrives wrapped as `Panic` (better-result re-wraps
-		// it); a plain async handler throws raw. Unwrap so the Worker log shows
-		// the defect, not the wrapper.
-		const defect = Panic.is(cause) ? cause.cause : cause;
-		const message = defect instanceof Error ? defect.message : String(defect);
+		// Peel every Panic wrapper down to the defect: tryRecover's recover
+		// callback re-throws are wrapped by tryOrPanic, and a gen body re-wraps
+		// that again. db-result then attaches the original driver error as a
+		// non-enumerable Error.cause, so walk that too — the deepest message is
+		// the real failure (the D1 error behind db/connect-failure).
+		let defect: unknown = cause;
+		for (
+			let depth = 0;
+			depth < 8 && Panic.is(defect) && defect.cause !== undefined;
+			depth += 1
+		) {
+			defect = defect.cause;
+		}
+		let leaf: unknown = defect;
+		for (
+			let depth = 0;
+			depth < 8 && leaf instanceof Error && leaf.cause !== undefined;
+			depth += 1
+		) {
+			leaf = leaf.cause;
+		}
+		const name = defect instanceof Error && defect.name !== "Error" ? defect.name : "";
+		const leafMessage = leaf instanceof Error && leaf.message ? leaf.message : "";
+		const message = [name, leafMessage].filter(Boolean).join(" — ") || String(leaf ?? defect);
 		// oxlint-disable-next-line no-console -- defects belong in the Worker log.
 		console.error(
 			`[rpc] incident=${incidentId} path=${procedurePath ?? "?"} ${message}`,
-			defect instanceof Error ? defect.stack : defect,
+			leaf instanceof Error ? leaf.stack : leaf,
 		);
 	},
 });
