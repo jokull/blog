@@ -127,50 +127,6 @@ const toNote = (row: typeof Note.$inferSelect): SavedNote => ({
 	createdAt: row.createdAt,
 });
 
-type Db = typeof db;
-
-/**
- * findFirst + the "missing" guard, shared by every handler that must load a
- * row before writing it. The query's own failure is scenario C — unwrapped to
- * a Panic here — so a gen body can `yield* (await requirePost(...))` and keep
- * its error lane on declared errors only.
- */
-async function requirePost<E extends AnyTaggedError>(
-	db: Db,
-	slug: string,
-	missing: (args: { slug: string }) => E,
-): Promise<Result<typeof Post.$inferSelect, E>> {
-	const row = (await db.query.Post.findFirst({ where: { slug } })).unwrap();
-	return row ? ok(row) : err(missing({ slug }));
-}
-
-async function requireCategory<E extends AnyTaggedError>(
-	db: Db,
-	slug: string,
-	missing: (args: { slug: string }) => E,
-): Promise<Result<typeof Category.$inferSelect, E>> {
-	const row = (await db.query.Category.findFirst({ where: { slug } })).unwrap();
-	return row ? ok(row) : err(missing({ slug }));
-}
-
-async function requireNote<E extends AnyTaggedError>(
-	db: Db,
-	id: string,
-	missing: (args: { id: string }) => E,
-): Promise<Result<typeof Note.$inferSelect, E>> {
-	const row = (await db.query.Note.findFirst({ where: { id } })).unwrap();
-	return row ? ok(row) : err(missing({ id }));
-}
-
-async function requireComment<E extends AnyTaggedError>(
-	db: Db,
-	id: number,
-	missing: (args: { id: number }) => E,
-): Promise<Result<typeof Comment.$inferSelect, E>> {
-	const row = (await db.query.Comment.findFirst({ where: { id } })).unwrap();
-	return row ? ok(row) : err(missing({ id }));
-}
-
 /**
  * The single-tag constraint fold: when the database rejected the write with a
  * constraint violation, the caller's declared error is the answer; anything
@@ -211,9 +167,12 @@ const exportPosts = server
 const postBySlug = server
 	.implement(postBySlugContract)
 	.use(requireAdmin)
-	.handler(async ({ input, errors, context }) =>
-		(await requirePost(context.db, input.slug, errors.notFound)).map(toPost),
-	);
+	.handler(async ({ input, errors, context }) => {
+		const row = (
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+		).unwrap();
+		return row ? ok(toPost(row)) : err(errors.notFound({ slug: input.slug }));
+	});
 
 const createPost = server
 	.implement(createPostContract)
@@ -258,85 +217,88 @@ const createPost = server
 const updatePost = server
 	.implement(updatePostContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context }) =>
-		Result.gen(async function* () {
-			const existing = yield* await requirePost(context.db, input.slug, errors.notFound);
-			if (existing.revision !== input.expectedRevision) {
-				return err(
-					errors.staleRevision({
-						slug: input.slug,
-						expected: input.expectedRevision,
-						current: existing.revision,
-					}),
-				);
-			}
+	.handler(async ({ input, errors, context }) => {
+		const existing = (
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+		).unwrap();
+		if (!existing) return err(errors.notFound({ slug: input.slug }));
+		if (existing.revision !== input.expectedRevision) {
+			return err(
+				errors.staleRevision({
+					slug: input.slug,
+					expected: input.expectedRevision,
+					current: existing.revision,
+				}),
+			);
+		}
 
-			if (input.categorySlug != null) {
-				yield* await requireCategory(
-					context.db,
-					input.categorySlug,
-					errors.unknownCategory,
-				);
-			}
-
-			const patch: Partial<typeof Post.$inferInsert> = {};
-			if (input.title !== undefined) patch.title = input.title;
-			if (input.publishedAt !== undefined) patch.publishedAt = input.publishedAt;
-			if (input.locale !== undefined) patch.locale = input.locale;
-			if (input.categorySlug !== undefined) patch.categorySlug = input.categorySlug;
-
-			if (input.markdown !== undefined) {
-				// Writing the body supersedes any draft, so the preview column is cleared —
-				// otherwise the next publish would promote a stale draft over the body this
-				// write just landed.
-				patch.markdown = input.markdown;
-				patch.previewMarkdown = null;
-			}
-
-			// Precedence: an explicit hero image wins; otherwise a new body's first
-			// image follows it; with neither, the column keeps whatever it had.
-			if (input.heroImage !== undefined) {
-				patch.heroImage = input.heroImage;
-			} else if (input.markdown !== undefined) {
-				patch.heroImage = await extractFirstImage(input.markdown);
-			}
-
-			const rows = (
-				await db
-					.update(Post)
-					.set({
-						...patch,
-						modifiedAt: new Date(),
-						revision: existing.revision + 1,
-					})
-					// The revision is re-checked in the WHERE clause, not just above, so a
-					// writer that slipped in between the SELECT and here loses the race
-					// rather than being overwritten by it. The guard makes the plain
-					// value equivalent to the SQL increment: success means the row
-					// still held `existing.revision` when the write landed.
-					.where(
-						and(eq(Post.slug, input.slug), eq(Post.revision, input.expectedRevision)),
-					)
-					.returning()
+		if (input.categorySlug != null) {
+			const category = (
+				await context.db.query.Category.findFirst({
+					where: { slug: input.categorySlug },
+				})
 			).unwrap();
+			if (!category) return err(errors.unknownCategory({ slug: input.categorySlug }));
+		}
 
-			// Drizzle types `.returning()` as a non-empty tuple, so this has to be a
-			// length check: an empty result means the revision guard in the WHERE
-			// clause rejected the write, which is the whole point of it.
-			if (rows.length === 0) {
-				const current = yield* await requirePost(context.db, input.slug, errors.notFound);
-				return err(
-					errors.staleRevision({
-						slug: input.slug,
-						expected: input.expectedRevision,
-						current: current.revision,
-					}),
-				);
-			}
+		const patch: Partial<typeof Post.$inferInsert> = {};
+		if (input.title !== undefined) patch.title = input.title;
+		if (input.publishedAt !== undefined) patch.publishedAt = input.publishedAt;
+		if (input.locale !== undefined) patch.locale = input.locale;
+		if (input.categorySlug !== undefined) patch.categorySlug = input.categorySlug;
 
-			return ok(toPost(rows[0]));
-		}),
-	);
+		if (input.markdown !== undefined) {
+			// Writing the body supersedes any draft, so the preview column is cleared —
+			// otherwise the next publish would promote a stale draft over the body this
+			// write just landed.
+			patch.markdown = input.markdown;
+			patch.previewMarkdown = null;
+		}
+
+		// Precedence: an explicit hero image wins; otherwise a new body's first
+		// image follows it; with neither, the column keeps whatever it had.
+		if (input.heroImage !== undefined) {
+			patch.heroImage = input.heroImage;
+		} else if (input.markdown !== undefined) {
+			patch.heroImage = await extractFirstImage(input.markdown);
+		}
+
+		const rows = (
+			await db
+				.update(Post)
+				.set({
+					...patch,
+					modifiedAt: new Date(),
+					revision: existing.revision + 1,
+				})
+				// The revision is re-checked in the WHERE clause, not just above, so a
+				// writer that slipped in between the SELECT and here loses the race
+				// rather than being overwritten by it. The guard makes the plain
+				// value equivalent to the SQL increment: success means the row
+				// still held `existing.revision` when the write landed.
+				.where(and(eq(Post.slug, input.slug), eq(Post.revision, input.expectedRevision)))
+				.returning()
+		).unwrap();
+
+		// Drizzle types `.returning()` as a non-empty tuple, so this has to be a
+		// length check: an empty result means the revision guard in the WHERE
+		// clause rejected the write, which is the whole point of it.
+		if (rows.length === 0) {
+			const current = (
+				await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+			).unwrap();
+			if (!current) return err(errors.notFound({ slug: input.slug }));
+			return err(
+				errors.staleRevision({
+					slug: input.slug,
+					expected: input.expectedRevision,
+					current: current.revision,
+				}),
+			);
+		}
+
+		return ok(toPost(rows[0]));
+	});
 
 /**
  * THE publish path — the one the dashboard switch and `blog update --publish`
@@ -349,51 +311,53 @@ const updatePost = server
 const setPublished = server
 	.implement(setPublishedContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context }) =>
-		Result.gen(async function* () {
-			const existing = yield* await requirePost(context.db, input.slug, errors.notFound);
+	.handler(async ({ input, errors, context }) => {
+		const existing = (
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+		).unwrap();
+		if (!existing) return err(errors.notFound({ slug: input.slug }));
 
-			// Absolute, not a toggle: asking for the state it is already in is a
-			// no-op rather than a flip, so a double click cannot unpublish.
-			if ((existing.publicAt !== null) === input.published) return ok(toPost(existing));
+		// Absolute, not a toggle: asking for the state it is already in is a
+		// no-op rather than a flip, so a double click cannot unpublish.
+		if ((existing.publicAt !== null) === input.published) return ok(toPost(existing));
 
-			const markdown = input.published
-				? (existing.previewMarkdown ?? existing.markdown)
-				: existing.markdown;
-			const heroImage = markdown ? await extractFirstImage(markdown) : existing.heroImage;
+		const markdown = input.published
+			? (existing.previewMarkdown ?? existing.markdown)
+			: existing.markdown;
+		const heroImage = markdown ? await extractFirstImage(markdown) : existing.heroImage;
 
-			const rows = (
-				await db
-					.update(Post)
-					.set({
-						publicAt: input.published ? new Date() : null,
-						markdown,
-						previewMarkdown: null,
-						heroImage,
-						modifiedAt: new Date(),
-						revision: existing.revision + 1,
-					})
-					.where(eq(Post.slug, input.slug))
-					.returning()
-			).unwrap();
+		const rows = (
+			await db
+				.update(Post)
+				.set({
+					publicAt: input.published ? new Date() : null,
+					markdown,
+					previewMarkdown: null,
+					heroImage,
+					modifiedAt: new Date(),
+					revision: existing.revision + 1,
+				})
+				.where(eq(Post.slug, input.slug))
+				.returning()
+		).unwrap();
 
-			return ok(toPost(rows[0]));
-		}),
-	);
+		return ok(toPost(rows[0]));
+	});
 
 const deletePost = server
 	.implement(deletePostContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context, touch }) =>
-		Result.gen(async function* () {
-			yield* await requirePost(context.db, input.slug, errors.notFound);
+	.handler(async ({ input, errors, context, touch }) => {
+		const post = (
+			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+		).unwrap();
+		if (!post) return err(errors.notFound({ slug: input.slug }));
 
-			(await context.db.delete(Post).where(eq(Post.slug, input.slug))).unwrap();
-			// A deleted row cannot ride back as an entity, so invalidate by identity.
-			touch(PostModel, input.slug);
-			return ok({ slug: input.slug });
-		}),
-	);
+		(await context.db.delete(Post).where(eq(Post.slug, input.slug))).unwrap();
+		// A deleted row cannot ride back as an entity, so invalidate by identity.
+		touch(PostModel, input.slug);
+		return ok({ slug: input.slug });
+	});
 
 // ------------------------------------------------------------------ categories
 
@@ -422,24 +386,25 @@ const createCategory = server
 const deleteCategory = server
 	.implement(deleteCategoryContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context }) =>
-		Result.gen(async function* () {
-			yield* await requireCategory(context.db, input.slug, errors.notFound);
+	.handler(async ({ input, errors, context }) => {
+		const category = (
+			await context.db.query.Category.findFirst({ where: { slug: input.slug } })
+		).unwrap();
+		if (!category) return err(errors.notFound({ slug: input.slug }));
 
-			const counted = (
-				await context.db
-					.select({ count: sql<number>`count(*)` })
-					.from(Post)
-					.where(eq(Post.categorySlug, input.slug))
-			).unwrap();
+		const counted = (
+			await context.db
+				.select({ count: sql<number>`count(*)` })
+				.from(Post)
+				.where(eq(Post.categorySlug, input.slug))
+		).unwrap();
 
-			const postCount = Number(counted[0]?.count ?? 0);
-			if (postCount > 0) return err(errors.inUse({ slug: input.slug, postCount }));
+		const postCount = Number(counted[0]?.count ?? 0);
+		if (postCount > 0) return err(errors.inUse({ slug: input.slug, postCount }));
 
-			(await context.db.delete(Category).where(eq(Category.slug, input.slug))).unwrap();
-			return ok({ slug: input.slug });
-		}),
-	);
+		(await context.db.delete(Category).where(eq(Category.slug, input.slug))).unwrap();
+		return ok({ slug: input.slug });
+	});
 
 // ------------------------------------------------------------------ notes
 
@@ -476,35 +441,33 @@ const createNote = server
 const updateNote = server
 	.implement(updateNoteContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context }) =>
-		Result.gen(async function* () {
-			yield* await requireNote(context.db, input.id, errors.notFound);
+	.handler(async ({ input, errors, context }) => {
+		const note = (await context.db.query.Note.findFirst({ where: { id: input.id } })).unwrap();
+		if (!note) return err(errors.notFound({ id: input.id }));
 
-			const patch: Partial<typeof Note.$inferInsert> = {};
-			if (input.description !== undefined) patch.description = input.description;
-			if (input.publish !== undefined) patch.publishedAt = input.publish ? new Date() : null;
+		const patch: Partial<typeof Note.$inferInsert> = {};
+		if (input.description !== undefined) patch.description = input.description;
+		if (input.publish !== undefined) patch.publishedAt = input.publish ? new Date() : null;
 
-			const rows = (
-				await db.update(Note).set(patch).where(eq(Note.id, input.id)).returning()
-			).unwrap();
+		const rows = (
+			await db.update(Note).set(patch).where(eq(Note.id, input.id)).returning()
+		).unwrap();
 
-			return ok(toNote(rows[0]));
-		}),
-	);
+		return ok(toNote(rows[0]));
+	});
 
 const deleteNote = server
 	.implement(deleteNoteContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context, touch }) =>
-		Result.gen(async function* () {
-			yield* await requireNote(context.db, input.id, errors.notFound);
+	.handler(async ({ input, errors, context, touch }) => {
+		const note = (await context.db.query.Note.findFirst({ where: { id: input.id } })).unwrap();
+		if (!note) return err(errors.notFound({ id: input.id }));
 
-			(await context.db.delete(Note).where(eq(Note.id, input.id))).unwrap();
-			// A deleted row cannot ride back as an entity, so invalidate by identity.
-			touch(NoteModel, input.id);
-			return ok({ id: input.id });
-		}),
-	);
+		(await context.db.delete(Note).where(eq(Note.id, input.id))).unwrap();
+		// A deleted row cannot ride back as an entity, so invalidate by identity.
+		touch(NoteModel, input.id);
+		return ok({ id: input.id });
+	});
 
 // ------------------------------------------------------------------ comments
 
@@ -570,58 +533,59 @@ const createComment = server
 const updateComment = server
 	.implement(updateCommentContract)
 	.use(requireViewer)
-	.handler(({ input, errors, context }) =>
-		Result.gen(async function* () {
-			const existing = yield* await requireComment(context.db, input.id, errors.notFound);
-			if (!canModerate(existing, context.viewer))
-				return err(errors.notAuthor({ id: input.id }));
+	.handler(async ({ input, errors, context }) => {
+		const existing = (
+			await context.db.query.Comment.findFirst({ where: { id: input.id } })
+		).unwrap();
+		if (!existing) return err(errors.notFound({ id: input.id }));
+		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-			const rows = (
-				await db
-					.update(Comment)
-					.set({ content: input.content })
-					.where(eq(Comment.id, input.id))
-					.returning()
-			).unwrap();
+		const rows = (
+			await db
+				.update(Comment)
+				.set({ content: input.content })
+				.where(eq(Comment.id, input.id))
+				.returning()
+		).unwrap();
 
-			return ok(toComment(rows[0]));
-		}),
-	);
+		return ok(toComment(rows[0]));
+	});
 
 const setCommentHidden = server
 	.implement(setCommentHiddenContract)
 	.use(requireAdmin)
-	.handler(({ input, errors, context }) =>
-		Result.gen(async function* () {
-			yield* await requireComment(context.db, input.id, errors.notFound);
+	.handler(async ({ input, errors, context }) => {
+		const comment = (
+			await context.db.query.Comment.findFirst({ where: { id: input.id } })
+		).unwrap();
+		if (!comment) return err(errors.notFound({ id: input.id }));
 
-			const rows = (
-				await db
-					.update(Comment)
-					.set({ isHidden: input.hidden })
-					.where(eq(Comment.id, input.id))
-					.returning()
-			).unwrap();
+		const rows = (
+			await db
+				.update(Comment)
+				.set({ isHidden: input.hidden })
+				.where(eq(Comment.id, input.id))
+				.returning()
+		).unwrap();
 
-			return ok(toComment(rows[0]));
-		}),
-	);
+		return ok(toComment(rows[0]));
+	});
 
 const deleteComment = server
 	.implement(deleteCommentContract)
 	.use(requireViewer)
-	.handler(({ input, errors, context, touch }) =>
-		Result.gen(async function* () {
-			const existing = yield* await requireComment(context.db, input.id, errors.notFound);
-			if (!canModerate(existing, context.viewer))
-				return err(errors.notAuthor({ id: input.id }));
+	.handler(async ({ input, errors, context, touch }) => {
+		const existing = (
+			await context.db.query.Comment.findFirst({ where: { id: input.id } })
+		).unwrap();
+		if (!existing) return err(errors.notFound({ id: input.id }));
+		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-			(await context.db.delete(Comment).where(eq(Comment.id, input.id))).unwrap();
-			// A deleted row cannot ride back as an entity, so invalidate by identity.
-			touch(CommentModel, input.id);
-			return ok({ id: input.id });
-		}),
-	);
+		(await context.db.delete(Comment).where(eq(Comment.id, input.id))).unwrap();
+		// A deleted row cannot ride back as an entity, so invalidate by identity.
+		touch(CommentModel, input.id);
+		return ok({ id: input.id });
+	});
 
 // ------------------------------------------------------------------ link check and stats
 
