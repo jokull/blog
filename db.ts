@@ -1,28 +1,116 @@
 import { env } from "cloudflare:workers";
-import { drizzle } from "drizzle-orm/d1";
-import { drizzleTryDb } from "db-result/drizzle";
+import { Kysely, sql, type Selectable } from "kysely";
+import { D1Dialect } from "kysely-d1";
+import { kyselyTryDb } from "db-result/kysely";
 import type { SqliteDbError } from "db-result/sqlite";
-import { relations } from "./schema";
+import { ThemeColorsCodec, type ThemeColors } from "@/src/kitty/colors";
+import type {
+	CategoryTable,
+	CommentTable,
+	DB,
+	KittyThemeTable,
+	NoteTable,
+	PostTable,
+	StoredCategory,
+	StoredComment,
+	StoredKittyTheme,
+	StoredNote,
+	StoredPost,
+} from "./schema";
 
 /**
- * Drizzle 1.0 relational queries v2: the database is typed by its relations
- * alone — `defineRelations(tables, ...)` carries the tables, so there is no
- * schema generic and no `schema` config option.
- *
- * Wrapped with db-result's `drizzleTryDb`: every builder chain, transaction,
- * raw execute, and relational query (`db.query.*`) resolves `Result<T, E>`
- * with the sqlite protocol union — classified db failures, transient retries,
- * and read-shape narrowing on relational reads. No `tryDb` litter at call
- * sites; handlers fold the db/* tags they know and throw the rest.
+ * Wrapped with db-result's `kyselyTryDb`: every builder terminal resolves
+ * `Result<T, E>` with the sqlite protocol union — classified db failures,
+ * transient retries, and `executeTakeFirst`'s absent-row `undefined` (or the
+ * `NoResultError` lane of `executeTakeFirstOrThrow`). No `tryDb` litter at
+ * call sites; handlers fold the db/* tags they know and throw the rest.
  */
-/**
- * The unwrapped drizzle db — for the one remaining degraded shape: explicit
- * `select({ columns })` projections still lose their row type through the
- * wrapped chain (db-result tracks this as a follow-up), so
- * `tryDb(rawDb.select(...)...)` is used for those. `insert`/`update`/`delete`
- * chains keep exact rows through `db` now that the wrapper threads the table
- * generic from the call site.
- */
-export const rawDb = drizzle(env.DB, { relations });
+export const rawDb = new Kysely<DB>({ dialect: new D1Dialect({ database: env.DB }) });
 
-export const db = drizzleTryDb<typeof rawDb, SqliteDbError>(rawDb);
+export const db = kyselyTryDb<typeof rawDb, SqliteDbError>(rawDb);
+
+/**
+ * Epoch seconds is the storage unit of every timestamp column (the schema's
+ * legacy format, written by the old drizzle layer). These two helpers are the
+ * only sanctioned way to convert for a write.
+ */
+export const epoch = (date: Date): number => Math.floor(date.getTime() / 1000);
+export const epochOrNull = (date: Date | null): number | null =>
+	date === null ? null : Math.floor(date.getTime() / 1000);
+
+/**
+ * db-result#3: the wrapped `orderBy` drops kysely's `(expr, modifiers)` two-arg
+ * form, so a descending direction must ride inside the expression. Revert to
+ * `orderBy(column, "desc")` once the override is fixed.
+ */
+export const orderByDesc = <T extends string>(column: T) => sql`${sql.ref(column)} desc`;
+
+/**
+ * The raw row decoded to the model's exact shape — the drift boundary.
+ * Written out field by field rather than spread, so a new column in schema.ts
+ * is a decision here instead of an accident on the wire.
+ */
+export const decodePost = (row: PostTable): StoredPost => ({
+	slug: row.slug,
+	title: row.title,
+	markdown: row.markdown,
+	previewMarkdown: row.preview_markdown,
+	publicAt: row.public_at === null ? null : new Date(row.public_at * 1000),
+	createdAt: new Date(row.created_at * 1000),
+	publishedAt: new Date(row.published_at * 1000),
+	modifiedAt: row.modified_at === null ? null : new Date(row.modified_at * 1000),
+	revision: row.revision,
+	locale: row.locale,
+	heroImage: row.hero_image,
+	categorySlug: row.category_slug,
+});
+
+export const decodeCategory = (row: CategoryTable): StoredCategory => ({
+	slug: row.slug,
+	label: row.label,
+	createdAt: new Date(row.created_at * 1000),
+});
+
+export const decodeComment = (row: Selectable<CommentTable>): StoredComment => ({
+	id: row.id,
+	postSlug: row.post_slug,
+	authorGithubId: row.author_github_id,
+	authorGithubUsername: row.author_github_username,
+	authorAvatarUrl: row.author_avatar_url,
+	content: row.content,
+	isHidden: row.is_hidden === 1,
+	createdAt: new Date(row.created_at * 1000),
+});
+
+export const decodeNote = (row: NoteTable): StoredNote => ({
+	id: row.id,
+	description: row.description,
+	publishedAt: row.published_at === null ? null : new Date(row.published_at * 1000),
+	createdAt: new Date(row.created_at * 1000),
+});
+
+/**
+ * Stored colors are JSON text. Decode validates rather than casts, so a
+ * corrupted row becomes a Panic (scenario C) instead of a mis-shapen theme.
+ */
+const decodeColors = (row: Selectable<KittyThemeTable>): ThemeColors => {
+	const decoded = ThemeColorsCodec.decode(JSON.parse(row.colors));
+	if (!decoded.ok)
+		throw new Error(`stored theme colors failed validation: ${JSON.stringify(decoded.issues)}`);
+	return decoded.value;
+};
+
+export const decodeTheme = (row: Selectable<KittyThemeTable>): StoredKittyTheme => ({
+	id: row.id,
+	slug: row.slug,
+	name: row.name,
+	authorGithubId: row.author_github_id,
+	authorGithubUsername: row.author_github_username,
+	authorAvatarUrl: row.author_avatar_url,
+	isPublished: row.is_published === 1,
+	forkedFromId: row.forked_from_id,
+	blurb: row.blurb,
+	colors: decodeColors(row),
+	createdAt: new Date(row.created_at * 1000),
+	modifiedAt: row.modified_at === null ? null : new Date(row.modified_at * 1000),
+});

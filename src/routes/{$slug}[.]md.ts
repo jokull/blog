@@ -1,20 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Result } from "better-result";
-import { db } from "@/db";
+import { db, decodePost } from "@/db";
 
 export const Route = createFileRoute("/{$slug}.md")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				const post = Result.unwrap(
-					await db.query.Post.findFirst({
-						where: { slug: params.slug },
-					}),
-				);
+				const row = (
+					await db
+						.selectFrom("post")
+						.selectAll()
+						.where("slug", "=", params.slug)
+						.executeTakeFirst()
+				).unwrap();
 
-				if (!post?.publicAt) {
-					return new Response("Not Found", { status: 404 });
-				}
+				if (!row) return new Response("Not Found", { status: 404 });
+				const post = decodePost(row);
+				if (!post.publicAt) return new Response("Not Found", { status: 404 });
 
 				const formattedDate = post.publicAt.toISOString().split("T")[0];
 				const markdownDocument = `# ${post.title}

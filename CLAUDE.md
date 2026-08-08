@@ -39,7 +39,7 @@ code drags D1, iron-session and the GitHub client secret into the bundle. This i
 a security bug, not a size regression. After `bun run build`:
 
 ```bash
-rg -l 'iron-session|drizzle-orm/d1|cloudflare:workers|GITHUB_CLIENT_SECRET' dist/client/
+rg -l 'iron-session|kysely-d1|cloudflare:workers|GITHUB_CLIENT_SECRET' dist/client/
 # must print nothing
 ```
 

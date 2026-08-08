@@ -1,8 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import RSS, { type ItemOptions } from "rss";
-import { Result } from "better-result";
-import { db } from "@/db";
+import { db, decodePost, orderByDesc } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { extractFirstImage, normalizeImageUrl } from "@/lib/mdx-image-extractor";
 
@@ -26,15 +25,18 @@ export const Route = createFileRoute("/feed.xml")({
 					ttl: 60,
 				});
 
-				const posts = Result.unwrap(
-					await db.query.Post.findMany({
-						where: { publicAt: { isNotNull: true } },
-						orderBy: { publishedAt: "desc" },
-						limit: 20,
-					}),
-				);
+				const posts = (
+					await db
+						.selectFrom("post")
+						.selectAll()
+						.where("public_at", "is not", null)
+						.orderBy(orderByDesc("published_at"))
+						.limit(20)
+						.execute()
+				).unwrap();
+				const decoded = posts.map(decodePost);
 
-				for (const post of posts) {
+				for (const post of decoded) {
 					const description = await extractFirstParagraph(post.markdown);
 					const extractedImage =
 						post.heroImage ?? (await extractFirstImage(post.markdown));

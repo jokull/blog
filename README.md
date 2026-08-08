@@ -11,7 +11,7 @@ managing posts, and the [Kitty](https://www.solberg.is/kitty) terminal-theme edi
 - [Vite](https://vite.dev) and the Cloudflare Vite plugin
 - [Cloudflare Workers](https://workers.cloudflare.com) and
   [Cloudflare D1](https://developers.cloudflare.com/d1/)
-- [Drizzle ORM](https://orm.drizzle.team) for the SQLite schema and migrations
+- [Kysely](https://kysely.dev) for typed queries, with `db-result` classifying failures into Result tags
 - Markdown and MDX rendered with `safe-mdx`, with server-side Shiki highlighting
 - Monaco for post editing
 - Tailwind CSS v4

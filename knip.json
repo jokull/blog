@@ -1,4 +1,4 @@
 {
 	"$schema": "https://unpkg.com/knip@5/schema.json",
-	"ignore": ["**/*.d.ts", "migrations/**", "drizzle-kit.config.ts"]
+	"ignore": ["**/*.d.ts", "migrations/**"]
 }

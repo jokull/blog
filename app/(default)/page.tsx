@@ -1,9 +1,6 @@
 import { Theater } from "@/components/theater";
 import { tryDb } from "db-result";
-import { Result } from "better-result";
-import { db, rawDb } from "@/db";
-import { Comment } from "@/schema";
-import { eq, sql } from "drizzle-orm";
+import { db, rawDb, decodeCategory, decodePost, orderByDesc } from "@/db";
 import type { Metadata } from "@/src/lib/metadata";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
@@ -19,11 +16,13 @@ export async function generateMetadata({
 	const { category } = await searchParams;
 
 	if (category) {
-		const cat = Result.unwrap(
-			await db.query.Category.findFirst({
-				where: { slug: category },
-			}),
-		);
+		const cat = (
+			await db
+				.selectFrom("category")
+				.selectAll()
+				.where("slug", "=", category)
+				.executeTakeFirst()
+		).unwrap();
 		if (cat) {
 			return {
 				title: `${cat.label} — Jökull Sólberg`,
@@ -69,33 +68,39 @@ function ShowsSkeleton() {
 
 export default async function Page() {
 	// Fetch all posts with category information
-	const posts = Result.unwrap(
-		await db.query.Post.findMany({
-			where: { publicAt: { isNotNull: true } },
-			orderBy: { publishedAt: "desc" },
-		}),
-	);
+	const posts = (
+		await db
+			.selectFrom("post")
+			.selectAll()
+			.where("public_at", "is not", null)
+			.orderBy(orderByDesc("published_at"))
+			.execute()
+	)
+		.unwrap()
+		.map(decodePost);
 
 	// Fetch all categories
-	const categories = Result.unwrap(await db.query.Category.findMany());
+	const categories = (await db.selectFrom("category").selectAll().execute())
+		.unwrap()
+		.map(decodeCategory);
 
 	// Get comment counts for all posts
-	const commentCounts = Result.unwrap(
-		await tryDb(
+	// db-result#4: `select`/`groupBy` return unwrapped builders, so the
+	// aggregation runs on the raw db inside `tryDb`.
+	const commentCounts = (
+		await tryDb(() =>
 			rawDb
-				.select({
-					postSlug: Comment.postSlug,
-					count: sql<number>`count(*)`.as("count"),
-				})
-				.from(Comment)
-				.where(eq(Comment.isHidden, false))
-				.groupBy(Comment.postSlug),
-		),
-	);
+				.selectFrom("comment")
+				.select(["post_slug", ({ fn }) => fn.countAll<number>().as("count")])
+				.where("is_hidden", "=", 0)
+				.groupBy("post_slug")
+				.execute(),
+		)
+	).unwrap();
 
 	const commentCountsMap = commentCounts.reduce(
 		(acc, item) => {
-			acc[item.postSlug] = item.count;
+			acc[item.post_slug] = item.count;
 			return acc;
 		},
 		{} as Record<string, number>,

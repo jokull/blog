@@ -46,7 +46,7 @@ is no `'use client'` directive protecting you here.
 Verify after `bun run build`:
 
 ```bash
-grep -rl "iron-session\|drizzle-orm/d1\|cloudflare:workers\|getIronSession" dist/client/
+grep -rl "iron-session\|kysely-d1\|cloudflare:workers\|getIronSession" dist/client/
 # must print nothing
 ```
 

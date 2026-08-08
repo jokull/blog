@@ -1,22 +1,15 @@
 /**
  * SERVER-ONLY: the kitty handlers. This module closes over the D1 binding and
- * the iron-session secret. Nothing in the browser graph may reach it — it is
- * reachable only from src/rpc/server.ts, which the `/api/rpc` route and the
- * `createServerFn` prefetchers in ssr.ts import, and which TanStack Start
- * strips from the client build.
- *
- * Every handler here was a `throw new Error("...")` in app/kitty/mutations.ts.
- * They return declared failures now, so the union a component can be asked to
- * render is exactly the union this file can produce.
+ * keeps the RPC layer free of database imports.
  */
-import { eq } from "drizzle-orm";
 import { Result } from "better-result";
 import { err, ok } from "result-rpc";
+import { type Selectable } from "kysely";
 import { getGithubUser } from "@/auth";
-import { db } from "@/db";
+import { db, decodeTheme, epoch, orderByDesc } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
 import { requireViewer, server, session } from "@/src/rpc/server-base";
-import { KittyTheme } from "@/schema";
+import type { KittyThemeTable } from "@/schema";
 import {
 	communityBySlugContract,
 	communityListContract,
@@ -40,36 +33,25 @@ const generateSlug = (name: string) =>
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/^-+|-+$/g, "")}-${Date.now().toString(36)}`;
 
-/** The Drizzle row mapped to the model's exact shape — the drift boundary. */
-const toTheme = (row: typeof KittyTheme.$inferSelect): SavedTheme => ({
-	id: row.id,
-	slug: row.slug,
-	name: row.name,
-	authorGithubId: row.authorGithubId,
-	authorGithubUsername: row.authorGithubUsername,
-	authorAvatarUrl: row.authorAvatarUrl,
-	isPublished: row.isPublished,
-	forkedFromId: row.forkedFromId,
-	blurb: row.blurb,
-	colors: row.colors,
-	createdAt: row.createdAt,
-	modifiedAt: row.modifiedAt,
-});
+/** `colors` crosses the wire as an object but is stored as JSON text. */
+const encodeColors = (colors: SavedTheme["colors"]): string => JSON.stringify(colors);
 
-const canWrite = (row: typeof KittyTheme.$inferSelect, viewer: Viewer) =>
-	row.authorGithubUsername === viewer.username || viewer.isAdmin;
+const canWrite = (row: Selectable<KittyThemeTable>, viewer: Viewer) =>
+	row.author_github_username === viewer.username || viewer.isAdmin;
 
 const published = server.implement(publishedThemesContract).handler(async ({ context }) => {
 	// A read with no declared failure: the query either answers or it is
 	// scenario C — `unwrap` throws a Panic and the framework turns that
 	// into a sanitized server/internal with an incident id.
 	const rows = (
-		await context.db.query.KittyTheme.findMany({
-			where: { isPublished: true },
-			orderBy: { createdAt: "desc" },
-		})
+		await db
+			.selectFrom("kitty_theme")
+			.selectAll()
+			.where("is_published", "=", 1)
+			.orderBy(orderByDesc("created_at"))
+			.execute()
 	).unwrap();
-	return ok(rows.map(toTheme));
+	return ok(rows.map(decodeTheme));
 });
 
 const mine = server
@@ -77,12 +59,14 @@ const mine = server
 	.use(requireViewer)
 	.handler(async ({ context }) => {
 		const rows = (
-			await context.db.query.KittyTheme.findMany({
-				where: { authorGithubUsername: context.viewer.username },
-				orderBy: { createdAt: "desc" },
-			})
+			await db
+				.selectFrom("kitty_theme")
+				.selectAll()
+				.where("author_github_username", "=", context.viewer.username)
+				.orderBy(orderByDesc("created_at"))
+				.execute()
 		).unwrap();
-		return ok(rows.map(toTheme));
+		return ok(rows.map(decodeTheme));
 	});
 
 /**
@@ -96,18 +80,22 @@ const byId = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const row = (
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+				await db
+					.selectFrom("kitty_theme")
+					.selectAll()
+					.where("id", "=", input.id)
+					.executeTakeFirst()
 			).unwrap();
 			// An unpublished theme is `theme/not-found` to anyone but its owner and
 			// admins. Hiding existence is the point, so this deliberately does not
 			// distinguish "no such theme" from "not yours" — that would be a disclosure.
 			if (
 				!row ||
-				(!row.isPublished && (context.viewer === null || !canWrite(row, context.viewer)))
+				(!row.is_published && (context.viewer === null || !canWrite(row, context.viewer)))
 			) {
 				return yield* err(errors.notFound({ themeId: input.id }));
 			}
-			return ok(toTheme(row));
+			return ok(decodeTheme(row));
 		}),
 	);
 
@@ -123,22 +111,24 @@ const create = server
 			);
 
 			// The insert has no declared fold: any database failure is scenario C.
-			const [row] = (
+			const row = (
 				await db
-					.insert(KittyTheme)
+					.insertInto("kitty_theme")
 					.values({
 						slug: generateSlug(input.name),
 						name: input.name,
 						blurb: input.blurb,
-						colors: input.colors,
-						authorGithubId: author.id,
-						authorGithubUsername: author.login,
-						authorAvatarUrl: author.avatar_url,
-						isPublished: false,
+						colors: encodeColors(input.colors),
+						author_github_id: author.id,
+						author_github_username: author.login,
+						author_avatar_url: author.avatar_url,
+						is_published: 0,
+						created_at: epoch(new Date()),
 					})
-					.returning()
+					.returningAll()
+					.executeTakeFirstOrThrow()
 			).unwrap();
-			return ok(toTheme(row));
+			return ok(decodeTheme(row));
 		}),
 	);
 
@@ -148,26 +138,31 @@ const update = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const existing = (
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+				await db
+					.selectFrom("kitty_theme")
+					.selectAll()
+					.where("id", "=", input.id)
+					.executeTakeFirst()
 			).unwrap();
 			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!canWrite(existing, context.viewer)) {
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			const [row] = (
+			const row = (
 				await db
-					.update(KittyTheme)
+					.updateTable("kitty_theme")
 					.set({
 						name: input.name,
 						blurb: input.blurb,
-						colors: input.colors,
-						modifiedAt: new Date(),
+						colors: encodeColors(input.colors),
+						modified_at: epoch(new Date()),
 					})
-					.where(eq(KittyTheme.id, input.id))
-					.returning()
+					.where("id", "=", input.id)
+					.returningAll()
+					.executeTakeFirstOrThrow()
 			).unwrap();
-			return ok(toTheme(row));
+			return ok(decodeTheme(row));
 		}),
 	);
 
@@ -177,21 +172,29 @@ const togglePublish = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const existing = (
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+				await db
+					.selectFrom("kitty_theme")
+					.selectAll()
+					.where("id", "=", input.id)
+					.executeTakeFirst()
 			).unwrap();
 			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!canWrite(existing, context.viewer)) {
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			const [row] = (
+			const row = (
 				await db
-					.update(KittyTheme)
-					.set({ isPublished: !existing.isPublished, modifiedAt: new Date() })
-					.where(eq(KittyTheme.id, input.id))
-					.returning()
+					.updateTable("kitty_theme")
+					.set({
+						is_published: existing.is_published === 1 ? 0 : 1,
+						modified_at: epoch(new Date()),
+					})
+					.where("id", "=", input.id)
+					.returningAll()
+					.executeTakeFirstOrThrow()
 			).unwrap();
-			return ok(toTheme(row));
+			return ok(decodeTheme(row));
 		}),
 	);
 
@@ -201,10 +204,14 @@ const fork = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const original = (
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+				await db
+					.selectFrom("kitty_theme")
+					.selectAll()
+					.where("id", "=", input.id)
+					.executeTakeFirst()
 			).unwrap();
 			if (!original) return yield* err(errors.notFound({ themeId: input.id }));
-			if (!original.isPublished) {
+			if (!original.is_published) {
 				return yield* err(errors.forkUnpublished({ themeId: input.id }));
 			}
 
@@ -212,23 +219,25 @@ const fork = server
 				errors.authorUnavailable(),
 			);
 
-			const [row] = (
+			const row = (
 				await db
-					.insert(KittyTheme)
+					.insertInto("kitty_theme")
 					.values({
 						slug: generateSlug(`${original.name} remix`),
 						name: `${original.name} (Remix)`,
 						blurb: original.blurb,
 						colors: original.colors,
-						authorGithubId: author.id,
-						authorGithubUsername: author.login,
-						authorAvatarUrl: author.avatar_url,
-						forkedFromId: original.id,
-						isPublished: false,
+						author_github_id: author.id,
+						author_github_username: author.login,
+						author_avatar_url: author.avatar_url,
+						forked_from_id: original.id,
+						is_published: 0,
+						created_at: epoch(new Date()),
 					})
-					.returning()
+					.returningAll()
+					.executeTakeFirstOrThrow()
 			).unwrap();
-			return ok(toTheme(row));
+			return ok(decodeTheme(row));
 		}),
 	);
 
@@ -238,14 +247,18 @@ const remove = server
 	.handler(({ input, errors, context, touch }) =>
 		Result.gen(async function* () {
 			const existing = (
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+				await db
+					.selectFrom("kitty_theme")
+					.selectAll()
+					.where("id", "=", input.id)
+					.executeTakeFirst()
 			).unwrap();
 			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!canWrite(existing, context.viewer)) {
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			(await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id))).unwrap();
+			(await db.deleteFrom("kitty_theme").where("id", "=", input.id).execute()).unwrap();
 			// A deleted row cannot ride back as an entity, so invalidate by identity.
 			touch(KittyThemeModel, input.id);
 			return ok({ id: input.id });

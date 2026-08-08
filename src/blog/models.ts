@@ -6,14 +6,14 @@
  * mutation returning the row patches the admin table and any other cached view
  * in place, with no page-level revalidation involved.
  *
- * `$satisfies` proves each shape is an exact projection of the Drizzle row, so
+ * `$satisfies` proves each shape is an exact projection of the stored row, so
  * adding a column to schema.ts without deciding whether it crosses the wire is
  * a type error rather than a silent omission.
  *
  * BROWSER-SAFE: the Drizzle imports are type-only and erased at build.
  */
 import { defineModel, wire, type InputOf, type ModelValue } from "result-rpc";
-import type { Category, Comment, Note, Post } from "@/schema";
+import type { StoredCategory, StoredComment, StoredNote, StoredPost } from "@/schema";
 
 const nullableString = wire.nullable(wire.string);
 const nullableDate = wire.nullable(wire.date);
@@ -37,7 +37,7 @@ export const PostModel = defineModel("post", {
 		heroImage: nullableString,
 		categorySlug: nullableString,
 	},
-}).$satisfies<typeof Post.$inferSelect>();
+}).$satisfies<StoredPost>();
 
 /**
  * The admin table and `blog list`. A strict projection that leaves out
@@ -72,7 +72,7 @@ export const CategoryModel = defineModel("category", {
 		label: wire.string,
 		createdAt: wire.date,
 	},
-}).$satisfies<typeof Category.$inferSelect>();
+}).$satisfies<StoredCategory>();
 
 export const CategoryView = CategoryModel.all("a category is a slug, a label and a date");
 export type SavedCategory = ModelValue<typeof CategoryModel>;
@@ -84,7 +84,7 @@ export type SavedCategory = ModelValue<typeof CategoryModel>;
  * `cache.updateEntity` patches the model's fields and an edit has to be able to
  * invalidate the rendered copy alongside the markdown it was rendered from.
  */
-type RenderedComment = typeof Comment.$inferSelect & { contentHtml: string | null };
+type RenderedComment = StoredComment & { contentHtml: string | null };
 
 /**
  * Keyed by `id`, so editing a comment patches it wherever it is cached and
@@ -127,7 +127,7 @@ export const NoteModel = defineModel("note", {
 		publishedAt: nullableDate,
 		createdAt: wire.date,
 	},
-}).$satisfies<typeof Note.$inferSelect>();
+}).$satisfies<StoredNote>();
 
 export const NoteView = NoteModel.all("a note is four columns and `blog note list` prints them");
 export type SavedNote = ModelValue<typeof NoteModel>;

@@ -1,26 +1,42 @@
 /**
  * SERVER-ONLY: the blog handlers.
  *
- * Both front ends — the dashboard and the CLI — call the procedures below, so
- * there is exactly one implementation of each post operation.
- *
- * Nothing in the browser graph may reach this file: it closes over the D1
- * binding, the iron-session password and the GitHub client secret.
+ * The three-outcome model: handlers declare the failures they know (constraint
+ * folds, read guards), return happy paths, and let everything else fall
+ * through as a Panic that the framework turns into a sanitized `server/internal`
+ * with an incident id.
  */
 import { env } from "cloudflare:workers";
-import { and, eq, sql } from "drizzle-orm";
+import { type Selectable } from "kysely";
 import { Result } from "better-result";
 import { err, ok, type AnyTaggedError } from "result-rpc";
-import { isConstraintViolation, UniqueViolation, ForeignKeyViolation } from "db-result";
-import { db } from "@/db";
+import { isConstraintViolation, UniqueViolation, ForeignKeyViolation, tryDb } from "db-result";
+import {
+	db,
+	rawDb,
+	decodeCategory,
+	decodeComment,
+	decodeNote,
+	decodePost,
+	epoch,
+	orderByDesc,
+} from "@/db";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
 import { extractFirstImage } from "@/lib/mdx-image-extractor";
 import { createStatsClient } from "@/lib/onedollarstats";
+import type { CommentTable, NoteTable, PostTable, StoredPost } from "@/schema";
 import { renderCommentHtml } from "./comment-markdown";
 import { getGithubUser } from "@/auth";
 import { requireAdmin, requireViewer, server, session } from "@/src/rpc/server-base";
-import { Category, Comment, Note, Post } from "@/schema";
+import {
+	CommentModel,
+	NoteModel,
+	PostModel,
+	type SavedComment,
+	type ChartPoint,
+	type PostRowValue,
+} from "./models";
 import {
 	checkLinksContract,
 	cliContract,
@@ -45,60 +61,23 @@ import {
 	updateNoteContract,
 	updatePostContract,
 } from "./contract";
-import {
-	CommentModel,
-	NoteModel,
-	PostModel,
-	type SavedCategory,
-	type SavedComment,
-	type SavedNote,
-	type SavedPost,
-	type ChartPoint,
-	type PostRowValue,
-} from "./models";
-
-/**
- * The Drizzle row mapped to each model's exact shape — the drift boundary.
- * Written out field by field rather than spread, so a new column in schema.ts
- * is a decision here instead of an accident on the wire.
- */
-const toPost = (row: typeof Post.$inferSelect): SavedPost => ({
-	slug: row.slug,
-	title: row.title,
-	markdown: row.markdown,
-	previewMarkdown: row.previewMarkdown,
-	publicAt: row.publicAt,
-	createdAt: row.createdAt,
-	publishedAt: row.publishedAt,
-	modifiedAt: row.modifiedAt,
-	revision: row.revision,
-	locale: row.locale,
-	heroImage: row.heroImage,
-	categorySlug: row.categorySlug,
-});
 
 /**
  * The table projection. `PostRow` is a strict view — it validates an exact
  * shape rather than stripping a wider one — so the bodies are dropped here on
  * purpose: `posts.list` cannot accidentally ship every post's markdown.
  */
-const toPostRow = (row: typeof Post.$inferSelect): PostRowValue => ({
-	slug: row.slug,
-	title: row.title,
-	locale: row.locale,
-	revision: row.revision,
-	publicAt: row.publicAt,
-	createdAt: row.createdAt,
-	publishedAt: row.publishedAt,
-	modifiedAt: row.modifiedAt,
-	heroImage: row.heroImage,
-	categorySlug: row.categorySlug,
-});
-
-const toCategory = (row: typeof Category.$inferSelect): SavedCategory => ({
-	slug: row.slug,
-	label: row.label,
-	createdAt: row.createdAt,
+const toPostRow = (post: StoredPost): PostRowValue => ({
+	slug: post.slug,
+	title: post.title,
+	locale: post.locale,
+	revision: post.revision,
+	publicAt: post.publicAt,
+	createdAt: post.createdAt,
+	publishedAt: post.publishedAt,
+	modifiedAt: post.modifiedAt,
+	heroImage: post.heroImage,
+	categorySlug: post.categorySlug,
 });
 
 /**
@@ -108,23 +87,9 @@ const toCategory = (row: typeof Category.$inferSelect): SavedCategory => ({
  * `@tanstack/highlight` is a synchronous tokenizer with no WASM and no async
  * init.
  */
-const toComment = (row: typeof Comment.$inferSelect): SavedComment => ({
-	id: row.id,
-	postSlug: row.postSlug,
-	authorGithubId: row.authorGithubId,
-	authorGithubUsername: row.authorGithubUsername,
-	authorAvatarUrl: row.authorAvatarUrl,
-	content: row.content,
+const toComment = (row: Selectable<CommentTable>): SavedComment => ({
+	...decodeComment(row),
 	contentHtml: renderCommentHtml(row.content),
-	isHidden: row.isHidden,
-	createdAt: row.createdAt,
-});
-
-const toNote = (row: typeof Note.$inferSelect): SavedNote => ({
-	id: row.id,
-	description: row.description,
-	publishedAt: row.publishedAt,
-	createdAt: row.createdAt,
 });
 
 /**
@@ -149,9 +114,9 @@ const listPosts = server
 		// scenario C — `unwrap` throws a Panic and the framework turns that
 		// into a sanitized server/internal with an incident id.
 		const rows = (
-			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } })
+			await db.selectFrom("post").selectAll().orderBy(orderByDesc("published_at")).execute()
 		).unwrap();
-		return ok(rows.map(toPostRow));
+		return ok(rows.map((row) => toPostRow(decodePost(row))));
 	});
 
 const exportPosts = server
@@ -159,9 +124,9 @@ const exportPosts = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } })
+			await db.selectFrom("post").selectAll().orderBy(orderByDesc("published_at")).execute()
 		).unwrap();
-		return ok(rows.map(toPost));
+		return ok(rows.map(decodePost));
 	});
 
 const postBySlug = server
@@ -169,9 +134,13 @@ const postBySlug = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const row = (
-			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+			await db
+				.selectFrom("post")
+				.selectAll()
+				.where("slug", "=", input.slug)
+				.executeTakeFirst()
 		).unwrap();
-		return row ? ok(toPost(row)) : err(errors.notFound({ slug: input.slug }));
+		return row ? ok(decodePost(row)) : err(errors.notFound({ slug: input.slug }));
 	});
 
 const createPost = server
@@ -188,19 +157,23 @@ const createPost = server
 		// incident id.
 		return (
 			await db
-				.insert(Post)
+				.insertInto("post")
 				.values({
 					slug: input.slug,
 					title: input.title,
 					markdown: input.markdown,
+					preview_markdown: null,
+					public_at: input.publish ? epoch(now) : null,
+					created_at: epoch(now),
+					published_at: epoch(now),
+					modified_at: null,
+					revision: 1,
 					locale: input.locale,
-					categorySlug: input.categorySlug,
-					heroImage: input.heroImage ?? (await extractFirstImage(input.markdown)),
-					publishedAt: now,
-					createdAt: now,
-					publicAt: input.publish ? now : null,
+					hero_image: input.heroImage ?? (await extractFirstImage(input.markdown)),
+					category_slug: input.categorySlug,
 				})
-				.returning()
+				.returningAll()
+				.executeTakeFirstOrThrow()
 		)
 			.tryRecover((e) => {
 				if (UniqueViolation.is(e)) {
@@ -211,17 +184,22 @@ const createPost = server
 				}
 				throw e; // scenario C: the rest falls through the cracks
 			})
-			.map((inserted) => toPost(inserted[0]));
+			.map(decodePost);
 	});
 
 const updatePost = server
 	.implement(updatePostContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = (
-			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+		const row = (
+			await db
+				.selectFrom("post")
+				.selectAll()
+				.where("slug", "=", input.slug)
+				.executeTakeFirst()
 		).unwrap();
-		if (!existing) return err(errors.notFound({ slug: input.slug }));
+		if (!row) return err(errors.notFound({ slug: input.slug }));
+		const existing = decodePost(row);
 		if (existing.revision !== input.expectedRevision) {
 			return err(
 				errors.staleRevision({
@@ -234,41 +212,43 @@ const updatePost = server
 
 		if (input.categorySlug != null) {
 			const category = (
-				await context.db.query.Category.findFirst({
-					where: { slug: input.categorySlug },
-				})
+				await db
+					.selectFrom("category")
+					.selectAll()
+					.where("slug", "=", input.categorySlug)
+					.executeTakeFirst()
 			).unwrap();
 			if (!category) return err(errors.unknownCategory({ slug: input.categorySlug }));
 		}
 
-		const patch: Partial<typeof Post.$inferInsert> = {};
+		const patch: Partial<PostTable> = {};
 		if (input.title !== undefined) patch.title = input.title;
-		if (input.publishedAt !== undefined) patch.publishedAt = input.publishedAt;
+		if (input.publishedAt !== undefined) patch.published_at = epoch(input.publishedAt);
 		if (input.locale !== undefined) patch.locale = input.locale;
-		if (input.categorySlug !== undefined) patch.categorySlug = input.categorySlug;
+		if (input.categorySlug !== undefined) patch.category_slug = input.categorySlug;
 
 		if (input.markdown !== undefined) {
 			// Writing the body supersedes any draft, so the preview column is cleared —
 			// otherwise the next publish would promote a stale draft over the body this
 			// write just landed.
 			patch.markdown = input.markdown;
-			patch.previewMarkdown = null;
+			patch.preview_markdown = null;
 		}
 
 		// Precedence: an explicit hero image wins; otherwise a new body's first
 		// image follows it; with neither, the column keeps whatever it had.
 		if (input.heroImage !== undefined) {
-			patch.heroImage = input.heroImage;
+			patch.hero_image = input.heroImage;
 		} else if (input.markdown !== undefined) {
-			patch.heroImage = await extractFirstImage(input.markdown);
+			patch.hero_image = await extractFirstImage(input.markdown);
 		}
 
-		const rows = (
+		const updated = (
 			await db
-				.update(Post)
+				.updateTable("post")
 				.set({
 					...patch,
-					modifiedAt: new Date(),
+					modified_at: epoch(new Date()),
 					revision: existing.revision + 1,
 				})
 				// The revision is re-checked in the WHERE clause, not just above, so a
@@ -276,16 +256,21 @@ const updatePost = server
 				// rather than being overwritten by it. The guard makes the plain
 				// value equivalent to the SQL increment: success means the row
 				// still held `existing.revision` when the write landed.
-				.where(and(eq(Post.slug, input.slug), eq(Post.revision, input.expectedRevision)))
-				.returning()
+				.where("slug", "=", input.slug)
+				.where("revision", "=", input.expectedRevision)
+				.returningAll()
+				.executeTakeFirst()
 		).unwrap();
 
-		// Drizzle types `.returning()` as a non-empty tuple, so this has to be a
-		// length check: an empty result means the revision guard in the WHERE
-		// clause rejected the write, which is the whole point of it.
-		if (rows.length === 0) {
+		// `undefined` means the revision guard in the WHERE clause rejected the
+		// write, which is the whole point of it.
+		if (updated === undefined) {
 			const current = (
-				await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+				await db
+					.selectFrom("post")
+					.selectAll()
+					.where("slug", "=", input.slug)
+					.executeTakeFirst()
 			).unwrap();
 			if (!current) return err(errors.notFound({ slug: input.slug }));
 			return err(
@@ -297,7 +282,7 @@ const updatePost = server
 			);
 		}
 
-		return ok(toPost(rows[0]));
+		return ok(decodePost(updated));
 	});
 
 /**
@@ -312,36 +297,42 @@ const setPublished = server
 	.implement(setPublishedContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const existing = (
-			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+		const row = (
+			await db
+				.selectFrom("post")
+				.selectAll()
+				.where("slug", "=", input.slug)
+				.executeTakeFirst()
 		).unwrap();
-		if (!existing) return err(errors.notFound({ slug: input.slug }));
+		if (!row) return err(errors.notFound({ slug: input.slug }));
+		const existing = decodePost(row);
 
 		// Absolute, not a toggle: asking for the state it is already in is a
 		// no-op rather than a flip, so a double click cannot unpublish.
-		if ((existing.publicAt !== null) === input.published) return ok(toPost(existing));
+		if ((existing.publicAt !== null) === input.published) return ok(existing);
 
 		const markdown = input.published
 			? (existing.previewMarkdown ?? existing.markdown)
 			: existing.markdown;
 		const heroImage = markdown ? await extractFirstImage(markdown) : existing.heroImage;
 
-		const rows = (
+		const updated = (
 			await db
-				.update(Post)
+				.updateTable("post")
 				.set({
-					publicAt: input.published ? new Date() : null,
+					public_at: input.published ? epoch(new Date()) : null,
 					markdown,
-					previewMarkdown: null,
-					heroImage,
-					modifiedAt: new Date(),
+					preview_markdown: null,
+					hero_image: heroImage,
+					modified_at: epoch(new Date()),
 					revision: existing.revision + 1,
 				})
-				.where(eq(Post.slug, input.slug))
-				.returning()
+				.where("slug", "=", input.slug)
+				.returningAll()
+				.executeTakeFirstOrThrow()
 		).unwrap();
 
-		return ok(toPost(rows[0]));
+		return ok(decodePost(updated));
 	});
 
 const deletePost = server
@@ -349,11 +340,15 @@ const deletePost = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context, touch }) => {
 		const post = (
-			await context.db.query.Post.findFirst({ where: { slug: input.slug } })
+			await db
+				.selectFrom("post")
+				.selectAll()
+				.where("slug", "=", input.slug)
+				.executeTakeFirst()
 		).unwrap();
 		if (!post) return err(errors.notFound({ slug: input.slug }));
 
-		(await context.db.delete(Post).where(eq(Post.slug, input.slug))).unwrap();
+		(await db.deleteFrom("post").where("slug", "=", input.slug).execute()).unwrap();
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(PostModel, input.slug);
 		return ok({ slug: input.slug });
@@ -366,9 +361,9 @@ const listCategories = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await context.db.query.Category.findMany({ orderBy: { label: "asc" } })
+			await db.selectFrom("category").selectAll().orderBy("label").execute()
 		).unwrap();
-		return ok(rows.map(toCategory));
+		return ok(rows.map(decodeCategory));
 	});
 
 const createCategory = server
@@ -378,9 +373,15 @@ const createCategory = server
 	// only failure left is the one the database owns: the primary key.
 	// Everything else is scenario C.
 	.handler(async ({ input, errors }) =>
-		(await db.insert(Category).values({ slug: input.slug, label: input.label }).returning())
+		(
+			await db
+				.insertInto("category")
+				.values({ slug: input.slug, label: input.label, created_at: epoch(new Date()) })
+				.returningAll()
+				.executeTakeFirstOrThrow()
+		)
 			.tryRecover(constraintTo(() => errors.slugTaken({ slug: input.slug })))
-			.map((inserted) => toCategory(inserted[0])),
+			.map(decodeCategory),
 	);
 
 const deleteCategory = server
@@ -388,21 +389,30 @@ const deleteCategory = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const category = (
-			await context.db.query.Category.findFirst({ where: { slug: input.slug } })
+			await db
+				.selectFrom("category")
+				.selectAll()
+				.where("slug", "=", input.slug)
+				.executeTakeFirst()
 		).unwrap();
 		if (!category) return err(errors.notFound({ slug: input.slug }));
 
+		// db-result#4: `select`/`groupBy` return unwrapped builders, so the
+		// projection runs on the raw db inside `tryDb`; revert once fixed.
 		const counted = (
-			await context.db
-				.select({ count: sql<number>`count(*)` })
-				.from(Post)
-				.where(eq(Post.categorySlug, input.slug))
+			await tryDb(() =>
+				rawDb
+					.selectFrom("post")
+					.select(({ fn }) => fn.countAll<number>().as("count"))
+					.where("category_slug", "=", input.slug)
+					.executeTakeFirst(),
+			)
 		).unwrap();
 
-		const postCount = Number(counted[0]?.count ?? 0);
+		const postCount = Number(counted?.count ?? 0);
 		if (postCount > 0) return err(errors.inUse({ slug: input.slug, postCount }));
 
-		(await context.db.delete(Category).where(eq(Category.slug, input.slug))).unwrap();
+		(await db.deleteFrom("category").where("slug", "=", input.slug).execute()).unwrap();
 		return ok({ slug: input.slug });
 	});
 
@@ -413,9 +423,9 @@ const listNotes = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await context.db.query.Note.findMany({ orderBy: { createdAt: "desc" } })
+			await db.selectFrom("note").selectAll().orderBy(orderByDesc("created_at")).execute()
 		).unwrap();
-		return ok(rows.map(toNote));
+		return ok(rows.map(decodeNote));
 	});
 
 const createNote = server
@@ -424,46 +434,58 @@ const createNote = server
 	.handler(async ({ input, errors }) =>
 		(
 			await db
-				.insert(Note)
+				.insertInto("note")
 				.values({
 					id: input.id,
 					description: input.description,
-					publishedAt: input.publish ? new Date() : null,
+					published_at: input.publish ? epoch(new Date()) : null,
+					created_at: epoch(new Date()),
 				})
-				.returning()
+				.returningAll()
+				.executeTakeFirstOrThrow()
 		)
 			// `id` is the primary key, so the database owns this one failure;
 			// everything else is scenario C.
 			.tryRecover(constraintTo(() => errors.idTaken({ id: input.id })))
-			.map((inserted) => toNote(inserted[0])),
+			.map(decodeNote),
 	);
 
 const updateNote = server
 	.implement(updateNoteContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
-		const note = (await context.db.query.Note.findFirst({ where: { id: input.id } })).unwrap();
-		if (!note) return err(errors.notFound({ id: input.id }));
+		const row = (
+			await db.selectFrom("note").selectAll().where("id", "=", input.id).executeTakeFirst()
+		).unwrap();
+		if (!row) return err(errors.notFound({ id: input.id }));
 
-		const patch: Partial<typeof Note.$inferInsert> = {};
+		const patch: Partial<NoteTable> = {};
 		if (input.description !== undefined) patch.description = input.description;
-		if (input.publish !== undefined) patch.publishedAt = input.publish ? new Date() : null;
+		if (input.publish !== undefined)
+			patch.published_at = input.publish ? epoch(new Date()) : null;
 
-		const rows = (
-			await db.update(Note).set(patch).where(eq(Note.id, input.id)).returning()
+		const updated = (
+			await db
+				.updateTable("note")
+				.set(patch)
+				.where("id", "=", input.id)
+				.returningAll()
+				.executeTakeFirstOrThrow()
 		).unwrap();
 
-		return ok(toNote(rows[0]));
+		return ok(decodeNote(updated));
 	});
 
 const deleteNote = server
 	.implement(deleteNoteContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context, touch }) => {
-		const note = (await context.db.query.Note.findFirst({ where: { id: input.id } })).unwrap();
+		const note = (
+			await db.selectFrom("note").selectAll().where("id", "=", input.id).executeTakeFirst()
+		).unwrap();
 		if (!note) return err(errors.notFound({ id: input.id }));
 
-		(await context.db.delete(Note).where(eq(Note.id, input.id))).unwrap();
+		(await db.deleteFrom("note").where("id", "=", input.id).execute()).unwrap();
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(NoteModel, input.id);
 		return ok({ id: input.id });
@@ -472,9 +494,9 @@ const deleteNote = server
 // ------------------------------------------------------------------ comments
 
 const canModerate = (
-	row: typeof Comment.$inferSelect,
+	row: Selectable<CommentTable>,
 	viewer: { username: string; isAdmin: boolean },
-) => row.authorGithubUsername === viewer.username || viewer.isAdmin;
+) => row.author_github_username === viewer.username || viewer.isAdmin;
 
 /**
  * Public. Runs behind the optional session layer, so a signed-out reader gets
@@ -486,12 +508,14 @@ const listComments = server
 	.use(session)
 	.handler(async ({ input, context }) => {
 		const rows = (
-			await context.db.query.Comment.findMany({
-				where: { postSlug: input.postSlug },
-				orderBy: { createdAt: "asc" },
-			})
+			await db
+				.selectFrom("comment")
+				.selectAll()
+				.where("post_slug", "=", input.postSlug)
+				.orderBy("created_at")
+				.execute()
 		).unwrap();
-		const visible = context.viewer?.isAdmin ? rows : rows.filter((row) => !row.isHidden);
+		const visible = context.viewer?.isAdmin ? rows : rows.filter((row) => !row.is_hidden);
 		return ok(visible.map(toComment));
 	});
 
@@ -509,15 +533,18 @@ const createComment = server
 
 			const inserted = yield* (
 				await db
-					.insert(Comment)
+					.insertInto("comment")
 					.values({
-						postSlug: input.postSlug,
-						authorGithubId: author.id,
-						authorGithubUsername: author.login,
-						authorAvatarUrl: author.avatar_url,
+						post_slug: input.postSlug,
+						author_github_id: author.id,
+						author_github_username: author.login,
+						author_avatar_url: author.avatar_url,
 						content: input.content,
+						created_at: epoch(new Date()),
+						is_hidden: 0,
 					})
-					.returning()
+					.returningAll()
+					.executeTakeFirstOrThrow()
 			).tryRecover(
 				// `post_slug` is a foreign key, so "commenting on a post that
 				// was just deleted" is the database's answer rather than a
@@ -526,7 +553,7 @@ const createComment = server
 				constraintTo(() => errors.notFound({ slug: input.postSlug })),
 			);
 
-			return ok(toComment(inserted[0]));
+			return ok(toComment(inserted));
 		}),
 	);
 
@@ -535,20 +562,21 @@ const updateComment = server
 	.use(requireViewer)
 	.handler(async ({ input, errors, context }) => {
 		const existing = (
-			await context.db.query.Comment.findFirst({ where: { id: input.id } })
+			await db.selectFrom("comment").selectAll().where("id", "=", input.id).executeTakeFirst()
 		).unwrap();
 		if (!existing) return err(errors.notFound({ id: input.id }));
 		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-		const rows = (
+		const updated = (
 			await db
-				.update(Comment)
+				.updateTable("comment")
 				.set({ content: input.content })
-				.where(eq(Comment.id, input.id))
-				.returning()
+				.where("id", "=", input.id)
+				.returningAll()
+				.executeTakeFirstOrThrow()
 		).unwrap();
 
-		return ok(toComment(rows[0]));
+		return ok(toComment(updated));
 	});
 
 const setCommentHidden = server
@@ -556,19 +584,20 @@ const setCommentHidden = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const comment = (
-			await context.db.query.Comment.findFirst({ where: { id: input.id } })
+			await db.selectFrom("comment").selectAll().where("id", "=", input.id).executeTakeFirst()
 		).unwrap();
 		if (!comment) return err(errors.notFound({ id: input.id }));
 
-		const rows = (
+		const updated = (
 			await db
-				.update(Comment)
-				.set({ isHidden: input.hidden })
-				.where(eq(Comment.id, input.id))
-				.returning()
+				.updateTable("comment")
+				.set({ is_hidden: input.hidden ? 1 : 0 })
+				.where("id", "=", input.id)
+				.returningAll()
+				.executeTakeFirstOrThrow()
 		).unwrap();
 
-		return ok(toComment(rows[0]));
+		return ok(toComment(updated));
 	});
 
 const deleteComment = server
@@ -576,12 +605,12 @@ const deleteComment = server
 	.use(requireViewer)
 	.handler(async ({ input, errors, context, touch }) => {
 		const existing = (
-			await context.db.query.Comment.findFirst({ where: { id: input.id } })
+			await db.selectFrom("comment").selectAll().where("id", "=", input.id).executeTakeFirst()
 		).unwrap();
 		if (!existing) return err(errors.notFound({ id: input.id }));
 		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-		(await context.db.delete(Comment).where(eq(Comment.id, input.id))).unwrap();
+		(await db.deleteFrom("comment").where("id", "=", input.id).execute()).unwrap();
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(CommentModel, input.id);
 		return ok({ id: input.id });
@@ -593,8 +622,8 @@ const checkLinks = server
 	.implement(checkLinksContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const posts = (await context.db.query.Post.findMany()).unwrap();
-		return ok(await checkPostLinks(posts, env.SITE_URL));
+		const rows = (await db.selectFrom("post").selectAll().execute()).unwrap();
+		return ok(await checkPostLinks(rows.map(decodePost), env.SITE_URL));
 	});
 
 const toChartPoints = (

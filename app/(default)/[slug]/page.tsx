@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { ClientErrorBoundary } from "@/components/error-boundary";
-import { Result } from "better-result";
-import { db } from "@/db";
+import { tryDb } from "db-result";
+import { db, rawDb, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
@@ -21,23 +21,24 @@ export const dynamic = "force-dynamic";
 
 // Cache the database query for reuse
 const getPost = cache(async (slug: string) => {
-	const post = Result.unwrap(await db.query.Post.findFirst({ where: { slug } }));
-	if (!post) {
+	const row = (
+		await db.selectFrom("post").selectAll().where("slug", "=", slug).executeTakeFirst()
+	).unwrap();
+	if (!row) {
 		throwNotFound();
 	}
-	return post;
+	return decodePost(row);
 });
 
 // Generate all possible slug values at build time
 export async function generateStaticParams() {
-	const posts = Result.unwrap(
-		await db.query.Post.findMany({
-			columns: {
-				slug: true,
-			},
-			where: { publicAt: { isNotNull: true } },
-		}),
-	);
+	// db-result#4: `select` returns unwrapped builders, so the projection
+	// runs on the raw db inside `tryDb`.
+	const posts = (
+		await tryDb(() =>
+			rawDb.selectFrom("post").select("slug").where("public_at", "is not", null).execute(),
+		)
+	).unwrap();
 
 	return posts.map((post) => ({
 		slug: post.slug,

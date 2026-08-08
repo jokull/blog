@@ -1,33 +1,42 @@
 import { createServerFn } from "@tanstack/react-start";
 import { appServerClient } from "@/src/rpc/server";
-import { Result } from "better-result";
-import { db } from "@/db";
+import { tryDb } from "db-result";
+import { db, rawDb, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { homeHead, pageHead, postHead } from "@/src/lib/seo";
 
 export const getPostHead = createServerFn({ method: "GET" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
-		const post = Result.unwrap(await db.query.Post.findFirst({ where: { slug: data.slug } }));
-		if (!post?.publicAt)
+		const row = (
+			await db.selectFrom("post").selectAll().where("slug", "=", data.slug).executeTakeFirst()
+		).unwrap();
+		if (!row?.public_at)
 			return pageHead({
 				title: "Not found",
 				description: "Page not found",
 				path: `/${data.slug}`,
 			});
+		const post = decodePost(row);
 		return postHead({ ...post, markdown: await extractFirstParagraph(post.markdown) });
 	});
 
 export const getHomeHead = createServerFn({ method: "GET" })
 	.validator((data: { category?: string }) => data)
 	.handler(async ({ data }) => {
-		const category = data.category
-			? Result.unwrap(
-					await db.query.Category.findFirst({
-						where: { slug: data.category },
-						columns: { slug: true, label: true },
-					}),
-				)
+		// db-result#4: `select` returns unwrapped builders, so the projection
+		// runs on the raw db inside `tryDb`.
+		const categorySlug = data.category;
+		const category = categorySlug
+			? (
+					await tryDb(() =>
+						rawDb
+							.selectFrom("category")
+							.select(["slug", "label"])
+							.where("slug", "=", categorySlug)
+							.executeTakeFirst(),
+					)
+				).unwrap()
 			: null;
 		return homeHead(category);
 	});

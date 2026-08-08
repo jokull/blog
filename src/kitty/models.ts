@@ -11,7 +11,7 @@
  * shapes, immune to entity patching by construction.
  */
 import { defineModel, wire, type InputOf, type ModelValue } from "result-rpc";
-import type { KittyTheme } from "@/schema";
+import type { StoredKittyTheme } from "@/schema";
 import { OklchColorCodec, ThemeColorsCodec, type OklchColor, type ThemeColors } from "./colors";
 
 export { OklchColorCodec, ThemeColorsCodec };
@@ -33,7 +33,7 @@ export const KittyThemeModel = defineModel("kitty-theme", {
 		createdAt: wire.date,
 		modifiedAt: wire.nullable(wire.date),
 	},
-}).$satisfies<typeof KittyTheme.$inferSelect>();
+}).$satisfies<StoredKittyTheme>();
 
 /**
  * Every field is public: a theme is a shareable artifact, and the browser

@@ -1,5 +1,4 @@
-import { Result } from "better-result";
-import { db } from "@/db";
+import { db, decodeNote, epoch, orderByDesc } from "@/db";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
 import { Link } from "@/src/lib/navigation";
@@ -23,17 +22,19 @@ export default async function NotesPage({
 }) {
 	const { cursor } = await searchParams;
 
-	const notes = Result.unwrap(
-		await db.query.Note.findMany({
-			where: {
-				publishedAt: cursor
-					? { isNotNull: true, lt: new Date(Number(cursor)) }
-					: { isNotNull: true },
-			},
-			orderBy: { publishedAt: "desc" },
-			limit: PAGE_SIZE + 1,
-		}),
-	);
+	const rows = (
+		await db
+			.selectFrom("note")
+			.selectAll()
+			.where("published_at", "is not", null)
+			.$if(Boolean(cursor), (qb) =>
+				qb.where("published_at", "<", epoch(new Date(Number(cursor)))),
+			)
+			.orderBy(orderByDesc("published_at"))
+			.limit(PAGE_SIZE + 1)
+			.execute()
+	).unwrap();
+	const notes = rows.map(decodeNote);
 
 	const hasMore = notes.length > PAGE_SIZE;
 	const items = hasMore ? notes.slice(0, PAGE_SIZE) : notes;

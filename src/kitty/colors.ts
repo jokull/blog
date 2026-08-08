@@ -4,7 +4,7 @@
  * This module is imported by BOTH the Drizzle column type in schema.ts and
  * the wire model in models.ts, so the JSON stored in D1 and the JSON on the
  * wire are the same declaration rather than two hand-kept copies. That is
- * what makes `KittyThemeModel.$satisfies<typeof KittyTheme.$inferSelect>()`
+ * what makes `KittyThemeModel.$satisfies<StoredKittyTheme>()`
  * hold over the `colors` column instead of only over the scalars.
  *
  * It imports nothing but result-rpc, so schema.ts pulling it in costs the
