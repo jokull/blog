@@ -140,7 +140,7 @@ const requirePost = async <E extends AnyTaggedError>(
 	slug: string,
 	missing: (args: { slug: string }) => E,
 ): Promise<Result<typeof Post.$inferSelect, E>> => {
-	const row = Result.unwrap(await db.query.Post.findFirst({ where: { slug } }));
+	const row = (await db.query.Post.findFirst({ where: { slug } })).unwrap();
 	return row ? ok(row) : err(missing({ slug }));
 };
 
@@ -149,7 +149,7 @@ const requireCategory = async <E extends AnyTaggedError>(
 	slug: string,
 	missing: (args: { slug: string }) => E,
 ): Promise<Result<typeof Category.$inferSelect, E>> => {
-	const row = Result.unwrap(await db.query.Category.findFirst({ where: { slug } }));
+	const row = (await db.query.Category.findFirst({ where: { slug } })).unwrap();
 	return row ? ok(row) : err(missing({ slug }));
 };
 
@@ -158,7 +158,7 @@ const requireNote = async <E extends AnyTaggedError>(
 	id: string,
 	missing: (args: { id: string }) => E,
 ): Promise<Result<typeof Note.$inferSelect, E>> => {
-	const row = Result.unwrap(await db.query.Note.findFirst({ where: { id } }));
+	const row = (await db.query.Note.findFirst({ where: { id } })).unwrap();
 	return row ? ok(row) : err(missing({ id }));
 };
 
@@ -167,7 +167,7 @@ const requireComment = async <E extends AnyTaggedError>(
 	id: number,
 	missing: (args: { id: number }) => E,
 ): Promise<Result<typeof Comment.$inferSelect, E>> => {
-	const row = Result.unwrap(await db.query.Comment.findFirst({ where: { id } }));
+	const row = (await db.query.Comment.findFirst({ where: { id } })).unwrap();
 	return row ? ok(row) : err(missing({ id }));
 };
 
@@ -192,9 +192,9 @@ const listPosts = server
 		// A read with no declared failure: the query either answers or it is
 		// scenario C — `unwrap` throws a Panic and the framework turns that
 		// into a sanitized server/internal with an incident id.
-		const rows = Result.unwrap(
-			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } }),
-		);
+		const rows = (
+			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } })
+		).unwrap();
 		return ok(rows.map(toPostRow));
 	});
 
@@ -202,9 +202,9 @@ const exportPosts = server
 	.implement(exportPostsContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = Result.unwrap(
-			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } }),
-		);
+		const rows = (
+			await context.db.query.Post.findMany({ orderBy: { publishedAt: "desc" } })
+		).unwrap();
 		return ok(rows.map(toPost));
 	});
 
@@ -227,7 +227,7 @@ const createPost = server
 		// Everything left over is scenario C: it falls through the cracks as
 		// an unhandled Panic and becomes a sanitized server/internal with an
 		// incident id.
-		return Result.tryRecover(
+		return (
 			await db
 				.insert(Post)
 				.values({
@@ -241,8 +241,9 @@ const createPost = server
 					createdAt: now,
 					publicAt: input.publish ? now : null,
 				})
-				.returning(),
-			(e) => {
+				.returning()
+		)
+			.tryRecover((e) => {
 				if (UniqueViolation.is(e)) {
 					return err(errors.slugTaken({ slug: input.slug }));
 				}
@@ -250,8 +251,8 @@ const createPost = server
 					return err(errors.notFound({ slug: input.categorySlug ?? "" }));
 				}
 				throw e; // scenario C: the rest falls through the cracks
-			},
-		).map((inserted) => toPost(inserted[0]));
+			})
+			.map((inserted) => toPost(inserted[0]));
 	});
 
 const updatePost = server
@@ -300,7 +301,7 @@ const updatePost = server
 				patch.heroImage = await extractFirstImage(input.markdown);
 			}
 
-			const rows = Result.unwrap(
+			const rows = (
 				await db
 					.update(Post)
 					.set({
@@ -316,8 +317,8 @@ const updatePost = server
 					.where(
 						and(eq(Post.slug, input.slug), eq(Post.revision, input.expectedRevision)),
 					)
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 
 			// Drizzle types `.returning()` as a non-empty tuple, so this has to be a
 			// length check: an empty result means the revision guard in the WHERE
@@ -361,7 +362,7 @@ const setPublished = server
 				: existing.markdown;
 			const heroImage = markdown ? await extractFirstImage(markdown) : existing.heroImage;
 
-			const rows = Result.unwrap(
+			const rows = (
 				await db
 					.update(Post)
 					.set({
@@ -373,8 +374,8 @@ const setPublished = server
 						revision: existing.revision + 1,
 					})
 					.where(eq(Post.slug, input.slug))
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 
 			return ok(toPost(rows[0]));
 		}),
@@ -387,7 +388,7 @@ const deletePost = server
 		Result.gen(async function* () {
 			yield* await requirePost(context.db, input.slug, errors.notFound);
 
-			Result.unwrap(await context.db.delete(Post).where(eq(Post.slug, input.slug)));
+			(await context.db.delete(Post).where(eq(Post.slug, input.slug))).unwrap();
 			// A deleted row cannot ride back as an entity, so invalidate by identity.
 			touch(PostModel, input.slug);
 			return ok({ slug: input.slug });
@@ -400,9 +401,9 @@ const listCategories = server
 	.implement(listCategoriesContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = Result.unwrap(
-			await context.db.query.Category.findMany({ orderBy: { label: "asc" } }),
-		);
+		const rows = (
+			await context.db.query.Category.findMany({ orderBy: { label: "asc" } })
+		).unwrap();
 		return ok(rows.map(toCategory));
 	});
 
@@ -413,10 +414,9 @@ const createCategory = server
 	// only failure left is the one the database owns: the primary key.
 	// Everything else is scenario C.
 	.handler(async ({ input, errors }) =>
-		Result.tryRecover(
-			await db.insert(Category).values({ slug: input.slug, label: input.label }).returning(),
-			constraintTo(() => errors.slugTaken({ slug: input.slug })),
-		).map((inserted) => toCategory(inserted[0])),
+		(await db.insert(Category).values({ slug: input.slug, label: input.label }).returning())
+			.tryRecover(constraintTo(() => errors.slugTaken({ slug: input.slug })))
+			.map((inserted) => toCategory(inserted[0])),
 	);
 
 const deleteCategory = server
@@ -426,17 +426,17 @@ const deleteCategory = server
 		Result.gen(async function* () {
 			yield* await requireCategory(context.db, input.slug, errors.notFound);
 
-			const counted = Result.unwrap(
+			const counted = (
 				await context.db
 					.select({ count: sql<number>`count(*)` })
 					.from(Post)
-					.where(eq(Post.categorySlug, input.slug)),
-			);
+					.where(eq(Post.categorySlug, input.slug))
+			).unwrap();
 
 			const postCount = Number(counted[0]?.count ?? 0);
 			if (postCount > 0) return err(errors.inUse({ slug: input.slug, postCount }));
 
-			Result.unwrap(await context.db.delete(Category).where(eq(Category.slug, input.slug)));
+			(await context.db.delete(Category).where(eq(Category.slug, input.slug))).unwrap();
 			return ok({ slug: input.slug });
 		}),
 	);
@@ -447,9 +447,9 @@ const listNotes = server
 	.implement(listNotesContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = Result.unwrap(
-			await context.db.query.Note.findMany({ orderBy: { createdAt: "desc" } }),
-		);
+		const rows = (
+			await context.db.query.Note.findMany({ orderBy: { createdAt: "desc" } })
+		).unwrap();
 		return ok(rows.map(toNote));
 	});
 
@@ -457,7 +457,7 @@ const createNote = server
 	.implement(createNoteContract)
 	.use(requireAdmin)
 	.handler(async ({ input, errors }) =>
-		Result.tryRecover(
+		(
 			await db
 				.insert(Note)
 				.values({
@@ -465,11 +465,12 @@ const createNote = server
 					description: input.description,
 					publishedAt: input.publish ? new Date() : null,
 				})
-				.returning(),
+				.returning()
+		)
 			// `id` is the primary key, so the database owns this one failure;
 			// everything else is scenario C.
-			constraintTo(() => errors.idTaken({ id: input.id })),
-		).map((inserted) => toNote(inserted[0])),
+			.tryRecover(constraintTo(() => errors.idTaken({ id: input.id })))
+			.map((inserted) => toNote(inserted[0])),
 	);
 
 const updateNote = server
@@ -483,9 +484,9 @@ const updateNote = server
 			if (input.description !== undefined) patch.description = input.description;
 			if (input.publish !== undefined) patch.publishedAt = input.publish ? new Date() : null;
 
-			const rows = Result.unwrap(
-				await db.update(Note).set(patch).where(eq(Note.id, input.id)).returning(),
-			);
+			const rows = (
+				await db.update(Note).set(patch).where(eq(Note.id, input.id)).returning()
+			).unwrap();
 
 			return ok(toNote(rows[0]));
 		}),
@@ -498,7 +499,7 @@ const deleteNote = server
 		Result.gen(async function* () {
 			yield* await requireNote(context.db, input.id, errors.notFound);
 
-			Result.unwrap(await context.db.delete(Note).where(eq(Note.id, input.id)));
+			(await context.db.delete(Note).where(eq(Note.id, input.id))).unwrap();
 			// A deleted row cannot ride back as an entity, so invalidate by identity.
 			touch(NoteModel, input.id);
 			return ok({ id: input.id });
@@ -521,12 +522,12 @@ const listComments = server
 	.implement(listCommentsContract)
 	.use(session)
 	.handler(async ({ input, context }) => {
-		const rows = Result.unwrap(
+		const rows = (
 			await context.db.query.Comment.findMany({
 				where: { postSlug: input.postSlug },
 				orderBy: { createdAt: "asc" },
-			}),
-		);
+			})
+		).unwrap();
 		const visible = context.viewer?.isAdmin ? rows : rows.filter((row) => !row.isHidden);
 		return ok(visible.map(toComment));
 	});
@@ -543,7 +544,7 @@ const createComment = server
 				errors.authorUnavailable(),
 			);
 
-			const inserted = yield* Result.tryRecover(
+			const inserted = yield* (
 				await db
 					.insert(Comment)
 					.values({
@@ -553,7 +554,8 @@ const createComment = server
 						authorAvatarUrl: author.avatar_url,
 						content: input.content,
 					})
-					.returning(),
+					.returning()
+			).tryRecover(
 				// `post_slug` is a foreign key, so "commenting on a post that
 				// was just deleted" is the database's answer rather than a
 				// pre-flight SELECT that could go stale between check and
@@ -574,13 +576,13 @@ const updateComment = server
 			if (!canModerate(existing, context.viewer))
 				return err(errors.notAuthor({ id: input.id }));
 
-			const rows = Result.unwrap(
+			const rows = (
 				await db
 					.update(Comment)
 					.set({ content: input.content })
 					.where(eq(Comment.id, input.id))
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 
 			return ok(toComment(rows[0]));
 		}),
@@ -593,13 +595,13 @@ const setCommentHidden = server
 		Result.gen(async function* () {
 			yield* await requireComment(context.db, input.id, errors.notFound);
 
-			const rows = Result.unwrap(
+			const rows = (
 				await db
 					.update(Comment)
 					.set({ isHidden: input.hidden })
 					.where(eq(Comment.id, input.id))
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 
 			return ok(toComment(rows[0]));
 		}),
@@ -614,7 +616,7 @@ const deleteComment = server
 			if (!canModerate(existing, context.viewer))
 				return err(errors.notAuthor({ id: input.id }));
 
-			Result.unwrap(await context.db.delete(Comment).where(eq(Comment.id, input.id)));
+			(await context.db.delete(Comment).where(eq(Comment.id, input.id))).unwrap();
 			// A deleted row cannot ride back as an entity, so invalidate by identity.
 			touch(CommentModel, input.id);
 			return ok({ id: input.id });
@@ -627,7 +629,7 @@ const checkLinks = server
 	.implement(checkLinksContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const posts = Result.unwrap(await context.db.query.Post.findMany());
+		const posts = (await context.db.query.Post.findMany()).unwrap();
 		return ok(await checkPostLinks(posts, env.SITE_URL));
 	});
 

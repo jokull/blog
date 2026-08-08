@@ -63,12 +63,12 @@ const published = server.implement(publishedThemesContract).handler(async ({ con
 	// A read with no declared failure: the query either answers or it is
 	// scenario C — `unwrap` throws a Panic and the framework turns that
 	// into a sanitized server/internal with an incident id.
-	const rows = Result.unwrap(
+	const rows = (
 		await context.db.query.KittyTheme.findMany({
 			where: { isPublished: true },
 			orderBy: { createdAt: "desc" },
-		}),
-	);
+		})
+	).unwrap();
 	return ok(rows.map(toTheme));
 });
 
@@ -76,12 +76,12 @@ const mine = server
 	.implement(myThemesContract)
 	.use(requireViewer)
 	.handler(async ({ context }) => {
-		const rows = Result.unwrap(
+		const rows = (
 			await context.db.query.KittyTheme.findMany({
 				where: { authorGithubUsername: context.viewer.username },
 				orderBy: { createdAt: "desc" },
-			}),
-		);
+			})
+		).unwrap();
 		return ok(rows.map(toTheme));
 	});
 
@@ -95,9 +95,9 @@ const byId = server
 	.use(session)
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
-			const row = Result.unwrap(
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-			);
+			const row = (
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+			).unwrap();
 			// An unpublished theme is `theme/not-found` to anyone but its owner and
 			// admins. Hiding existence is the point, so this deliberately does not
 			// distinguish "no such theme" from "not yours" — that would be a disclosure.
@@ -123,7 +123,7 @@ const create = server
 			);
 
 			// The insert has no declared fold: any database failure is scenario C.
-			const [row] = Result.unwrap(
+			const [row] = (
 				await db
 					.insert(KittyTheme)
 					.values({
@@ -136,8 +136,8 @@ const create = server
 						authorAvatarUrl: author.avatar_url,
 						isPublished: false,
 					})
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 			return ok(toTheme(row));
 		}),
 	);
@@ -147,15 +147,15 @@ const update = server
 	.use(requireViewer)
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
-			const existing = Result.unwrap(
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-			);
+			const existing = (
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+			).unwrap();
 			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!canWrite(existing, context.viewer)) {
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			const [row] = Result.unwrap(
+			const [row] = (
 				await db
 					.update(KittyTheme)
 					.set({
@@ -165,8 +165,8 @@ const update = server
 						modifiedAt: new Date(),
 					})
 					.where(eq(KittyTheme.id, input.id))
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 			return ok(toTheme(row));
 		}),
 	);
@@ -176,21 +176,21 @@ const togglePublish = server
 	.use(requireViewer)
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
-			const existing = Result.unwrap(
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-			);
+			const existing = (
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+			).unwrap();
 			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!canWrite(existing, context.viewer)) {
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			const [row] = Result.unwrap(
+			const [row] = (
 				await db
 					.update(KittyTheme)
 					.set({ isPublished: !existing.isPublished, modifiedAt: new Date() })
 					.where(eq(KittyTheme.id, input.id))
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 			return ok(toTheme(row));
 		}),
 	);
@@ -200,9 +200,9 @@ const fork = server
 	.use(requireViewer)
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
-			const original = Result.unwrap(
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-			);
+			const original = (
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+			).unwrap();
 			if (!original) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!original.isPublished) {
 				return yield* err(errors.forkUnpublished({ themeId: input.id }));
@@ -212,7 +212,7 @@ const fork = server
 				errors.authorUnavailable(),
 			);
 
-			const [row] = Result.unwrap(
+			const [row] = (
 				await db
 					.insert(KittyTheme)
 					.values({
@@ -226,8 +226,8 @@ const fork = server
 						forkedFromId: original.id,
 						isPublished: false,
 					})
-					.returning(),
-			);
+					.returning()
+			).unwrap();
 			return ok(toTheme(row));
 		}),
 	);
@@ -237,15 +237,15 @@ const remove = server
 	.use(requireViewer)
 	.handler(({ input, errors, context, touch }) =>
 		Result.gen(async function* () {
-			const existing = Result.unwrap(
-				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-			);
+			const existing = (
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } })
+			).unwrap();
 			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
 			if (!canWrite(existing, context.viewer)) {
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			Result.unwrap(await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id)));
+			(await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id))).unwrap();
 			// A deleted row cannot ride back as an entity, so invalidate by identity.
 			touch(KittyThemeModel, input.id);
 			return ok({ id: input.id });
