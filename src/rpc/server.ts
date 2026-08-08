@@ -7,6 +7,7 @@
  * route, the `createServerFn` prefetchers in the ssr modules, and the OG/SEO
  * server routes — all of which TanStack Start strips from the client build.
  */
+import { Panic } from "better-result";
 import { createFetchHandler, createServerClient } from "result-rpc/server";
 import {
 	categoriesRouter,
@@ -71,7 +72,15 @@ export const rpcHandler = createFetchHandler({
 	endpoint: "/api/rpc",
 	createContext: ({ request }) => createContext(request.headers.get("authorization")),
 	onInternalError: ({ incidentId, procedurePath, cause }) => {
+		// A gen body's throw arrives wrapped as `Panic` (better-result re-wraps
+		// it); a plain async handler throws raw. Unwrap so the Worker log shows
+		// the defect, not the wrapper.
+		const defect = Panic.is(cause) ? cause.cause : cause;
+		const message = defect instanceof Error ? defect.message : String(defect);
 		// oxlint-disable-next-line no-console -- defects belong in the Worker log.
-		console.error("[rpc]", incidentId, procedurePath, cause);
+		console.error(
+			`[rpc] incident=${incidentId} path=${procedurePath ?? "?"} ${message}`,
+			defect instanceof Error ? defect.stack : defect,
+		);
 	},
 });
