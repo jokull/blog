@@ -135,41 +135,41 @@ type Db = typeof db;
  * a Panic here — so a gen body can `yield* (await requirePost(...))` and keep
  * its error lane on declared errors only.
  */
-const requirePost = async <E extends AnyTaggedError>(
+async function requirePost<E extends AnyTaggedError>(
 	db: Db,
 	slug: string,
 	missing: (args: { slug: string }) => E,
-): Promise<Result<typeof Post.$inferSelect, E>> => {
+): Promise<Result<typeof Post.$inferSelect, E>> {
 	const row = (await db.query.Post.findFirst({ where: { slug } })).unwrap();
 	return row ? ok(row) : err(missing({ slug }));
-};
+}
 
-const requireCategory = async <E extends AnyTaggedError>(
+async function requireCategory<E extends AnyTaggedError>(
 	db: Db,
 	slug: string,
 	missing: (args: { slug: string }) => E,
-): Promise<Result<typeof Category.$inferSelect, E>> => {
+): Promise<Result<typeof Category.$inferSelect, E>> {
 	const row = (await db.query.Category.findFirst({ where: { slug } })).unwrap();
 	return row ? ok(row) : err(missing({ slug }));
-};
+}
 
-const requireNote = async <E extends AnyTaggedError>(
+async function requireNote<E extends AnyTaggedError>(
 	db: Db,
 	id: string,
 	missing: (args: { id: string }) => E,
-): Promise<Result<typeof Note.$inferSelect, E>> => {
+): Promise<Result<typeof Note.$inferSelect, E>> {
 	const row = (await db.query.Note.findFirst({ where: { id } })).unwrap();
 	return row ? ok(row) : err(missing({ id }));
-};
+}
 
-const requireComment = async <E extends AnyTaggedError>(
+async function requireComment<E extends AnyTaggedError>(
 	db: Db,
 	id: number,
 	missing: (args: { id: number }) => E,
-): Promise<Result<typeof Comment.$inferSelect, E>> => {
+): Promise<Result<typeof Comment.$inferSelect, E>> {
 	const row = (await db.query.Comment.findFirst({ where: { id } })).unwrap();
 	return row ? ok(row) : err(missing({ id }));
-};
+}
 
 /**
  * The single-tag constraint fold: when the database rejected the write with a
