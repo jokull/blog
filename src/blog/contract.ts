@@ -86,7 +86,10 @@ export const postBySlugContract = app
 	.procedure()
 	.input(wire.object({ slug: wire.string }))
 	.output(PostFull)
-	.errors({ ...adminAuth, ...pickErrors(postErrors, "notFound") })
+	.errors({
+		...adminAuth,
+		...pickErrors(postErrors, "notFound"),
+	})
 	.query();
 
 export const createPostContract = app
@@ -159,7 +162,10 @@ export const setPublishedContract = app
 	.procedure()
 	.input(wire.object({ slug: wire.string, published: wire.boolean }))
 	.output(PostFull)
-	.errors({ ...adminAuth, ...pickErrors(postErrors, "notFound") })
+	.errors({
+		...adminAuth,
+		...pickErrors(postErrors, "notFound"),
+	})
 	.affects(listPostsContract)
 	.mutation();
 
@@ -168,7 +174,10 @@ export const deletePostContract = app
 	.procedure()
 	.input(wire.object({ slug: wire.string }))
 	.output(wire.object({ slug: wire.string }))
-	.errors({ ...adminAuth, ...pickErrors(postErrors, "notFound") })
+	.errors({
+		...adminAuth,
+		...pickErrors(postErrors, "notFound"),
+	})
 	.affects(listPostsContract)
 	.affects(exportPostsContract)
 	.mutation();
@@ -196,7 +205,10 @@ export const createCategoryContract = app
 	.procedure()
 	.input(wire.object({ slug: categorySlugInput, label: categoryLabelInput }))
 	.output(CategoryView)
-	.errors({ ...adminAuth, ...pickErrors(categoryErrors, "slugTaken") })
+	.errors({
+		...adminAuth,
+		...pickErrors(categoryErrors, "slugTaken"),
+	})
 	.affects(listCategoriesContract)
 	.mutation();
 
@@ -204,7 +216,10 @@ export const deleteCategoryContract = app
 	.procedure()
 	.input(wire.object({ slug: wire.string }))
 	.output(wire.object({ slug: wire.string }))
-	.errors({ ...adminAuth, ...pickErrors(categoryErrors, "notFound", "inUse") })
+	.errors({
+		...adminAuth,
+		...pickErrors(categoryErrors, "notFound", "inUse"),
+	})
 	.affects(listCategoriesContract)
 	.mutation();
 
@@ -233,7 +248,10 @@ export const createNoteContract = app
 		}),
 	)
 	.output(NoteView)
-	.errors({ ...adminAuth, ...pickErrors(noteErrors, "idTaken") })
+	.errors({
+		...adminAuth,
+		...pickErrors(noteErrors, "idTaken"),
+	})
 	.affects(listNotesContract)
 	.mutation();
 
@@ -247,14 +265,20 @@ export const updateNoteContract = app
 		}),
 	)
 	.output(NoteView)
-	.errors({ ...adminAuth, ...pickErrors(noteErrors, "notFound") })
+	.errors({
+		...adminAuth,
+		...pickErrors(noteErrors, "notFound"),
+	})
 	.mutation();
 
 export const deleteNoteContract = app
 	.procedure()
 	.input(wire.object({ id: wire.string }))
 	.output(wire.object({ id: wire.string }))
-	.errors({ ...adminAuth, ...pickErrors(noteErrors, "notFound") })
+	.errors({
+		...adminAuth,
+		...pickErrors(noteErrors, "notFound"),
+	})
 	.affects(listNotesContract)
 	.mutation();
 
@@ -302,7 +326,10 @@ export const updateCommentContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number, content: commentInput }))
 	.output(CommentView)
-	.errors({ ...signInErrors, ...pickErrors(commentErrors, "notFound", "notAuthor") })
+	.errors({
+		...signInErrors,
+		...pickErrors(commentErrors, "notFound", "notAuthor"),
+	})
 	.mutation();
 
 /** Admin moderation. Returns the entity, so the row dims in place. */
@@ -310,7 +337,10 @@ export const setCommentHiddenContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number, hidden: wire.boolean }))
 	.output(CommentView)
-	.errors({ ...authErrors, ...pickErrors(commentErrors, "notFound") })
+	.errors({
+		...authErrors,
+		...pickErrors(commentErrors, "notFound"),
+	})
 	.mutation();
 
 /**
@@ -322,7 +352,10 @@ export const deleteCommentContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number, postSlug: wire.string }))
 	.output(wire.object({ id: wire.number }))
-	.errors({ ...signInErrors, ...pickErrors(commentErrors, "notFound", "notAuthor") })
+	.errors({
+		...signInErrors,
+		...pickErrors(commentErrors, "notFound", "notAuthor"),
+	})
 	.affects(listCommentsContract, (input) => ({ postSlug: input.postSlug }))
 	.mutation();
 

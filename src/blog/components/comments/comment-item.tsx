@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { client } from "@/src/rpc/client";
+import { commentErrors } from "@/src/blog/errors";
 import { SessionShell, SignInShell } from "@/src/rpc/shells";
 import { CommentModel, type SavedComment } from "../../models";
 import { CommentFormSchema, type CommentForm } from "../../schemas";
@@ -190,7 +191,7 @@ export function CommentItem({ comment }: { comment: SavedComment }) {
 							exit="exit"
 							className="text-danger text-xs"
 						>
-							{remove.error._tag === "comment/not-author"
+							{commentErrors.notAuthor.is(remove.error)
 								? "That is not your comment."
 								: "That comment is already gone."}
 						</motion.p>
@@ -267,7 +268,7 @@ function CommentEditor({ comment, onDone }: { comment: SavedComment; onDone: () 
 				</Button>
 				{update.state === "failure" && (
 					<span className="text-danger text-xs">
-						{update.error._tag === "comment/not-author"
+						{commentErrors.notAuthor.is(update.error)
 							? "That is not your comment."
 							: "That comment is already gone."}
 					</span>

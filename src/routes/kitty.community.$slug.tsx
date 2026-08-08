@@ -6,6 +6,7 @@ import type { CommunityThemeDetail } from "@/src/kitty/models";
 import { client } from "@/src/kitty/rpc-client";
 import { SignInShell } from "@/src/kitty/shells";
 import { prefetchCommunityTheme } from "@/src/kitty/ssr";
+import { communityErrors } from "@/src/kitty/errors";
 import { asHead, pageHead } from "@/src/lib/seo";
 import { getCommunityKittyThemeHead } from "@/src/server/seo";
 
@@ -76,7 +77,7 @@ function CommunityThemeDetailView({ slug }: { slug: string }) {
 		case "failure":
 			// Two tags survive the shells, and they mean different things to a
 			// reader: the theme is gone, or GitHub is down and it may be back.
-			return theme.error._tag === "community/not-found" ? (
+			return communityErrors.notFound.is(theme.error) ? (
 				<CommunityMissing slug={slug} />
 			) : (
 				<CommunityUnavailable retry={() => void theme.refetch()} />

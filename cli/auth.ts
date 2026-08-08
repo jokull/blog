@@ -9,17 +9,8 @@
  * channel rather than a Result for our half and exceptions for GitHub's.
  */
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import {
-	defineErrors,
-	err,
-	gen,
-	isErr,
-	mapError,
-	ok,
-	wire,
-	type InferErr,
-	type Result,
-} from "result-rpc";
+import { Result } from "better-result";
+import { defineErrors, err, ok, wire, type InferErr } from "result-rpc";
 import * as v from "valibot";
 import { safeFetchJson, safeParse } from "../lib/safe-utils";
 import { createClient, type BlogClient } from "./client";
@@ -89,7 +80,7 @@ const TokenResponseSchema = v.object({
 type DeviceCode = v.InferOutput<typeof DeviceCodeSchema>;
 
 async function requestDeviceCode(clientId: string): Promise<Result<DeviceCode, DeviceFlowError>> {
-	const requested = await gen(async function* () {
+	const requested = await Result.gen(async function* () {
 		const payload = yield* await safeFetchJson("https://github.com/login/device/code", {
 			method: "POST",
 			headers: {
@@ -104,7 +95,7 @@ async function requestDeviceCode(clientId: string): Promise<Result<DeviceCode, D
 	// Both the fetch failure and the schema failure collapse to one tag: the
 	// operator cannot do anything different about "GitHub is down" and
 	// "GitHub answered something unexpected".
-	return mapError(requested, (error) =>
+	return Result.mapError(requested, (error) =>
 		deviceFlowErrors.failed({ reason: describeIssue(error) }),
 	);
 }
@@ -134,11 +125,11 @@ async function pollForGitHubToken(
 				grant_type: "urn:ietf:params:oauth:grant-type:device_code",
 			}),
 		});
-		if (isErr(response))
+		if (response.isErr())
 			return err(deviceFlowErrors.failed({ reason: describeIssue(response.error) }));
 
 		const parsed = safeParse(TokenResponseSchema)(response.value);
-		if (isErr(parsed))
+		if (parsed.isErr())
 			return err(deviceFlowErrors.failed({ reason: describeIssue(parsed.error) }));
 
 		const data = parsed.value;
@@ -178,7 +169,7 @@ export function getValidToken(): string | null {
  * non-admin GitHub account through the same channel.
  */
 export async function login(): Promise<Result<string, LoginFailure | DeviceFlowError>> {
-	return gen(async function* () {
+	return Result.gen(async function* () {
 		console.log("Fetching OAuth configuration...");
 		const config = yield* await createClient().cli.oauthConfig({});
 

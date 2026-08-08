@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { OctocatIcon } from "@/components/octocat-icon";
 import { client } from "@/src/rpc/client";
+import { commentErrors } from "@/src/blog/errors";
 import { SessionShell, SignInShell } from "@/src/rpc/shells";
 import { CommentFormSchema, type CommentForm } from "../../schemas";
 import { CONFIRMATION_MS, confirmation, springy } from "./motion";
@@ -180,7 +181,7 @@ export function CommentComposer({ postSlug }: { postSlug: string }) {
 					animate={{ opacity: 1 }}
 					className="text-danger text-sm"
 				>
-					{create.error._tag === "comment/author-unavailable"
+					{commentErrors.authorUnavailable.is(create.error)
 						? "GitHub is not responding, so your comment could not be attributed. Try again in a moment."
 						: "This post no longer exists."}
 				</motion.p>

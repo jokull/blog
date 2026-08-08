@@ -1,6 +1,7 @@
 import { Theater } from "@/components/theater";
 import { tryDb } from "db-result";
-import { db, orThrow, rawDb } from "@/db";
+import { Result } from "better-result";
+import { db, rawDb } from "@/db";
 import { Comment } from "@/schema";
 import { eq, sql } from "drizzle-orm";
 import type { Metadata } from "@/src/lib/metadata";
@@ -18,7 +19,7 @@ export async function generateMetadata({
 	const { category } = await searchParams;
 
 	if (category) {
-		const cat = orThrow(
+		const cat = Result.unwrap(
 			await db.query.Category.findFirst({
 				where: { slug: category },
 			}),
@@ -68,7 +69,7 @@ function ShowsSkeleton() {
 
 export default async function Page() {
 	// Fetch all posts with category information
-	const posts = orThrow(
+	const posts = Result.unwrap(
 		await db.query.Post.findMany({
 			where: { publicAt: { isNotNull: true } },
 			orderBy: { publishedAt: "desc" },
@@ -76,10 +77,10 @@ export default async function Page() {
 	);
 
 	// Fetch all categories
-	const categories = orThrow(await db.query.Category.findMany());
+	const categories = Result.unwrap(await db.query.Category.findMany());
 
 	// Get comment counts for all posts
-	const commentCounts = orThrow(
+	const commentCounts = Result.unwrap(
 		await tryDb(
 			rawDb
 				.select({

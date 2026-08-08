@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/modal";
 import { TextField } from "@/components/ui/text-field";
 import { client } from "@/src/rpc/client";
+import { categoryErrors } from "@/src/blog/errors";
 import { CategoryFormSchema, type CategoryForm } from "../schemas";
 import { AdminShell } from "../shells";
 import type { SavedCategory } from "../models";
@@ -102,7 +103,7 @@ export function CategoryManager({ categories, postCounts }: CategoryManagerProps
 			 */}
 			{remove.state === "failure" && (
 				<p className="mt-2 text-danger text-sm">
-					{remove.error._tag === "category/in-use"
+					{categoryErrors.inUse.is(remove.error)
 						? `"${remove.error.data.slug}" still has ${remove.error.data.postCount} post(s).`
 						: `"${remove.error.data.slug}" no longer exists.`}
 				</p>

@@ -1,13 +1,14 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import { groupBy, pipe } from "remeda";
-import { db, orThrow } from "@/db";
+import { Result } from "better-result";
+import { db } from "@/db";
 
 export const Route = createFileRoute("/llm.txt")({
 	server: {
 		handlers: {
 			GET: async () => {
-				const posts = orThrow(
+				const posts = Result.unwrap(
 					await db.query.Post.findMany({
 						where: { publicAt: { isNotNull: true } },
 						orderBy: { publishedAt: "desc" },

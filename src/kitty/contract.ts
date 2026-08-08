@@ -72,7 +72,10 @@ export const createThemeContract = app
 	.procedure()
 	.input(wire.object(themeDraftInput))
 	.output(KittyThemeView)
-	.errors({ ...signInErrors, ...pickErrors(themeErrors, "authorUnavailable") })
+	.errors({
+		...signInErrors,
+		...pickErrors(themeErrors, "authorUnavailable"),
+	})
 	.affects(myThemesContract)
 	.mutation();
 
@@ -80,7 +83,10 @@ export const updateThemeContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number, ...themeDraftInput }))
 	.output(KittyThemeView)
-	.errors({ ...signInErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
+	.errors({
+		...signInErrors,
+		...pickErrors(themeErrors, "notFound", "notOwner"),
+	})
 	.mutation();
 
 /** Publishing changes list membership, so the published list is invalidated. */
@@ -88,7 +94,10 @@ export const togglePublishContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number }))
 	.output(KittyThemeView)
-	.errors({ ...signInErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
+	.errors({
+		...signInErrors,
+		...pickErrors(themeErrors, "notFound", "notOwner"),
+	})
 	.affects(publishedThemesContract)
 	.mutation();
 
@@ -111,7 +120,10 @@ export const deleteThemeContract = app
 	.procedure()
 	.input(wire.object({ id: wire.number }))
 	.output(wire.object({ id: wire.number }))
-	.errors({ ...signInErrors, ...pickErrors(themeErrors, "notFound", "notOwner") })
+	.errors({
+		...signInErrors,
+		...pickErrors(themeErrors, "notFound", "notOwner"),
+	})
 	.affects(publishedThemesContract)
 	.affects(myThemesContract)
 	.mutation();

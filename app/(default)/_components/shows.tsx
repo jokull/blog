@@ -1,4 +1,4 @@
-import { andThen, unwrapOr } from "result-rpc";
+import { Result } from "better-result";
 import * as v from "valibot";
 import { safeFetchJson, safeParse } from "@/lib/safe-utils";
 
@@ -14,7 +14,7 @@ export async function RecentShows() {
 	const result = await safeFetchJson("https://personal.plex.uno/recent-shows", {
 		signal: AbortSignal.timeout(3000),
 	});
-	const shows = unwrapOr(andThen(result, safeParse(showsSchema)), []);
+	const shows = Result.unwrapOr(Result.andThen(result, safeParse(showsSchema)), []);
 
 	return (
 		<div className="-mx-6 flex gap-3 overflow-y-auto px-6 sm:grid sm:grid-cols-3 md:grid-cols-5 *:shrink-0 sm:*:w-auto">

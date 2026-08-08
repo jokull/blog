@@ -12,17 +12,8 @@
  * is what stops a GitHub 404 from leaking out of this blog as a `fetch/status`
  * the browser was never told about.
  */
-import {
-	defineErrors,
-	err,
-	gen,
-	ok,
-	tryPromise,
-	validateStandard,
-	wire,
-	type Result,
-	type StandardSchemaV1,
-} from "result-rpc";
+import { Result } from "better-result";
+import { defineErrors, err, ok, validateStandard, wire, type StandardSchemaV1 } from "result-rpc";
 
 const messageOf = (cause: unknown) => (cause instanceof Error ? cause.message : String(cause));
 
@@ -61,7 +52,7 @@ export async function safeFetch(
 	input: URL | string,
 	init?: RequestInit,
 ): Promise<Result<Response, FetchError>> {
-	return tryPromise({
+	return Result.tryPromise({
 		try: () => fetch(input, init),
 		catch: (cause) =>
 			fetchErrors.unreachable({ url: String(input), message: messageOf(cause) }, { cause }),
@@ -77,14 +68,14 @@ export async function safeFetchJson<T = unknown>(
 	input: URL | string,
 	init?: RequestInit,
 ): Promise<Result<T, FetchJsonError>> {
-	return gen(async function* () {
+	return Result.gen(async function* () {
 		const response = yield* await safeFetch(input, init);
 
 		if (!response.ok) {
 			return yield* err(fetchErrors.status({ url: String(input), status: response.status }));
 		}
 
-		const body = yield* await tryPromise({
+		const body = yield* await Result.tryPromise({
 			// `Response.json()` is generic in the workers types, so `T` is supplied
 			// by inference rather than an assertion.
 			try: () => response.json<T>(),

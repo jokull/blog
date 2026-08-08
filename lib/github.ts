@@ -5,7 +5,7 @@
  * value the session middleware can turn into "anonymous" without a catch block,
  * and the reason survives the trip.
  */
-import { andThen, type Result } from "result-rpc";
+import { Result } from "better-result";
 import * as v from "valibot";
 import { safeFetchJson, safeParse, type FetchJsonError, type SchemaError } from "./safe-utils";
 
@@ -32,7 +32,7 @@ export async function fetchAuthenticatedUser(
 	const response = await safeFetchJson("https://api.github.com/user", {
 		headers: { ...GITHUB_HEADERS, Authorization: `Bearer ${accessToken}` },
 	});
-	return andThen(response, safeParse(githubUserSchema));
+	return Result.andThen(response, safeParse(githubUserSchema));
 }
 
 export async function fetchGithubUser(username: string): Promise<Result<GitHubUser, GitHubError>> {
@@ -40,5 +40,5 @@ export async function fetchGithubUser(username: string): Promise<Result<GitHubUs
 		headers: GITHUB_HEADERS,
 		signal: AbortSignal.timeout(3000),
 	});
-	return andThen(response, safeParse(githubUserSchema));
+	return Result.andThen(response, safeParse(githubUserSchema));
 }

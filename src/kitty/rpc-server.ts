@@ -10,10 +10,10 @@
  * render is exactly the union this file can produce.
  */
 import { eq } from "drizzle-orm";
-import { err, gen, ok, tryPromise } from "result-rpc";
+import { Result } from "better-result";
+import { err, ok } from "result-rpc";
 import { getGithubUser } from "@/auth";
-import { tryDb } from "db-result";
-import { orThrow, rawDb } from "@/db";
+import { db } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
 import { requireViewer, server, session } from "@/src/rpc/server-base";
 import { KittyTheme } from "@/schema";
@@ -60,7 +60,10 @@ const canWrite = (row: typeof KittyTheme.$inferSelect, viewer: Viewer) =>
 	row.authorGithubUsername === viewer.username || viewer.isAdmin;
 
 const published = server.implement(publishedThemesContract).handler(async ({ context }) => {
-	const rows = orThrow(
+	// A read with no declared failure: the query either answers or it is
+	// scenario C — `unwrap` throws a Panic and the framework turns that
+	// into a sanitized server/internal with an incident id.
+	const rows = Result.unwrap(
 		await context.db.query.KittyTheme.findMany({
 			where: { isPublished: true },
 			orderBy: { createdAt: "desc" },
@@ -73,7 +76,7 @@ const mine = server
 	.implement(myThemesContract)
 	.use(requireViewer)
 	.handler(async ({ context }) => {
-		const rows = orThrow(
+		const rows = Result.unwrap(
 			await context.db.query.KittyTheme.findMany({
 				where: { authorGithubUsername: context.viewer.username },
 				orderBy: { createdAt: "desc" },
@@ -90,59 +93,70 @@ const mine = server
 const byId = server
 	.implement(themeByIdContract)
 	.use(session)
-	.handler(async ({ input, errors, context }) => {
-		const row = orThrow(
-			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-		);
-		if (!row) return err(errors.notFound({ themeId: input.id }));
-		if (!row.isPublished && (context.viewer === null || !canWrite(row, context.viewer))) {
-			return err(errors.notFound({ themeId: input.id }));
-		}
-		return ok(toTheme(row));
-	});
+	.handler(({ input, errors, context }) =>
+		Result.gen(async function* () {
+			const row = Result.unwrap(
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+			);
+			// An unpublished theme is `theme/not-found` to anyone but its owner and
+			// admins. Hiding existence is the point, so this deliberately does not
+			// distinguish "no such theme" from "not yours" — that would be a disclosure.
+			if (
+				!row ||
+				(!row.isPublished && (context.viewer === null || !canWrite(row, context.viewer)))
+			) {
+				return yield* err(errors.notFound({ themeId: input.id }));
+			}
+			return ok(toTheme(row));
+		}),
+	);
 
 const create = server
 	.implement(createThemeContract)
 	.use(requireViewer)
-	.handler(async ({ input, errors, context }) => {
-		// The author's avatar and id are stamped onto the row, so a GitHub outage
-		// is a declared, retryable failure rather than an unhandled throw.
-		const author = await getGithubUser(context.viewer.username);
-		if (author.isErr()) return err(errors.authorUnavailable());
+	.handler(({ input, errors, context }) =>
+		Result.gen(async function* () {
+			// The author's avatar and id are stamped onto the row, so a GitHub outage
+			// is a declared, retryable failure rather than an unhandled throw.
+			const author = yield* (await getGithubUser(context.viewer.username)).mapError(() =>
+				errors.authorUnavailable(),
+			);
 
-		const [row] = orThrow(
-			await tryDb(
-				rawDb
+			// The insert has no declared fold: any database failure is scenario C.
+			const [row] = Result.unwrap(
+				await db
 					.insert(KittyTheme)
 					.values({
 						slug: generateSlug(input.name),
 						name: input.name,
 						blurb: input.blurb,
 						colors: input.colors,
-						authorGithubId: author.value.id,
-						authorGithubUsername: author.value.login,
-						authorAvatarUrl: author.value.avatar_url,
+						authorGithubId: author.id,
+						authorGithubUsername: author.login,
+						authorAvatarUrl: author.avatar_url,
 						isPublished: false,
 					})
 					.returning(),
-			),
-		);
-		return ok(toTheme(row));
-	});
+			);
+			return ok(toTheme(row));
+		}),
+	);
 
 const update = server
 	.implement(updateThemeContract)
 	.use(requireViewer)
-	.handler(async ({ input, errors, context }) => {
-		const existing = orThrow(
-			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-		);
-		if (!existing) return err(errors.notFound({ themeId: input.id }));
-		if (!canWrite(existing, context.viewer)) return err(errors.notOwner({ themeId: input.id }));
+	.handler(({ input, errors, context }) =>
+		Result.gen(async function* () {
+			const existing = Result.unwrap(
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+			);
+			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
+			if (!canWrite(existing, context.viewer)) {
+				return yield* err(errors.notOwner({ themeId: input.id }));
+			}
 
-		const [row] = orThrow(
-			await tryDb(
-				rawDb
+			const [row] = Result.unwrap(
+				await db
 					.update(KittyTheme)
 					.set({
 						name: input.name,
@@ -152,82 +166,91 @@ const update = server
 					})
 					.where(eq(KittyTheme.id, input.id))
 					.returning(),
-			),
-		);
-		return ok(toTheme(row));
-	});
+			);
+			return ok(toTheme(row));
+		}),
+	);
 
 const togglePublish = server
 	.implement(togglePublishContract)
 	.use(requireViewer)
-	.handler(async ({ input, errors, context }) => {
-		const existing = orThrow(
-			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-		);
-		if (!existing) return err(errors.notFound({ themeId: input.id }));
-		if (!canWrite(existing, context.viewer)) return err(errors.notOwner({ themeId: input.id }));
+	.handler(({ input, errors, context }) =>
+		Result.gen(async function* () {
+			const existing = Result.unwrap(
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+			);
+			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
+			if (!canWrite(existing, context.viewer)) {
+				return yield* err(errors.notOwner({ themeId: input.id }));
+			}
 
-		const [row] = orThrow(
-			await tryDb(
-				rawDb
+			const [row] = Result.unwrap(
+				await db
 					.update(KittyTheme)
 					.set({ isPublished: !existing.isPublished, modifiedAt: new Date() })
 					.where(eq(KittyTheme.id, input.id))
 					.returning(),
-			),
-		);
-		return ok(toTheme(row));
-	});
+			);
+			return ok(toTheme(row));
+		}),
+	);
 
 const fork = server
 	.implement(forkThemeContract)
 	.use(requireViewer)
-	.handler(async ({ input, errors, context }) => {
-		const original = orThrow(
-			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-		);
-		if (!original) return err(errors.notFound({ themeId: input.id }));
-		if (!original.isPublished) return err(errors.forkUnpublished({ themeId: input.id }));
+	.handler(({ input, errors, context }) =>
+		Result.gen(async function* () {
+			const original = Result.unwrap(
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+			);
+			if (!original) return yield* err(errors.notFound({ themeId: input.id }));
+			if (!original.isPublished) {
+				return yield* err(errors.forkUnpublished({ themeId: input.id }));
+			}
 
-		const author = await getGithubUser(context.viewer.username);
-		if (author.isErr()) return err(errors.authorUnavailable());
+			const author = yield* (await getGithubUser(context.viewer.username)).mapError(() =>
+				errors.authorUnavailable(),
+			);
 
-		const [row] = orThrow(
-			await tryDb(
-				rawDb
+			const [row] = Result.unwrap(
+				await db
 					.insert(KittyTheme)
 					.values({
 						slug: generateSlug(`${original.name} remix`),
 						name: `${original.name} (Remix)`,
 						blurb: original.blurb,
 						colors: original.colors,
-						authorGithubId: author.value.id,
-						authorGithubUsername: author.value.login,
-						authorAvatarUrl: author.value.avatar_url,
+						authorGithubId: author.id,
+						authorGithubUsername: author.login,
+						authorAvatarUrl: author.avatar_url,
 						forkedFromId: original.id,
 						isPublished: false,
 					})
 					.returning(),
-			),
-		);
-		return ok(toTheme(row));
-	});
+			);
+			return ok(toTheme(row));
+		}),
+	);
 
 const remove = server
 	.implement(deleteThemeContract)
 	.use(requireViewer)
-	.handler(async ({ input, errors, context, touch }) => {
-		const existing = orThrow(
-			await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
-		);
-		if (!existing) return err(errors.notFound({ themeId: input.id }));
-		if (!canWrite(existing, context.viewer)) return err(errors.notOwner({ themeId: input.id }));
+	.handler(({ input, errors, context, touch }) =>
+		Result.gen(async function* () {
+			const existing = Result.unwrap(
+				await context.db.query.KittyTheme.findFirst({ where: { id: input.id } }),
+			);
+			if (!existing) return yield* err(errors.notFound({ themeId: input.id }));
+			if (!canWrite(existing, context.viewer)) {
+				return yield* err(errors.notOwner({ themeId: input.id }));
+			}
 
-		orThrow(await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id)));
-		// A deleted row cannot ride back as an entity, so invalidate by identity.
-		touch(KittyThemeModel, input.id);
-		return ok({ id: input.id });
-	});
+			Result.unwrap(await context.db.delete(KittyTheme).where(eq(KittyTheme.id, input.id)));
+			// A deleted row cannot ride back as an entity, so invalidate by identity.
+			touch(KittyThemeModel, input.id);
+			return ok({ id: input.id });
+		}),
+	);
 
 const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master";
 
@@ -238,35 +261,28 @@ const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/mast
  * community list cannot act differently on "offline" versus "malformed JSON".
  */
 const fetchIndex = () =>
-	gen(async function* () {
-		const response = yield* await tryPromise({
+	Result.gen(async function* () {
+		const response = yield* await Result.tryPromise({
 			try: () => fetch(`${UPSTREAM}/themes.json`),
 			catch: () => communityErrors.unavailable(),
 		});
 		if (!response.ok) return yield* err(communityErrors.unavailable());
-		const payload = yield* await tryPromise({
+		const payload = yield* await Result.tryPromise({
 			try: () => response.json(),
 			catch: () => communityErrors.unavailable(),
 		});
 		return ok(themeIndexEntries(payload));
 	});
 
-const communityList = server.implement(communityListContract).handler(async () => {
-	const index = await fetchIndex();
-	if (index.isErr()) return err(index.error);
-	return ok(index.value);
-});
+const communityList = server.implement(communityListContract).handler(() => fetchIndex());
 
-const communityBySlug = server
-	.implement(communityBySlugContract)
-	.handler(async ({ input, errors }) => {
-		const index = await fetchIndex();
-		if (index.isErr()) return err(index.error);
+const communityBySlug = server.implement(communityBySlugContract).handler(({ input, errors }) =>
+	Result.gen(async function* () {
+		const index = yield* await fetchIndex();
+		const meta = index.find((entry) => entry.slug === input.slug);
+		if (!meta) return yield* err(errors.notFound({ slug: input.slug }));
 
-		const meta = index.value.find((entry) => entry.slug === input.slug);
-		if (!meta) return err(errors.notFound({ slug: input.slug }));
-
-		const config = await tryPromise({
+		const config = yield* await Result.tryPromise({
 			try: async () => {
 				const response = await fetch(`${UPSTREAM}/${meta.file}`);
 				if (!response.ok) throw new Error(`upstream ${response.status}`);
@@ -274,14 +290,14 @@ const communityBySlug = server
 			},
 			catch: () => errors.unavailable(),
 		});
-		if (config.isErr()) return err(config.error);
 
 		// Merged over the default so all 21 colours are always present.
 		return ok({
 			meta,
-			colors: { ...defaultThemeColors, ...parseThemeConfig(config.value).colors },
+			colors: { ...defaultThemeColors, ...parseThemeConfig(config).colors },
 		});
-	});
+	}),
+);
 
 /** Composed into the app router by src/rpc/server.ts. */
 export const themesRouter = {

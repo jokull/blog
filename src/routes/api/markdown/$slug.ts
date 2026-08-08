@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db, orThrow } from "@/db";
+import { Result } from "better-result";
+import { db } from "@/db";
 
 export const Route = createFileRoute("/api/markdown/$slug")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				const post = orThrow(
+				const post = Result.unwrap(
 					await db.query.Post.findFirst({
 						where: { slug: params.slug },
 					}),

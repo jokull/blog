@@ -1,4 +1,5 @@
-import { db, orThrow } from "@/db";
+import { Result } from "better-result";
+import { db } from "@/db";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
 import { Link } from "@/src/lib/navigation";
@@ -22,7 +23,7 @@ export default async function NotesPage({
 }) {
 	const { cursor } = await searchParams;
 
-	const notes = orThrow(
+	const notes = Result.unwrap(
 		await db.query.Note.findMany({
 			where: {
 				publishedAt: cursor

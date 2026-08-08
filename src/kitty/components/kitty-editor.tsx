@@ -296,12 +296,14 @@ export function KittyEditor({
  * are the only two outcomes a save can present here, and adding a case for
  * anything else is a type error.
  */
-function SaveFailure({ tag }: { tag: "theme/not-found" | "theme/not-owner" }) {
+function SaveFailure({ tag }: { tag: "db/unavailable" | "theme/not-found" | "theme/not-owner" }) {
 	return (
 		<div role="alert" className="px-4 py-2 text-sm text-danger">
 			{tag === "theme/not-owner"
 				? "This theme belongs to someone else — fork it to make changes."
-				: "This theme no longer exists."}
+				: tag === "db/unavailable"
+					? "The database is unavailable right now — try again shortly."
+					: "This theme no longer exists."}
 		</div>
 	);
 }

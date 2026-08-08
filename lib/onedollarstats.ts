@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { andThen, map, type Result } from "result-rpc";
+import { Result } from "better-result";
 import * as v from "valibot";
 import { safeFetchJson, safeParse, type FetchJsonError, type SchemaError } from "./safe-utils";
 
@@ -103,7 +103,7 @@ export class OneDollarStatsClient {
 				site_id: this.siteId,
 			}),
 		});
-		return andThen(fetchResult, safeParse(oneDollarStatsResponseSchema));
+		return Result.andThen(fetchResult, safeParse(oneDollarStatsResponseSchema));
 	}
 
 	/**
@@ -118,7 +118,7 @@ export class OneDollarStatsClient {
 			dimensions: ["time:day"],
 			order_by: [["time:day", "asc"]],
 		});
-		return map(result, (response) =>
+		return Result.map(result, (response) =>
 			response.results.map((r) => ({
 				date: r.dimensions[0],
 				visitors: r.metrics[0],
@@ -140,7 +140,7 @@ export class OneDollarStatsClient {
 			dimensions: ["time:week"],
 			order_by: [["time:week", "asc"]],
 		});
-		return map(result, (response) =>
+		return Result.map(result, (response) =>
 			response.results.map((r) => ({
 				date: r.dimensions[0],
 				visitors: r.metrics[0],
@@ -158,7 +158,7 @@ export class OneDollarStatsClient {
 			metrics: ["visitors", "visits", "pageviews"],
 			date_range: dateRange,
 		});
-		return map(result, (response) => {
+		return Result.map(result, (response) => {
 			if (response.results.length === 0) {
 				return { visitors: 0, visits: 0, pageviews: 0 };
 			}
@@ -180,7 +180,7 @@ export class OneDollarStatsClient {
 			order_by: [["pageviews", "desc"]],
 			pagination: { limit: 500 },
 		});
-		return map(result, (response) => {
+		return Result.map(result, (response) => {
 			const byPath = new Map<string, number>();
 			for (const r of response.results) {
 				byPath.set(r.dimensions[0], r.metrics[0]);

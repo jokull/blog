@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db, orThrow } from "@/db";
+import { Result } from "better-result";
+import { db } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { ogImage } from "@/src/lib/og";
 
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/og/blog/$slug")({
 					});
 				}
 
-				const post = orThrow(
+				const post = Result.unwrap(
 					await db.query.Post.findFirst({ where: { slug: params.slug } }),
 				);
 				if (!post?.publicAt) return new Response("Not Found", { status: 404 });

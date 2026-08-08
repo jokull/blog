@@ -18,6 +18,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createQueryRuntime } from "result-rpc/query";
 import { createServerClient } from "result-rpc/server";
 import { createContext, router } from "@/src/rpc/server";
+import { communityErrors } from "@/src/kitty/errors";
 
 const buildRuntime = () => {
 	const serverClient = createServerClient(router, { context: createContext() });
@@ -77,6 +78,6 @@ export const prefetchCommunityTheme = createServerFn({ method: "GET" })
 			// the client starts the query cold and its `retry: "transient"`
 			// policy gets a live attempt — better than freezing one request's
 			// bad luck into the HTML.
-			missing: detail.isErr() && detail.error._tag === "community/not-found",
+			missing: detail.isErr() && communityErrors.notFound.is(detail.error),
 		};
 	});
