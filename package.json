@@ -21,7 +21,10 @@
 		"knip": "dotenvx run -- knip",
 		"knip:fix": "dotenvx run -- knip --fix",
 		"run:migration": "wrangler d1 execute solberg-blog --file",
-		"postinstall": "lefthook install"
+		"postinstall": "lefthook install",
+		"generate:migration": "drizzle-kit generate --config=drizzle-kit.config.ts",
+		"studio": "drizzle-kit studio --config=drizzle-kit.config.ts",
+		"gen:db-types": "bun run scripts/gen-db-types.ts"
 	},
 	"dependencies": {
 		"@formisch/react": "^1.0.0-rc.0",
@@ -45,6 +48,7 @@
 		"d3-shape": "^3.2.0",
 		"db-result": "^0.2.1",
 		"diff": "^9.0.0",
+		"drizzle-orm": "1.0.0-rc.4",
 		"iron-session": "^8.0.4",
 		"kysely": "^0.29.4",
 		"kysely-d1": "^0.4.0",
@@ -83,6 +87,7 @@
 		"@types/react-dom": "^19.2.3",
 		"@types/rss": "^0.0.32",
 		"@vitejs/plugin-rsc": "^0.5.32",
+		"drizzle-kit": "1.0.0-rc.4",
 		"knip": "^6.29.0",
 		"lefthook": "^2.1.10",
 		"oxfmt": "^0.61.0",

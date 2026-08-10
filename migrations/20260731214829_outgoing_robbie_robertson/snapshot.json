@@ -1,0 +1,494 @@
+{
+	"version": "7",
+	"dialect": "sqlite",
+	"id": "ca3b45b9-8e9d-4d88-9a76-0447ebccdeb3",
+	"prevIds": ["09a5e45e-78c3-4cab-8099-6cabb7ec1832"],
+	"ddl": [
+		{
+			"name": "category",
+			"entityType": "tables"
+		},
+		{
+			"name": "comment",
+			"entityType": "tables"
+		},
+		{
+			"name": "kitty_theme",
+			"entityType": "tables"
+		},
+		{
+			"name": "note",
+			"entityType": "tables"
+		},
+		{
+			"name": "post",
+			"entityType": "tables"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "slug",
+			"entityType": "columns",
+			"table": "category"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "label",
+			"entityType": "columns",
+			"table": "category"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "category"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": true,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "post_slug",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "author_github_id",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "author_github_username",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "author_avatar_url",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "content",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": "false",
+			"generated": null,
+			"name": "is_hidden",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "comment"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": true,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "slug",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "name",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "author_github_id",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "author_github_username",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "author_avatar_url",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": "false",
+			"generated": null,
+			"name": "is_published",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "forked_from_id",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "blurb",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "colors",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "modified_at",
+			"entityType": "columns",
+			"table": "kitty_theme"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "note"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "description",
+			"entityType": "columns",
+			"table": "note"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "published_at",
+			"entityType": "columns",
+			"table": "note"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "note"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "slug",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "title",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "markdown",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "preview_markdown",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "public_at",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "published_at",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "modified_at",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": "1",
+			"generated": null,
+			"name": "revision",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": "'en'",
+			"generated": null,
+			"name": "locale",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "hero_image",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "category_slug",
+			"entityType": "columns",
+			"table": "post"
+		},
+		{
+			"columns": ["post_slug"],
+			"tableTo": "post",
+			"columnsTo": ["slug"],
+			"onUpdate": "NO ACTION",
+			"onDelete": "NO ACTION",
+			"nameExplicit": false,
+			"name": "comment_post_slug_post_slug_fk",
+			"entityType": "fks",
+			"table": "comment"
+		},
+		{
+			"columns": ["forked_from_id"],
+			"tableTo": "kitty_theme",
+			"columnsTo": ["id"],
+			"onUpdate": "NO ACTION",
+			"onDelete": "NO ACTION",
+			"nameExplicit": false,
+			"name": "kitty_theme_forked_from_id_kitty_theme_id_fk",
+			"entityType": "fks",
+			"table": "kitty_theme"
+		},
+		{
+			"columns": ["category_slug"],
+			"tableTo": "category",
+			"columnsTo": ["slug"],
+			"onUpdate": "NO ACTION",
+			"onDelete": "NO ACTION",
+			"nameExplicit": false,
+			"name": "post_category_slug_category_slug_fk",
+			"entityType": "fks",
+			"table": "post"
+		},
+		{
+			"columns": ["slug"],
+			"nameExplicit": false,
+			"name": "category_pk",
+			"table": "category",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "comment_pk",
+			"table": "comment",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "kitty_theme_pk",
+			"table": "kitty_theme",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "note_pk",
+			"table": "note",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["slug"],
+			"nameExplicit": false,
+			"name": "post_pk",
+			"table": "post",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["slug"],
+			"nameExplicit": false,
+			"name": "kitty_theme_slug_unique",
+			"entityType": "uniques",
+			"table": "kitty_theme"
+		}
+	],
+	"renames": []
+}

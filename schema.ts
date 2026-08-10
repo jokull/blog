@@ -1,6 +1,7 @@
 /**
- * The database as Kysely sees it: table types keyed by column name, plus the
- * decoded row types the blog models must match.
+ * The database. Drizzle table definitions are the source of truth — they feed
+ * drizzle-kit's migration generation — and the kysely types the queries see
+ * are derived from them by the vendored `Kyselify` port in `src/db/kyselify.ts`.
  *
  * Storage formats (fixed by the existing schema, written by the old drizzle
  * layer and now read raw by kysely):
@@ -11,80 +12,123 @@
  * - Booleans store `0`/`1` integers.
  * - `kitty_theme.colors` stores JSON text.
  *
- * Column-level notes: `Generated` = the column is provided by the database or
- * its DDL default (`id` autoincrement).
+ * `Stored*` types are the decoded rows the blog models must match, and
+ * `decode*` in `db.ts` is the one bridge from the raw kysely row.
  */
-import type { Generated } from "kysely";
+import { defineRelations } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+// Type-only: the same declaration the wire codec uses, so the column and the
+// RPC contract cannot drift. Erased at build.
 import type { ThemeColors } from "@/src/kitty/colors";
 
-export type DB = {
-	category: CategoryTable;
-	comment: CommentTable;
-	kitty_theme: KittyThemeTable;
-	note: NoteTable;
-	post: PostTable;
-};
+export const Category = sqliteTable("category", {
+	slug: text("slug").notNull().primaryKey(),
+	label: text("label").notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$default(() => new Date()),
+});
 
-export type CategoryTable = {
-	slug: string;
-	label: string;
-	created_at: number;
-};
+export const Post = sqliteTable("post", {
+	slug: text("slug").notNull().primaryKey(),
+	title: text("title").notNull(),
+	markdown: text("markdown").notNull(),
+	previewMarkdown: text("preview_markdown"),
+	publicAt: integer("public_at", { mode: "timestamp" }),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$default(() => new Date()),
+	publishedAt: integer("published_at", { mode: "timestamp" }).notNull(),
+	modifiedAt: integer("modified_at", { mode: "timestamp" }),
+	revision: integer("revision").default(1).notNull(),
+	locale: text("locale", { enum: ["is", "en"] })
+		.default("en")
+		.notNull(),
+	heroImage: text("hero_image"),
+	categorySlug: text("category_slug").references(() => Category.slug),
+});
 
-export type CommentTable = {
-	id: Generated<number>;
-	post_slug: string;
-	author_github_id: number;
-	author_github_username: string;
-	author_avatar_url: string;
-	content: string;
-	is_hidden: 0 | 1;
-	created_at: number;
-};
+export const Comment = sqliteTable("comment", {
+	id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+	postSlug: text("post_slug")
+		.notNull()
+		.references(() => Post.slug),
+	authorGithubId: integer("author_github_id", { mode: "number" }).notNull(),
+	authorGithubUsername: text("author_github_username").notNull(),
+	authorAvatarUrl: text("author_avatar_url").notNull(),
+	content: text("content").notNull(),
+	isHidden: integer("is_hidden", { mode: "boolean" }).default(false).notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$default(() => new Date()),
+});
 
-export type KittyThemeTable = {
-	id: Generated<number>;
-	slug: string;
-	name: string;
-	author_github_id: number;
-	author_github_username: string;
-	author_avatar_url: string;
-	is_published: 0 | 1;
-	forked_from_id: number | null;
-	blurb: string | null;
-	/** The theme colors as JSON text. Decode with `JSON.parse`. */
-	colors: string;
-	created_at: number;
-	modified_at: number | null;
-};
+export const Note = sqliteTable("note", {
+	id: text("id").notNull().primaryKey(),
+	description: text("description"),
+	publishedAt: integer("published_at", { mode: "timestamp" }),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$default(() => new Date()),
+});
 
-export type NoteTable = {
-	id: string;
-	description: string | null;
-	published_at: number | null;
-	created_at: number;
-};
+export const KittyTheme = sqliteTable("kitty_theme", {
+	id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+	slug: text("slug").notNull().unique(),
+	name: text("name").notNull(),
+	authorGithubId: integer("author_github_id", { mode: "number" }).notNull(),
+	authorGithubUsername: text("author_github_username").notNull(),
+	authorAvatarUrl: text("author_avatar_url").notNull(),
+	isPublished: integer("is_published", { mode: "boolean" }).default(false).notNull(),
+	// Self-reference: `any` required to break circular type inference in Drizzle ORM
+	forkedFromId: integer("forked_from_id", { mode: "number" }).references(
+		(): any => KittyTheme.id,
+	),
+	blurb: text("blurb"),
+	colors: text("colors", { mode: "json" }).notNull().$type<ThemeColors>(),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$default(() => new Date()),
+	modifiedAt: integer("modified_at", { mode: "timestamp" }),
+});
 
-export type PostTable = {
-	slug: string;
-	title: string;
-	markdown: string;
-	preview_markdown: string | null;
-	public_at: number | null;
-	created_at: number;
-	published_at: number;
-	modified_at: number | null;
-	revision: number;
-	locale: "is" | "en";
-	hero_image: string | null;
-	category_slug: string | null;
-};
+export const relations = defineRelations({ Category, Comment, KittyTheme, Note, Post }, (r) => ({
+	Category: {
+		posts: r.many.Post({ from: r.Category.slug, to: r.Post.categorySlug }),
+	},
+	Post: {
+		category: r.one.Category({ from: r.Post.categorySlug, to: r.Category.slug }),
+		comments: r.many.Comment(),
+	},
+	Comment: {
+		post: r.one.Post({ from: r.Comment.postSlug, to: r.Post.slug, optional: false }),
+	},
+	KittyTheme: {
+		forkedFrom: r.one.KittyTheme({
+			from: r.KittyTheme.forkedFromId,
+			to: r.KittyTheme.id,
+			alias: "forkedFrom",
+		}),
+		forks: r.many.KittyTheme({
+			from: r.KittyTheme.id,
+			to: r.KittyTheme.forkedFromId,
+			alias: "forkedFrom",
+		}),
+	},
+}));
 
-/**
- * `category` with timestamps decoded and columns renamed to the camelCase the
- * blog models use. The model drift boundary: `CategoryModel` satisfies this,
- * and the `decodeCategory` in `db.ts` is the one bridge from the raw row.
- */
+// The kysely table types, generated from the drizzle definitions above by
+// scripts/gen-db-types.ts (`bun run gen:db-types`). Storage-faithful: epoch
+// seconds, 0/1 booleans, JSON text.
+export type {
+	DB,
+	CategoryTable,
+	CommentTable,
+	KittyThemeTable,
+	NoteTable,
+	PostTable,
+} from "@/src/db/db-types.generated";
+
 export type StoredCategory = {
 	slug: string;
 	label: string;
