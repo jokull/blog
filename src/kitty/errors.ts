@@ -7,7 +7,7 @@
  *
  * Keys become kebab-case tags under the namespace: `notFound` -> `theme/not-found`.
  */
-import { defineErrors, wire } from "result-rpc";
+import { defineErrors, type ErrorUnion, wire } from "result-rpc";
 
 /**
  * The `auth/*` vocabulary lives in src/rpc/auth.ts, because the blog admin
@@ -40,3 +40,14 @@ export const communityErrors = defineErrors("community", {
 	unavailable: { httpStatus: 503, retry: "transient" },
 	notFound: { data: wire.object({ slug: wire.string }), httpStatus: 404 },
 });
+
+/**
+ * The two outcomes `themes.update` can present to the editor — the contract's
+ * declared errors minus the `auth/*` and `server/*` shells claim. Mirrors the
+ * `pickErrors(themeErrors, "notFound", "notOwner")` the update contract
+ * declares, so the component's union cannot drift from the wire.
+ */
+export type ThemeSaveError = ErrorUnion<{
+	notFound: typeof themeErrors.notFound;
+	notOwner: typeof themeErrors.notOwner;
+}>;

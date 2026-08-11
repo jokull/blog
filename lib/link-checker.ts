@@ -98,8 +98,10 @@ export async function checkPostLinks(
 					signal: AbortSignal.timeout(5000),
 					redirect: "follow",
 				});
-				if (result.isErr()) return { url, status: "error" as const };
-				return { url, status: result.value.status };
+				return result.match<{ url: string; status: number | "error" }>({
+					ok: (response) => ({ url, status: response.status }),
+					err: () => ({ url, status: "error" as const }),
+				});
 			}),
 		);
 		for (const r of results) {

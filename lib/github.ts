@@ -5,7 +5,7 @@
  * value the session middleware can turn into "anonymous" without a catch block,
  * and the reason survives the trip.
  */
-import { Result } from "better-result";
+import type { Result } from "better-result";
 import * as v from "valibot";
 import { safeFetchJson, safeParse, type FetchJsonError, type SchemaError } from "./safe-utils";
 
@@ -29,16 +29,18 @@ const GITHUB_HEADERS = {
 export async function fetchAuthenticatedUser(
 	accessToken: string,
 ): Promise<Result<GitHubUser, GitHubError>> {
-	const response = await safeFetchJson("https://api.github.com/user", {
-		headers: { ...GITHUB_HEADERS, Authorization: `Bearer ${accessToken}` },
-	});
-	return Result.andThen(response, safeParse(githubUserSchema));
+	return (
+		await safeFetchJson("https://api.github.com/user", {
+			headers: { ...GITHUB_HEADERS, Authorization: `Bearer ${accessToken}` },
+		})
+	).andThen(safeParse(githubUserSchema));
 }
 
 export async function fetchGithubUser(username: string): Promise<Result<GitHubUser, GitHubError>> {
-	const response = await safeFetchJson(`https://api.github.com/users/${username}`, {
-		headers: GITHUB_HEADERS,
-		signal: AbortSignal.timeout(3000),
-	});
-	return Result.andThen(response, safeParse(githubUserSchema));
+	return (
+		await safeFetchJson(`https://api.github.com/users/${username}`, {
+			headers: GITHUB_HEADERS,
+			signal: AbortSignal.timeout(3000),
+		})
+	).andThen(safeParse(githubUserSchema));
 }

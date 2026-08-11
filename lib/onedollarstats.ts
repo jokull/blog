@@ -92,18 +92,19 @@ export class OneDollarStatsClient {
 	private async request(
 		body: Omit<OneDollarStatsRequest, "site_id">,
 	): Promise<Result<OneDollarStatsResponse, OneDollarStatsError>> {
-		const fetchResult = await safeFetchJson(API_ENDPOINT, {
-			method: "POST",
-			headers: {
-				"x-api-key": this.apiKey,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				...body,
-				site_id: this.siteId,
-			}),
-		});
-		return Result.andThen(fetchResult, safeParse(oneDollarStatsResponseSchema));
+		return (
+			await safeFetchJson(API_ENDPOINT, {
+				method: "POST",
+				headers: {
+					"x-api-key": this.apiKey,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					...body,
+					site_id: this.siteId,
+				}),
+			})
+		).andThen(safeParse(oneDollarStatsResponseSchema));
 	}
 
 	/**

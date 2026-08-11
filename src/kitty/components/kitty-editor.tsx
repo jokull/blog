@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { defaultThemeColors } from "../lib/default-theme";
 import type { ColorKey, OklchColor, ThemeColors, ThemeView } from "../lib/types";
 import { KittyThemeModel } from "../models";
+import { themeErrors, type ThemeSaveError } from "../errors";
 import { client } from "../rpc-client";
 import { ThemeMetaSchema, toThemeInput } from "../schemas";
 import { SessionShell, SignInShell } from "../shells";
@@ -270,7 +271,7 @@ export function KittyEditor({
 				onDelete={handleDelete}
 			/>
 
-			{save.state === "failure" && <SaveFailure tag={save.error._tag} />}
+			{save.state === "failure" && <SaveFailure error={save.error} />}
 
 			{showEmptyState ? (
 				<EmptyState
@@ -292,18 +293,16 @@ export function KittyEditor({
 
 /**
  * `auth/required` is absent from this union — SignInShell claims it — and so
- * is `server/bad-request`, which the DefectShell claims and escalates. These
- * are the only two outcomes a save can present here, and adding a case for
+ * is `server/internal`, which the DefectShell claims and escalates. These are
+ * the only two outcomes a save can present here, and adding a case for
  * anything else is a type error.
  */
-function SaveFailure({ tag }: { tag: "db/unavailable" | "theme/not-found" | "theme/not-owner" }) {
+function SaveFailure({ error }: { error: ThemeSaveError }) {
 	return (
 		<div role="alert" className="px-4 py-2 text-sm text-danger">
-			{tag === "theme/not-owner"
+			{themeErrors.notOwner.is(error)
 				? "This theme belongs to someone else — fork it to make changes."
-				: tag === "db/unavailable"
-					? "The database is unavailable right now — try again shortly."
-					: "This theme no longer exists."}
+				: "This theme no longer exists."}
 		</div>
 	);
 }

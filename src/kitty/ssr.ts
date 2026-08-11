@@ -18,7 +18,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createQueryRuntime } from "result-rpc/query";
 import { createServerClient } from "result-rpc/server";
 import { createContext, router } from "@/src/rpc/server";
-import { communityErrors } from "@/src/kitty/errors";
+import { communityErrors, themeErrors } from "@/src/kitty/errors";
 
 const buildRuntime = () => {
 	const serverClient = createServerClient(router, { context: createContext() });
@@ -42,7 +42,7 @@ export const prefetchKittyShell = createServerFn({ method: "GET" }).handler(asyn
 		runtime.prefetch(serverClient.session, {}),
 		runtime.prefetch(serverClient.themes.published, {}),
 	]);
-	if (session.isOk() && session.value !== null) {
+	if (session.unwrapOr(null) !== null) {
 		await runtime.prefetch(serverClient.themes.mine, {});
 	}
 	return runtime.dehydrate();
@@ -61,7 +61,16 @@ export const prefetchKittyTheme = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		const { serverClient, runtime } = buildRuntime();
 		const result = await runtime.prefetch(serverClient.themes.byId, { id: data.id });
-		return { cache: runtime.dehydrate(), missing: result.isErr() };
+		return {
+			cache: runtime.dehydrate(),
+			// Only a genuine miss is reported. If the server had an internal
+			// fault, the client starts the query cold and gets a live attempt —
+			// better than freezing one request's bad luck into the HTML.
+			missing: result.match({
+				ok: () => false,
+				err: (e) => themeErrors.notFound.is(e),
+			}),
+		};
 	});
 
 export const prefetchCommunityTheme = createServerFn({ method: "GET" })
@@ -78,6 +87,9 @@ export const prefetchCommunityTheme = createServerFn({ method: "GET" })
 			// the client starts the query cold and its `retry: "transient"`
 			// policy gets a live attempt — better than freezing one request's
 			// bad luck into the HTML.
-			missing: detail.isErr() && communityErrors.notFound.is(detail.error),
+			missing: detail.match({
+				ok: () => false,
+				err: (e) => communityErrors.notFound.is(e),
+			}),
 		};
 	});

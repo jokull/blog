@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { appServerClient } from "@/src/rpc/server";
 import { ogImage } from "@/src/lib/og";
+import { themeErrors } from "@/src/kitty/errors";
 
 export const Route = createFileRoute("/og/kitty/{$id}.png")({
 	server: {
@@ -12,7 +13,12 @@ export const Route = createFileRoute("/og/kitty/{$id}.png")({
 				// The same procedure the browser calls, so an unpublished theme
 				// stays hidden here too — no second visibility rule to keep in sync.
 				const theme = await appServerClient().themes.byId({ id });
-				if (theme.isErr()) return new Response("Not Found", { status: 404 });
+				if (theme.isErr()) {
+					const { status, body } = themeErrors.notFound.is(theme.error)
+						? ({ status: 404, body: "Not Found" } as const)
+						: ({ status: 503, body: "Unavailable" } as const);
+					return new Response(body, { status });
+				}
 
 				return ogImage({
 					title: theme.value.authorGithubUsername
