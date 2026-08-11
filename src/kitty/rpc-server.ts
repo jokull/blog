@@ -6,10 +6,9 @@ import { Result } from "better-result";
 import { isFetchUnreachable, safeFetchJson, safeFetchText } from "@/lib/safe-utils";
 import { err, ok } from "result-rpc";
 import { type Selectable } from "kysely";
-import { getGithubUser } from "@/auth";
 import { db, decodeTheme, epoch } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
-import { requireViewer, server, session } from "@/src/rpc/server-base";
+import { fetchAuthor, requireViewer, server, session } from "@/src/rpc/server-base";
 import type { KittyThemeTable } from "@/schema";
 import {
 	communityBySlugContract,
@@ -107,10 +106,9 @@ const create = server
 		Result.gen(async function* () {
 			// The author's avatar and id are stamped onto the row, so a GitHub outage
 			// is a declared, retryable failure rather than an unhandled throw.
-			const author = yield* (await getGithubUser(context.viewer.username)).mapError((e) => {
-				isFetchUnreachable(e);
-				return errors.authorUnavailable();
-			});
+			const author = yield* await fetchAuthor(context.viewer, () =>
+				errors.authorUnavailable(),
+			);
 
 			// The insert has no declared fold: any database failure is scenario C.
 			const row = (
@@ -217,10 +215,9 @@ const fork = server
 				return yield* err(errors.forkUnpublished({ themeId: input.id }));
 			}
 
-			const author = yield* (await getGithubUser(context.viewer.username)).mapError((e) => {
-				isFetchUnreachable(e);
-				return errors.authorUnavailable();
-			});
+			const author = yield* await fetchAuthor(context.viewer, () =>
+				errors.authorUnavailable(),
+			);
 
 			const row = (
 				await db
@@ -278,10 +275,9 @@ const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/mast
  */
 const fetchIndex = () =>
 	Result.gen(async function* () {
-		const payload = yield* (await safeFetchJson(`${UPSTREAM}/themes.json`)).mapError((e) => {
-			isFetchUnreachable(e);
-			return communityErrors.unavailable();
-		});
+		const payload = yield* (await safeFetchJson(`${UPSTREAM}/themes.json`))
+			.tapError(isFetchUnreachable)
+			.mapError(() => communityErrors.unavailable());
 		return ok(themeIndexEntries(payload));
 	});
 

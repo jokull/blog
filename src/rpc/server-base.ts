@@ -8,9 +8,10 @@
  * Nothing in the browser graph may import this file or anything downstream of
  * it: it closes over the D1 binding and the iron-session password.
  */
-import { ok } from "result-rpc";
+import { ok, type AnyTaggedError } from "result-rpc";
 import { serverRpc } from "result-rpc/server";
-import { getSession, whoami } from "@/auth";
+import { getGithubUser, getSession, whoami } from "@/auth";
+import { isFetchUnreachable } from "@/lib/safe-utils";
 import { verifyCliToken } from "@/lib/cli-token";
 import { AdminLayer, SessionLayer, ViewerLayer, type Viewer } from "./auth";
 import type { AppContext } from "./context";
@@ -73,3 +74,16 @@ export const session = SessionLayer.middleware(server, async ({ context }) => {
  */
 export const requireViewer = ViewerLayer.middleware(server, session);
 export const requireAdmin = AdminLayer.middleware(server, session);
+
+/**
+ * The GitHub author profile, folded to the caller's declared tag.
+ *
+ * A GitHub outage is a declared, retryable failure rather than a thrown 500,
+ * and the fetch boundary's `tapError` logs upstream-wrong responses (status /
+ * malformed / schema) as incidents while the reader just gets the retryable
+ * tag. Call from a gen body: `yield* await fetchAuthor(viewer, () => …)`.
+ */
+export const fetchAuthor = async <E extends AnyTaggedError>(viewer: Viewer, toDeclared: () => E) =>
+	(await getGithubUser(viewer.username))
+		.tapError(isFetchUnreachable)
+		.mapError(() => toDeclared());
