@@ -3,7 +3,7 @@
  * keeps the RPC layer free of database imports.
  */
 import { Result } from "better-result";
-import { safeFetchJson, safeFetchText } from "@/lib/safe-utils";
+import { isFetchUnreachable, safeFetchJson, safeFetchText } from "@/lib/safe-utils";
 import { err, ok } from "result-rpc";
 import { type Selectable } from "kysely";
 import { getGithubUser } from "@/auth";
@@ -107,9 +107,10 @@ const create = server
 		Result.gen(async function* () {
 			// The author's avatar and id are stamped onto the row, so a GitHub outage
 			// is a declared, retryable failure rather than an unhandled throw.
-			const author = yield* (await getGithubUser(context.viewer.username)).mapError(() =>
-				errors.authorUnavailable(),
-			);
+			const author = yield* (await getGithubUser(context.viewer.username)).mapError((e) => {
+				isFetchUnreachable(e);
+				return errors.authorUnavailable();
+			});
 
 			// The insert has no declared fold: any database failure is scenario C.
 			const row = (
@@ -216,9 +217,10 @@ const fork = server
 				return yield* err(errors.forkUnpublished({ themeId: input.id }));
 			}
 
-			const author = yield* (await getGithubUser(context.viewer.username)).mapError(() =>
-				errors.authorUnavailable(),
-			);
+			const author = yield* (await getGithubUser(context.viewer.username)).mapError((e) => {
+				isFetchUnreachable(e);
+				return errors.authorUnavailable();
+			});
 
 			const row = (
 				await db
@@ -276,9 +278,10 @@ const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/mast
  */
 const fetchIndex = () =>
 	Result.gen(async function* () {
-		const payload = yield* (await safeFetchJson(`${UPSTREAM}/themes.json`)).mapError(() =>
-			communityErrors.unavailable(),
-		);
+		const payload = yield* (await safeFetchJson(`${UPSTREAM}/themes.json`)).mapError((e) => {
+			isFetchUnreachable(e);
+			return communityErrors.unavailable();
+		});
 		return ok(themeIndexEntries(payload));
 	});
 
@@ -290,8 +293,15 @@ const communityBySlug = server.implement(communityBySlugContract).handler(({ inp
 		const meta = index.find((entry) => entry.slug === input.slug);
 		if (!meta) return yield* err(errors.notFound({ slug: input.slug }));
 
-		const config = yield* (await safeFetchText(`${UPSTREAM}/${meta.file}`)).mapError(() =>
-			errors.unavailable(),
+		const config = yield* (await safeFetchText(`${UPSTREAM}/${meta.file}`)).mapError(
+			// An upstream that answered wrong is a defect in the index/config
+			// relationship, not the reader's network: isFetchUnreachable logs it,
+			// and we cloak the real cause behind the same not-found the page
+			// shows for a bad slug. Only offline keeps the declared unavailable.
+			(e) =>
+				isFetchUnreachable(e)
+					? errors.unavailable()
+					: errors.notFound({ slug: input.slug }),
 		);
 
 		// Merged over the default so all 21 colours are always present.

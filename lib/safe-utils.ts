@@ -113,6 +113,26 @@ export async function safeFetchText(
 }
 
 /**
+ * Classifies a fetch boundary failure for a handler fold. An upstream that
+ * answered wrong — non-2xx, a malformed body, or a payload that fails schema
+ * validation — is a defect, so it is logged as an incident and the fold should
+ * cloak it behind a declared tag; genuine offline is the retryable, silent
+ * lane. Returns true for offline so the fold can pick the tag.
+ */
+export const isFetchUnreachable = (e: FetchJsonError | SchemaError): boolean => {
+	if (fetchErrors.unreachable.is(e)) return true;
+
+	if (fetchErrors.status.is(e)) {
+		console.error(`[fetch] upstream ${e.data.status} ${e.data.url}`);
+	} else if (fetchErrors.malformed.is(e)) {
+		console.error(`[fetch] malformed body ${e.data.url}: ${e.data.message}`);
+	} else {
+		console.error(`[fetch] schema/invalid ${e.data.issues.join(", ")}`);
+	}
+	return false;
+};
+
+/**
  * Schema validation as a Result-returning step, for use with `andThen`/`gen`.
  *
  * Takes any Standard Schema rather than a Zod schema specifically. In practice

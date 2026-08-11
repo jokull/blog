@@ -13,6 +13,7 @@ import { err, ok, type AnyTaggedError } from "result-rpc";
 import { isConstraintViolation, UniqueViolation, ForeignKeyViolation } from "db-result";
 import { db, decodeCategory, decodeComment, decodeNote, decodePost, epoch } from "@/db";
 import { createCliToken } from "@/lib/cli-token";
+import { isFetchUnreachable } from "@/lib/safe-utils";
 import { checkPostLinks } from "@/lib/link-checker";
 import { extractFirstImage } from "@/lib/mdx-image-extractor";
 import { createStatsClient } from "@/lib/onedollarstats";
@@ -514,9 +515,10 @@ const createComment = server
 			// The avatar and GitHub id are denormalized onto the row, so a GitHub
 			// outage is a declared, retryable failure rather than a thrown 500 that
 			// loses what the reader typed.
-			const author = yield* (await getGithubUser(context.viewer.username)).mapError(() =>
-				errors.authorUnavailable(),
-			);
+			const author = yield* (await getGithubUser(context.viewer.username)).mapError((e) => {
+				isFetchUnreachable(e);
+				return errors.authorUnavailable();
+			});
 
 			const inserted = yield* (
 				await db
