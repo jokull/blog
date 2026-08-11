@@ -88,6 +88,31 @@ export async function safeFetchJson<T = unknown>(
 }
 
 /**
+ * Fetch plus plain text — the sibling of `safeFetchJson` for endpoints that
+ * do not speak JSON. Same three failure modes, same private tags.
+ */
+export async function safeFetchText(
+	input: URL | string,
+	init?: RequestInit,
+): Promise<Result<string, FetchJsonError>> {
+	return Result.gen(async function* () {
+		const response = yield* await safeFetch(input, init);
+
+		if (!response.ok) {
+			return yield* err(fetchErrors.status({ url: String(input), status: response.status }));
+		}
+
+		const text = yield* await Result.tryPromise({
+			try: () => response.text(),
+			catch: (cause) =>
+				fetchErrors.malformed({ url: String(input), message: messageOf(cause) }, { cause }),
+		});
+
+		return ok(text);
+	});
+}
+
+/**
  * Schema validation as a Result-returning step, for use with `andThen`/`gen`.
  *
  * Takes any Standard Schema rather than a Zod schema specifically. In practice

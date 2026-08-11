@@ -3,6 +3,7 @@
  * keeps the RPC layer free of database imports.
  */
 import { Result } from "better-result";
+import { safeFetchJson, safeFetchText } from "@/lib/safe-utils";
 import { err, ok } from "result-rpc";
 import { type Selectable } from "kysely";
 import { getGithubUser } from "@/auth";
@@ -268,22 +269,16 @@ const remove = server
 const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master";
 
 /**
- * `tryPromise` is the border checkpoint: fetch's TypeError and
- * JSON's SyntaxError must become tagged values here or they escape as defects.
+ * `safeFetchJson` is the border checkpoint: unreachable, non-2xx and malformed
+ * JSON become private `fetch/*` tags here rather than escaping as defects.
  * All of them collapse to one declared tag, because a component rendering the
  * community list cannot act differently on "offline" versus "malformed JSON".
  */
 const fetchIndex = () =>
 	Result.gen(async function* () {
-		const response = yield* await Result.tryPromise({
-			try: () => fetch(`${UPSTREAM}/themes.json`),
-			catch: () => communityErrors.unavailable(),
-		});
-		if (!response.ok) return yield* err(communityErrors.unavailable());
-		const payload = yield* await Result.tryPromise({
-			try: () => response.json(),
-			catch: () => communityErrors.unavailable(),
-		});
+		const payload = yield* (await safeFetchJson(`${UPSTREAM}/themes.json`)).mapError(() =>
+			communityErrors.unavailable(),
+		);
 		return ok(themeIndexEntries(payload));
 	});
 
@@ -295,14 +290,9 @@ const communityBySlug = server.implement(communityBySlugContract).handler(({ inp
 		const meta = index.find((entry) => entry.slug === input.slug);
 		if (!meta) return yield* err(errors.notFound({ slug: input.slug }));
 
-		const config = yield* await Result.tryPromise({
-			try: async () => {
-				const response = await fetch(`${UPSTREAM}/${meta.file}`);
-				if (!response.ok) throw new Error(`upstream ${response.status}`);
-				return response.text();
-			},
-			catch: () => errors.unavailable(),
-		});
+		const config = yield* (await safeFetchText(`${UPSTREAM}/${meta.file}`)).mapError(() =>
+			errors.unavailable(),
+		);
 
 		// Merged over the default so all 21 colours are always present.
 		return ok({
