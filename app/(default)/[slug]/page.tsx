@@ -1,7 +1,6 @@
 import { env } from "cloudflare:workers";
 import { ClientErrorBoundary } from "@/components/error-boundary";
-import { tryDb } from "db-result";
-import { db, rawDb, decodePost } from "@/db";
+import { db, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
@@ -32,12 +31,8 @@ const getPost = cache(async (slug: string) => {
 
 // Generate all possible slug values at build time
 export async function generateStaticParams() {
-	// db-result#4: `select` returns unwrapped builders, so the projection
-	// runs on the raw db inside `tryDb`.
 	const posts = (
-		await tryDb(() =>
-			rawDb.selectFrom("post").select("slug").where("public_at", "is not", null).execute(),
-		)
+		await db.selectFrom("post").select("slug").where("public_at", "is not", null).execute()
 	).unwrap();
 
 	return posts.map((post) => ({

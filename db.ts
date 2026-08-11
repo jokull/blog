@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { Kysely, sql, type Selectable } from "kysely";
+import { Kysely, type Selectable } from "kysely";
 import { D1Dialect } from "kysely-d1";
 import { kyselyTryDb } from "db-result/kysely";
 import type { SqliteDbError } from "db-result/sqlite";
@@ -37,13 +37,6 @@ export const db = kyselyTryDb<typeof rawDb, SqliteDbError>(rawDb);
 export const epoch = (date: Date): number => Math.floor(date.getTime() / 1000);
 export const epochOrNull = (date: Date | null): number | null =>
 	date === null ? null : Math.floor(date.getTime() / 1000);
-
-/**
- * db-result#3: the wrapped `orderBy` drops kysely's `(expr, modifiers)` two-arg
- * form, so a descending direction must ride inside the expression. Revert to
- * `orderBy(column, "desc")` once the override is fixed.
- */
-export const orderByDesc = <T extends string>(column: T) => sql`${sql.ref(column)} desc`;
 
 /**
  * The raw row decoded to the model's exact shape — the drift boundary.

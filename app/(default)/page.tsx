@@ -1,6 +1,5 @@
 import { Theater } from "@/components/theater";
-import { tryDb } from "db-result";
-import { db, rawDb, decodeCategory, decodePost, orderByDesc } from "@/db";
+import { db, decodeCategory, decodePost } from "@/db";
 import type { Metadata } from "@/src/lib/metadata";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
@@ -73,7 +72,7 @@ export default async function Page() {
 			.selectFrom("post")
 			.selectAll()
 			.where("public_at", "is not", null)
-			.orderBy(orderByDesc("published_at"))
+			.orderBy("published_at", "desc")
 			.execute()
 	)
 		.unwrap()
@@ -85,17 +84,13 @@ export default async function Page() {
 		.map(decodeCategory);
 
 	// Get comment counts for all posts
-	// db-result#4: `select`/`groupBy` return unwrapped builders, so the
-	// aggregation runs on the raw db inside `tryDb`.
 	const commentCounts = (
-		await tryDb(() =>
-			rawDb
-				.selectFrom("comment")
-				.select(["post_slug", ({ fn }) => fn.countAll<number>().as("count")])
-				.where("is_hidden", "=", 0)
-				.groupBy("post_slug")
-				.execute(),
-		)
+		await db
+			.selectFrom("comment")
+			.select((eb) => ["post_slug", eb.fn.countAll<number>().as("count")])
+			.where("is_hidden", "=", 0)
+			.groupBy("post_slug")
+			.execute()
 	).unwrap();
 
 	const commentCountsMap = commentCounts.reduce(

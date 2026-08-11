@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import RSS, { type ItemOptions } from "rss";
-import { db, decodePost, orderByDesc } from "@/db";
+import { db, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { extractFirstImage, normalizeImageUrl } from "@/lib/mdx-image-extractor";
 
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/feed.xml")({
 						.selectFrom("post")
 						.selectAll()
 						.where("public_at", "is not", null)
-						.orderBy(orderByDesc("published_at"))
+						.orderBy("published_at", "desc")
 						.limit(20)
 						.execute()
 				).unwrap();

@@ -10,17 +10,8 @@ import { env } from "cloudflare:workers";
 import { type Selectable } from "kysely";
 import { Result } from "better-result";
 import { err, ok, type AnyTaggedError } from "result-rpc";
-import { isConstraintViolation, UniqueViolation, ForeignKeyViolation, tryDb } from "db-result";
-import {
-	db,
-	rawDb,
-	decodeCategory,
-	decodeComment,
-	decodeNote,
-	decodePost,
-	epoch,
-	orderByDesc,
-} from "@/db";
+import { isConstraintViolation, UniqueViolation, ForeignKeyViolation } from "db-result";
+import { db, decodeCategory, decodeComment, decodeNote, decodePost, epoch } from "@/db";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
 import { extractFirstImage } from "@/lib/mdx-image-extractor";
@@ -114,7 +105,7 @@ const listPosts = server
 		// scenario C — `unwrap` throws a Panic and the framework turns that
 		// into a sanitized server/internal with an incident id.
 		const rows = (
-			await db.selectFrom("post").selectAll().orderBy(orderByDesc("published_at")).execute()
+			await db.selectFrom("post").selectAll().orderBy("published_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map((row) => toPostRow(decodePost(row))));
 	});
@@ -124,7 +115,7 @@ const exportPosts = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db.selectFrom("post").selectAll().orderBy(orderByDesc("published_at")).execute()
+			await db.selectFrom("post").selectAll().orderBy("published_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map(decodePost));
 	});
@@ -397,16 +388,12 @@ const deleteCategory = server
 		).unwrap();
 		if (!category) return err(errors.notFound({ slug: input.slug }));
 
-		// db-result#4: `select`/`groupBy` return unwrapped builders, so the
-		// projection runs on the raw db inside `tryDb`; revert once fixed.
 		const counted = (
-			await tryDb(() =>
-				rawDb
-					.selectFrom("post")
-					.select(({ fn }) => fn.countAll<number>().as("count"))
-					.where("category_slug", "=", input.slug)
-					.executeTakeFirst(),
-			)
+			await db
+				.selectFrom("post")
+				.select(({ fn }) => fn.countAll<number>().as("count"))
+				.where("category_slug", "=", input.slug)
+				.executeTakeFirst()
 		).unwrap();
 
 		const postCount = Number(counted?.count ?? 0);
@@ -423,7 +410,7 @@ const listNotes = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db.selectFrom("note").selectAll().orderBy(orderByDesc("created_at")).execute()
+			await db.selectFrom("note").selectAll().orderBy("created_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map(decodeNote));
 	});

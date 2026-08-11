@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import { groupBy, pipe } from "remeda";
-import { db, decodePost, orderByDesc } from "@/db";
+import { db, decodePost } from "@/db";
 
 export const Route = createFileRoute("/llm.txt")({
 	server: {
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/llm.txt")({
 						.selectFrom("post")
 						.selectAll()
 						.where("public_at", "is not", null)
-						.orderBy(orderByDesc("published_at"))
+						.orderBy("published_at", "desc")
 						.execute()
 				)
 					.unwrap()

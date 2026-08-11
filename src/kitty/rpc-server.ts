@@ -6,7 +6,7 @@ import { Result } from "better-result";
 import { err, ok } from "result-rpc";
 import { type Selectable } from "kysely";
 import { getGithubUser } from "@/auth";
-import { db, decodeTheme, epoch, orderByDesc } from "@/db";
+import { db, decodeTheme, epoch } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
 import { requireViewer, server, session } from "@/src/rpc/server-base";
 import type { KittyThemeTable } from "@/schema";
@@ -48,7 +48,7 @@ const published = server.implement(publishedThemesContract).handler(async ({ con
 			.selectFrom("kitty_theme")
 			.selectAll()
 			.where("is_published", "=", 1)
-			.orderBy(orderByDesc("created_at"))
+			.orderBy("created_at", "desc")
 			.execute()
 	).unwrap();
 	return ok(rows.map(decodeTheme));
@@ -63,7 +63,7 @@ const mine = server
 				.selectFrom("kitty_theme")
 				.selectAll()
 				.where("author_github_username", "=", context.viewer.username)
-				.orderBy(orderByDesc("created_at"))
+				.orderBy("created_at", "desc")
 				.execute()
 		).unwrap();
 		return ok(rows.map(decodeTheme));

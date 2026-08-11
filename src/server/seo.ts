@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { appServerClient } from "@/src/rpc/server";
-import { tryDb } from "db-result";
-import { db, rawDb, decodePost } from "@/db";
+import { db, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { homeHead, pageHead, postHead } from "@/src/lib/seo";
 
@@ -25,17 +24,14 @@ export const getHomeHead = createServerFn({ method: "GET" })
 	.validator((data: { category?: string }) => data)
 	.handler(async ({ data }) => {
 		// db-result#4: `select` returns unwrapped builders, so the projection
-		// runs on the raw db inside `tryDb`.
 		const categorySlug = data.category;
 		const category = categorySlug
 			? (
-					await tryDb(() =>
-						rawDb
-							.selectFrom("category")
-							.select(["slug", "label"])
-							.where("slug", "=", categorySlug)
-							.executeTakeFirst(),
-					)
+					await db
+						.selectFrom("category")
+						.select(["slug", "label"])
+						.where("slug", "=", categorySlug)
+						.executeTakeFirst()
 				).unwrap()
 			: null;
 		return homeHead(category);
