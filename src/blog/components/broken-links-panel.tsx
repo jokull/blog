@@ -57,7 +57,9 @@ export function BrokenLinksPanel() {
 										}`}
 									>
 										{link.type === "image" ? "IMG" : "LINK"}{" "}
-										{link.status === "error" ? "ERR" : link.status}
+										{link.status.kind === "unreachable"
+											? "ERR"
+											: link.status.code}
 									</span>
 									<div className="min-w-0">
 										<Link

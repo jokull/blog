@@ -1,11 +1,19 @@
-import { safeFetch } from "./safe-utils";
+import type { Result } from "better-result";
+import { safeFetch, type FetchError } from "./safe-utils";
+
+/**
+ * The verdict on one checked URL: the server answered with an HTTP status
+ * (`code` — 4xx/5xx included, those are what the checker hunts), or the
+ * request never completed (`unreachable`).
+ */
+export type LinkVerdict = { kind: "status"; code: number } | { kind: "unreachable" };
 
 export interface BrokenLink {
 	postSlug: string;
 	postTitle: string;
 	url: string;
 	type: "link" | "image";
-	status: number | "error";
+	status: LinkVerdict;
 }
 
 const LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
@@ -84,42 +92,40 @@ export async function checkPostLinks(
 		}
 	}
 
-	// Dedupe URLs, check each once
+	// Dedupe URLs, check each once. The verdict for a URL is a Result: Ok
+	// carries the HTTP status the server answered with (any code — a 404 is
+	// data, not a failure), Err means the request never completed.
 	const uniqueUrls = [...new Set(urlChecks.map((c) => c.url))];
-
-	// Check in batches of 10
-	const statusMap = new Map<string, number | "error">();
+	const verdicts = new Map<string, Result<number, FetchError>>();
 	for (let i = 0; i < uniqueUrls.length; i += 10) {
 		const batch = uniqueUrls.slice(i, i + 10);
 		const results = await Promise.all(
 			batch.map(async (url) => {
-				const result = await safeFetch(url, {
+				const response = await safeFetch(url, {
 					method: "HEAD",
 					signal: AbortSignal.timeout(5000),
 					redirect: "follow",
 				});
-				return result.match<{ url: string; status: number | "error" }>({
-					ok: (response) => ({ url, status: response.status }),
-					err: () => ({ url, status: "error" as const }),
-				});
+				return [url, response.map((r) => r.status)] as const;
 			}),
 		);
-		for (const r of results) {
-			statusMap.set(r.url, r.status);
-		}
+		for (const [url, verdict] of results) verdicts.set(url, verdict);
 	}
 
 	for (const check of urlChecks) {
-		const status = statusMap.get(check.url);
-		if (status !== undefined && (status === "error" || status >= 400)) {
-			broken.push({
-				postSlug: check.postSlug,
-				postTitle: check.postTitle,
-				url: check.url,
-				type: check.type,
-				status,
-			});
-		}
+		const verdict = verdicts.get(check.url);
+		if (verdict === undefined) continue;
+		// unwrapOr: null is the transport failure — the server never answered.
+		// A 4xx/5xx and unreachable are both broken; a 2xx/3xx is not.
+		const code = verdict.unwrapOr(null);
+		if (code !== null && code < 400) continue;
+		broken.push({
+			postSlug: check.postSlug,
+			postTitle: check.postTitle,
+			url: check.url,
+			type: check.type,
+			status: code === null ? { kind: "unreachable" } : { kind: "status", code },
+		});
 	}
 
 	return broken;

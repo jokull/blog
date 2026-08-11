@@ -132,6 +132,12 @@ export const NoteModel = defineModel("note", {
 export const NoteView = NoteModel.all("a note is four columns and `blog note list` prints them");
 export type SavedNote = ModelValue<typeof NoteModel>;
 
+export const LinkVerdictCodec = wire.union([
+	wire.object({ kind: wire.literal("status"), code: wire.number }),
+	wire.object({ kind: wire.literal("unreachable") }),
+]);
+export type LinkVerdictValue = InputOf<typeof LinkVerdictCodec>;
+
 /**
  * Not a model. A broken link has no identity in this database — it is the
  * output of a scan, recomputed from scratch every run — so it is a plain wire
@@ -142,7 +148,7 @@ export const BrokenLinkCodec = wire.object({
 	postTitle: wire.string,
 	url: wire.string,
 	type: wire.union([wire.literal("link"), wire.literal("image")]),
-	status: wire.union([wire.number, wire.literal("error")]),
+	status: LinkVerdictCodec,
 });
 export type BrokenLinkValue = InputOf<typeof BrokenLinkCodec>;
 
