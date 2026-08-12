@@ -43,14 +43,6 @@ export const epochOrNull = (date: Date | null): number | null =>
 	date === null ? null : Math.floor(date.getTime() / 1000);
 
 /**
- * The plugin stringifies a PlainDate for storage; the type layer cannot see
- * the plugin, so writes pass through this one boundary cast.
- */
-export const plainDateForStorage = (date: Temporal.PlainDate | null): string | null =>
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-	date as unknown as string | null;
-
-/**
  * The raw row decoded to the model's exact shape — the drift boundary.
  * Written out field by field rather than spread, so a new column in schema.ts
  * is a decision here instead of an accident on the wire.
