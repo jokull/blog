@@ -39,7 +39,7 @@
         "recharts": "^3.10.1",
         "remark-gfm": "^4.0.1",
         "remeda": "^2.39.0",
-        "result-rpc": "github:jokull/result-rpc#experiment/wire-codec",
+        "result-rpc": "^0.5.0",
         "rss": "^1.2.2",
         "safe-mdx": "^1.11.5",
         "shiki": "^4.3.1",
@@ -1583,7 +1583,7 @@
 
     "resolve-pkg-maps": ["resolve-pkg-maps@1.0.0", "", {}, "sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw=="],
 
-    "result-rpc": ["result-rpc@github:jokull/result-rpc#63a289a", { "dependencies": { "@tanstack/query-core": "^5.101.4", "devalue": "5.8.2", "temporal-polyfill": "^1.0.3" }, "peerDependencies": { "better-result": "^3.0.0", "react": ">=18.3" } }, "jokull-result-rpc-63a289a", "sha512-NkTV+Y3F3KZj8CkBBgtiXPdpJ2QvaT+rWQ1u+UmR71Bosd/kcVfWuKkLRTp28UCWrHiBgqQPchpC5kaD8lbREg=="],
+    "result-rpc": ["result-rpc@0.5.0", "", { "dependencies": { "@tanstack/query-core": "^5.101.4", "devalue": "5.8.2", "temporal-polyfill": "^1.0.3" }, "peerDependencies": { "better-result": "^3.0.0", "react": ">=18.3" } }, "sha512-4Yex2zmEqpQpMtBglGwMYzXdoZWAdfgyP5gtgQUrmVJbhqlkVeSeVb+NF60QXwdExwQagJ5d9MvCExNov4X3YQ=="],
 
     "rolldown": ["rolldown@1.2.1", "", { "dependencies": { "@oxc-project/types": "=0.142.0", "@rolldown/pluginutils": "^1.0.0" }, "optionalDependencies": { "@rolldown/binding-android-arm64": "1.2.1", "@rolldown/binding-darwin-arm64": "1.2.1", "@rolldown/binding-darwin-x64": "1.2.1", "@rolldown/binding-freebsd-x64": "1.2.1", "@rolldown/binding-linux-arm-gnueabihf": "1.2.1", "@rolldown/binding-linux-arm64-gnu": "1.2.1", "@rolldown/binding-linux-arm64-musl": "1.2.1", "@rolldown/binding-linux-ppc64-gnu": "1.2.1", "@rolldown/binding-linux-s390x-gnu": "1.2.1", "@rolldown/binding-linux-x64-gnu": "1.2.1", "@rolldown/binding-linux-x64-musl": "1.2.1", "@rolldown/binding-openharmony-arm64": "1.2.1", "@rolldown/binding-wasm32-wasi": "1.2.1", "@rolldown/binding-win32-arm64-msvc": "1.2.1", "@rolldown/binding-win32-x64-msvc": "1.2.1" }, "bin": { "rolldown": "./bin/cli.mjs" } }, "sha512-4FKJhg8d3OiyQOA6Q1Q0hoFFpW9/OoX+VsHzpECsdsIZoOArrAK90gl59YK/Z+gnDel45bgJZK03ozH/9bCqEw=="],
 

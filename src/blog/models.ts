@@ -28,7 +28,7 @@ export const PostModel = defineModel("post", {
 		title: wire.string,
 		markdown: wire.string,
 		previewMarkdown: nullableString,
-		publicAt: wire.nullable(wire.temporal.plainDate),
+		publicAt: wire.nullable(wire.plainDate),
 		createdAt: wire.date,
 		publishedAt: wire.date,
 		modifiedAt: nullableDate,

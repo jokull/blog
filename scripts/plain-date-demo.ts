@@ -4,8 +4,8 @@
  * post.public_at is CHECK-constrained YYYY-MM-DD TEXT in D1 (see
  * migrations/..._noisy_may_parker/migration.sql). The plain-date plugin
  * marshals it to Temporal.PlainDate at the query boundary; result-rpc's
- * wire.temporal.plainDate projects it to its ISO string on the wire; the
- * client rebuilds the fancy type on receipt.
+ * The wire date codec (wire.plainDate) carries it as a first-class value;
+ * the client receives the fancy type.
  *
  * The loop is self-cleaning: it creates a scratch draft, publishes it (which
  * WRITES a Temporal.PlainDate through the plugin), re-reads it across the
