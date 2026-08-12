@@ -137,7 +137,9 @@ export const relations = defineRelations({ Category, Comment, KittyTheme, Note, 
 
 // The kysely table types, generated from the drizzle definitions above by
 // scripts/gen-db-types.ts (`bun run gen:db-types`). Storage-faithful: epoch
-// seconds, 0/1 booleans, JSON text.
+// seconds, 0/1 booleans, JSON text — except columns listed in the generator's
+// `boundaryOverrides`, which describe what the plugin-backed query boundary
+// yields (post.public_at is Temporal.PlainDate | null).
 export type {
 	DB,
 	CategoryTable,

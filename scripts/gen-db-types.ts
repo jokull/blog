@@ -80,12 +80,13 @@ const columnType = (col: ColumnLike): string => {
  * Columns a plugin marshals at the query boundary. These types say what the
  * query boundary YIELDS, not what sits on disk: the plain-date plugin rewrites
  * `Temporal.PlainDate` to its ISO string for storage and hydrates it back on
- * reads, so `post.public_at` is `Temporal.PlainDate | string | null` — writes
- * accept a PlainDate, reads may hand either back, and db.ts's `toPlainDate`
- * normalizes at the drift boundary.
+ * reads, so `post.public_at` is `Temporal.PlainDate | null` — writes must
+ * pass a PlainDate (the plugin's stringification is an implementation detail,
+ * not part of the API) and reads hand the fancy type back. `db.ts`'s
+ * `toPlainDate` keeps a defensive string arm for a plugin-bypassed query.
  */
 const boundaryOverrides: Record<string, Partial<Record<string, string>>> = {
-	post: { public_at: "Temporal.PlainDate | string | null" },
+	post: { public_at: "Temporal.PlainDate | null" },
 };
 
 const tableTypeNames: Record<string, string> = {

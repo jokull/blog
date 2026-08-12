@@ -46,7 +46,7 @@ export type PostTable = {
 	title: string;
 	markdown: string;
 	preview_markdown: string | null;
-	public_at: Temporal.PlainDate | string | null;
+	public_at: Temporal.PlainDate | null;
 	created_at: number;
 	published_at: number;
 	modified_at: number | null;
