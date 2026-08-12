@@ -32,9 +32,12 @@
  * TIMESTAMP columns, boolean for 0/1, Temporal.PlainDate for public_at).
  *
  * Migration changes this script exercises (all in-repo, no forks):
- *   1. lib/plain-date-plugin.ts stringifies insert-value cells — kysely 0.29
+ *   1. lib/plain-date-plugin.ts: stringify insert-value cells (kysely 0.29
  *      packs them as raw values in PrimitiveValueListNode; D1's binding
- *      coerced PlainDate via toJSON(), a PG driver sends the JSON string.
+ *      coerced PlainDate via toJSON(), a PG driver sends the JSON string),
+ *      and map Date → Temporal.PlainDate on read — PG DATE columns arrive
+ *      as a JS Date at UTC midnight, and the plugin (not a parser override)
+ *      is the DATE boundary.
  *   2. orderBy("public_at", "desc") needs explicit nulls — PG DESC means
  *      NULLS FIRST, SQLite DESC means NULLS LAST; drafts must stay last:
  *      orderBy("public_at", (ob) => ob.desc().nullsLast()).
@@ -44,8 +47,7 @@
  *      23505/23503, so they never fire until tursopg grows proper SQLSTATEs.
  *   4. The boundary writes Date objects instead of epoch numbers.
  *   5. FK enforcement is OFF by default on tursopg (D1 has it on); the app
- *      must `SET foreign_keys = ON` once at startup — the server's single
- *      shared connection makes it stick for all clients.
+ *      must `SET foreign_keys = ON` once per connection.
  *
  * Runs against a tursopg server started with:
  *
@@ -124,10 +126,6 @@ type TursopgDB = {
 
 const url = process.env.TURSO_PG_URL ?? "postgres://turso@127.0.0.1:5433/turso";
 
-// DATE (1082): keep the "YYYY-MM-DD" string so plainDatePlugin's ISO path
-// builds Temporal.PlainDate unchanged (pg's default DATE parser would hand
-// the plugin a JS Date).
-types.setTypeParser(1082, (value) => value);
 // TIMESTAMP (1114): tursopg emits "YYYY-MM-DD HH:MM:SS" wall-clock UTC; pg's
 // default parser reads tz-less timestamps as *local* time, which would shift
 // the instant. Re-attach Z so the Date is the true instant.
@@ -135,6 +133,8 @@ types.setTypeParser(1114, (value) => new Date(Date.parse(`${value.replace(" ", "
 // INT8 (20): node-postgres returns int8 as string; the blog's types demand
 // numbers (COUNT(*) and any bigserial columns). Parse.
 types.setTypeParser(20, (value) => parseInt(value, 10));
+// DATE (1082) deliberately has NO override: pg hands the plugin a JS Date at
+// UTC midnight and plainDatePlugin's Date arm rebuilds Temporal.PlainDate.
 
 const pool = new Pool({ connectionString: url, max: 1 });
 

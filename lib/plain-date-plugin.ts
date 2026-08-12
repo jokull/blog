@@ -10,11 +10,11 @@ import type {
 /**
  * Marshals `Temporal.PlainDate` across the storage boundary.
  *
- * The query side rewrites any ValueNode holding a `Temporal.PlainDate` into
- * its ISO string (`YYYY-MM-DD`), matching the CHECK-constrained TEXT column.
- * The result side rebuilds `Temporal.PlainDate` from the configured columns
- * — scoped by column name, so a title that happens to look like a date is
- * never coerced.
+ * One representation, the PG DATE column: the query side rewrites any
+ * `Temporal.PlainDate` into its ISO string (`YYYY-MM-DD`), which the DATE
+ * type accepts; the result side rebuilds `Temporal.PlainDate` from the
+ * driver's JS Date (OID 1082 arrives as UTC midnight) — scoped by column
+ * name, so a title that happens to look like a date is never coerced.
  *
  * Why the structural recursion instead of kysely's OperationNodeTransformer:
  * kysely's exports map only exposes `.` / ./helpers/* / ./migration /
@@ -23,8 +23,6 @@ import type {
  * arrays of them, so a property-agnostic walk rewrites ValueNodes wherever
  * they sit in the tree (select lists, insert values, where clauses).
  */
-
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const isPlainDate = (value: unknown): value is Temporal.PlainDate =>
 	value instanceof Temporal.PlainDate;
@@ -105,13 +103,16 @@ export const plainDatePlugin = (columns: readonly string[]): KyselyPlugin => ({
 			const next = { ...row };
 			for (const column of columns) {
 				const value = next[column];
-				if (typeof value === "string" && ISO_DATE.test(value)) {
-					// The GLOB CHECK guarantees the YYYY-MM-DD *format* but
-					// not a real calendar date, so `from` is the semantic
-					// gate: a regex-passing but invalid date ("2026-13-00")
-					// throws here, at the query boundary — scenario C, a
-					// sanitized internal — rather than surfacing as garbage.
-					next[column] = Temporal.PlainDate.from(value);
+				if (value instanceof Date) {
+					// The PG DATE boundary: both pg and postgres.js parse OID
+					// 1082 as a JS Date at UTC midnight. Rebuild from UTC
+					// components — local getters would shift the calendar day
+					// on non-UTC machines.
+					next[column] = Temporal.PlainDate.from({
+						year: value.getUTCFullYear(),
+						month: value.getUTCMonth() + 1,
+						day: value.getUTCDate(),
+					});
 				}
 			}
 			return next;
