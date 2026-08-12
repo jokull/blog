@@ -126,8 +126,14 @@ export default async function Page() {
 					posts={posts.map((post) => {
 						// public_at is guaranteed non-null by the SQL filter above.
 						const publicAt = post.publicAt!;
+						// PostList's Post contract, nothing more: a Temporal.PlainDate
+						// is not RSC-serializable, and markdown must never cross to
+						// the client. The render shape, not the model.
 						return {
-							...post,
+							slug: post.slug,
+							title: post.title,
+							locale: post.locale,
+							categorySlug: post.categorySlug,
 							formattedDate: publicAt.toLocaleString(post.locale, {
 								month: "short",
 								day: "numeric",
