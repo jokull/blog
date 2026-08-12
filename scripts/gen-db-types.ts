@@ -10,16 +10,23 @@
  * runtime column objects carry everything: `dataType`, `notNull`,
  * `config.autoIncrement`, `enumValues`.
  *
- * The mapping is STORAGE-FAITHFUL, mirroring what actually sits on disk (the
- * blog reads rows raw through kysely and decodes in db.ts):
+ * The mapping is WIRE-FAITHFUL — it describes what the tursopg boundary
+ * yields through the pg driver and plugins (the blog reads rows raw through
+ * kysely and decodes in db.ts):
  *
  *   - "number int53"   → number
- *   - "object date"    → number (timestamp columns store epoch seconds)
- *   - "boolean"        → 0 | 1
+ *   - "object date"    → Date (TIMESTAMP columns; the db.ts parser override
+ *     keeps the wall-clock-UTC instant, so no epoch math anywhere)
+ *   - "boolean"        → boolean (BOOLEAN columns; db.ts drops the 0|1
+ *     override — pg parses native booleans)
  *   - "string"         → string
  *   - "string enum"    → the literal union
  *   - "object json"    → string (JSON text) — $type overrides ignored
  *   - autoIncrement    → Generated<T> (never inserted/updated)
+ *
+ * Calendar dates (post.public_at, a DATE column) are handled by the
+ * boundaryOverrides below: the plain-date plugin yields
+ * Temporal.PlainDate, not Date.
  *
  * Run with `bun run gen:db-types` after changing schema.ts and commit the
  * regenerated file.
@@ -53,10 +60,11 @@ const isColumn = (value: unknown): value is ColumnLike =>
 const storageType = (col: ColumnLike): string => {
 	switch (col.dataType) {
 		case "number int53":
-		case "object date":
 			return "number";
+		case "object date":
+			return "Date";
 		case "boolean":
-			return "0 | 1";
+			return "boolean";
 		case "string":
 			return "string";
 		case "string enum":

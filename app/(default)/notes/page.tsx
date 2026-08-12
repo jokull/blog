@@ -1,4 +1,4 @@
-import { decodeNote, epoch, withDb } from "@/db";
+import { decodeNote, withDb } from "@/db";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
 import { Link } from "@/src/lib/navigation";
@@ -29,7 +29,7 @@ export default async function NotesPage({
 				.selectAll()
 				.where("published_at", "is not", null)
 				.$if(Boolean(cursor), (qb) =>
-					qb.where("published_at", "<", epoch(new Date(Number(cursor)))),
+					qb.where("published_at", "<", new Date(Number(cursor))),
 				)
 				.orderBy("published_at", "desc")
 				.limit(PAGE_SIZE + 1)

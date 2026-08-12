@@ -6,7 +6,7 @@ import { Result } from "better-result";
 import { isFetchUnreachable, safeFetchJson, safeFetchText } from "@/lib/safe-utils";
 import { err, ok } from "result-rpc";
 import { type Selectable } from "kysely";
-import { decodeTheme, epoch } from "@/db";
+import { decodeTheme } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
 import { fetchAuthor, requireViewer, server, session } from "@/src/rpc/server-base";
 import type { KittyThemeTable } from "@/schema";
@@ -47,7 +47,7 @@ const published = server.implement(publishedThemesContract).handler(async ({ con
 		await context.db
 			.selectFrom("kitty_theme")
 			.selectAll()
-			.where("is_published", "=", 1)
+			.where("is_published", "=", true)
 			.orderBy("created_at", "desc")
 			.execute()
 	).unwrap();
@@ -122,8 +122,8 @@ const create = server
 						author_github_id: author.id,
 						author_github_username: author.login,
 						author_avatar_url: author.avatar_url,
-						is_published: 0,
-						created_at: epoch(new Date()),
+						is_published: false,
+						created_at: new Date(),
 					})
 					.returningAll()
 					.executeTakeFirstOrThrow()
@@ -156,7 +156,7 @@ const update = server
 						name: input.name,
 						blurb: input.blurb,
 						colors: encodeColors(input.colors),
-						modified_at: epoch(new Date()),
+						modified_at: new Date(),
 					})
 					.where("id", "=", input.id)
 					.returningAll()
@@ -187,8 +187,8 @@ const togglePublish = server
 				await context.db
 					.updateTable("kitty_theme")
 					.set({
-						is_published: existing.is_published === 1 ? 0 : 1,
-						modified_at: epoch(new Date()),
+						is_published: !existing.is_published,
+						modified_at: new Date(),
 					})
 					.where("id", "=", input.id)
 					.returningAll()
@@ -231,8 +231,8 @@ const fork = server
 						author_github_username: author.login,
 						author_avatar_url: author.avatar_url,
 						forked_from_id: original.id,
-						is_published: 0,
-						created_at: epoch(new Date()),
+						is_published: false,
+						created_at: new Date(),
 					})
 					.returningAll()
 					.executeTakeFirstOrThrow()

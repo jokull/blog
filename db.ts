@@ -30,24 +30,25 @@ import type {
  * 2026-08-12 — postgres.js errors cleanly, pg hangs). `createDb()` per
  * request, disposed when the request is done.
  *
- * Wire-level conversion keeps the app's storage-faithful boundary (generated
- * db types: epoch seconds, 0/1) while the columns are TIMESTAMP/BOOLEAN/DATE:
- *   - TIMESTAMP (1114) → epoch seconds. tursopg emits "YYYY-MM-DD HH:MM:SS"
- *     wall-clock UTC; re-attach Z, parse, floor.
- *   - BOOLEAN (16) → 0 | 1. tursopg sends t/f.
+ * Wire-level conversion, all in one place (generated db types: Date, boolean,
+ * Temporal.PlainDate — the TursopgDB shapes):
+ *   - TIMESTAMP (1114) → Date (UTC instant). tursopg emits "YYYY-MM-DD HH:MM:SS"
+ *     wall-clock UTC; re-attach Z, parse.
+ *   - BOOLEAN (16) → native boolean; pg parses t/f itself (no override).
  *   - INT8 (20) → number (COUNT(*) and bigserial columns).
  *   - DATE (1082) needs no override: plainDatePlugin's Date arm rebuilds
  *     Temporal.PlainDate from the driver's JS Date (UTC midnight).
  *
- * The Date/boolean boundary flip (generated types + decodes + schema) is the
- * pending increment; this keeps the cutover runnable end to end first.
+ * Writes pass Date / boolean values directly — the boundary is the types;
+ * no epoch conversion anywhere.
  */
 
 // The parser overrides are global, so they live at module scope — once.
-pg.types.setTypeParser(1114, (value) =>
-	Math.floor(Date.parse(`${value.replace(" ", "T")}Z`) / 1000),
-);
-pg.types.setTypeParser(16, (value) => (value === "t" ? 1 : 0));
+// TIMESTAMP (1114): tursopg emits "YYYY-MM-DD HH:MM:SS" wall-clock UTC;
+// re-attach Z and parse as UTC so the Date is TZ-deterministic in node and
+// workerd alike. BOOLEAN (16) needs no override — pg parses native
+// booleans. INT8 (20) → number (COUNT(*) and bigserial columns).
+pg.types.setTypeParser(1114, (value) => new Date(`${value.replace(" ", "T")}Z`));
 pg.types.setTypeParser(20, (value) => parseInt(value, 10));
 
 export type Db = ReturnType<typeof createDb>["db"];
@@ -81,15 +82,6 @@ export const withDb = async <T>(
 };
 
 /**
- * Epoch seconds is the storage unit of every timestamp column at the app
- * boundary (the parser override above converts TIMESTAMP to it). These two
- * helpers are the only sanctioned way to convert for a write.
- */
-export const epoch = (date: Date): number => Math.floor(date.getTime() / 1000);
-export const epochOrNull = (date: Date | null): number | null =>
-	date === null ? null : Math.floor(date.getTime() / 1000);
-
-/**
  * The raw row decoded to the model's exact shape — the drift boundary.
  * Written out field by field rather than spread, so a new column in schema.ts
  * is a decision here instead of an accident on the wire.
@@ -103,9 +95,9 @@ export const decodePost = (row: PostTable): StoredPost => ({
 	// invalid date); the type enforces it — a plugin-less query path would
 	// be a compile-time error here, not a silent string.
 	publicAt: row.public_at,
-	createdAt: new Date(row.created_at * 1000),
-	publishedAt: new Date(row.published_at * 1000),
-	modifiedAt: row.modified_at === null ? null : new Date(row.modified_at * 1000),
+	createdAt: row.created_at,
+	publishedAt: row.published_at,
+	modifiedAt: row.modified_at,
 	revision: row.revision,
 	locale: row.locale,
 	heroImage: row.hero_image,
@@ -115,7 +107,7 @@ export const decodePost = (row: PostTable): StoredPost => ({
 export const decodeCategory = (row: CategoryTable): StoredCategory => ({
 	slug: row.slug,
 	label: row.label,
-	createdAt: new Date(row.created_at * 1000),
+	createdAt: row.created_at,
 });
 
 export const decodeComment = (row: Selectable<CommentTable>): StoredComment => ({
@@ -125,15 +117,15 @@ export const decodeComment = (row: Selectable<CommentTable>): StoredComment => (
 	authorGithubUsername: row.author_github_username,
 	authorAvatarUrl: row.author_avatar_url,
 	content: row.content,
-	isHidden: row.is_hidden === 1,
-	createdAt: new Date(row.created_at * 1000),
+	isHidden: row.is_hidden,
+	createdAt: row.created_at,
 });
 
 export const decodeNote = (row: NoteTable): StoredNote => ({
 	id: row.id,
 	description: row.description,
-	publishedAt: row.published_at === null ? null : new Date(row.published_at * 1000),
-	createdAt: new Date(row.created_at * 1000),
+	publishedAt: row.published_at,
+	createdAt: row.created_at,
 });
 
 /**
@@ -154,10 +146,10 @@ export const decodeTheme = (row: Selectable<KittyThemeTable>): StoredKittyTheme 
 	authorGithubId: row.author_github_id,
 	authorGithubUsername: row.author_github_username,
 	authorAvatarUrl: row.author_avatar_url,
-	isPublished: row.is_published === 1,
+	isPublished: row.is_published,
 	forkedFromId: row.forked_from_id,
 	blurb: row.blurb,
 	colors: decodeColors(row),
-	createdAt: new Date(row.created_at * 1000),
-	modifiedAt: row.modified_at === null ? null : new Date(row.modified_at * 1000),
+	createdAt: row.created_at,
+	modifiedAt: row.modified_at,
 });

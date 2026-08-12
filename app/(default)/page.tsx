@@ -92,7 +92,7 @@ export default async function Page() {
 			await db
 				.selectFrom("comment")
 				.select((eb) => ["post_slug", eb.fn.countAll<number>().as("count")])
-				.where("is_hidden", "=", 0)
+				.where("is_hidden", "=", false)
 				.groupBy("post_slug")
 				.execute()
 		).unwrap();

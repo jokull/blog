@@ -5,7 +5,7 @@ import type { Temporal } from "temporal-polyfill";
 export type CategoryTable = {
 	slug: string;
 	label: string;
-	created_at: number;
+	created_at: Date;
 };
 
 export type CommentTable = {
@@ -15,8 +15,8 @@ export type CommentTable = {
 	author_github_username: string;
 	author_avatar_url: string;
 	content: string;
-	is_hidden: 0 | 1;
-	created_at: number;
+	is_hidden: boolean;
+	created_at: Date;
 };
 
 export type KittyThemeTable = {
@@ -26,19 +26,19 @@ export type KittyThemeTable = {
 	author_github_id: number;
 	author_github_username: string;
 	author_avatar_url: string;
-	is_published: 0 | 1;
+	is_published: boolean;
 	forked_from_id: number | null;
 	blurb: string | null;
 	colors: string;
-	created_at: number;
-	modified_at: number | null;
+	created_at: Date;
+	modified_at: Date | null;
 };
 
 export type NoteTable = {
 	id: string;
 	description: string | null;
-	published_at: number | null;
-	created_at: number;
+	published_at: Date | null;
+	created_at: Date;
 };
 
 export type PostTable = {
@@ -47,9 +47,9 @@ export type PostTable = {
 	markdown: string;
 	preview_markdown: string | null;
 	public_at: Temporal.PlainDate | null;
-	created_at: number;
-	published_at: number;
-	modified_at: number | null;
+	created_at: Date;
+	published_at: Date;
+	modified_at: Date | null;
 	revision: number;
 	locale: "is" | "en";
 	hero_image: string | null;

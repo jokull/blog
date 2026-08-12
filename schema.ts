@@ -1,18 +1,17 @@
 /**
  * The database. Drizzle table definitions are the source of truth — they feed
  * drizzle-kit's migration generation — and the kysely types the queries see
- * are derived from them by the vendored `Kyselify` port in `src/db/kyselify.ts`.
+ * are derived from them by the generator in `scripts/gen-db-types.ts`.
  *
- * Storage formats (fixed by the existing schema, written by the old drizzle
- * layer and now read raw by kysely):
+ * Wire formats (the tursopg cutover; the generated kysely types describe what
+ * the pg boundary yields, not SQLite storage):
  *
- * - Every timestamp column stores **epoch seconds** as an integer — never a
- *   Date and never milliseconds. Reads decode with `new Date(v * 1000)`; a
- *   write converts with the `epoch`/`epochOrNull` helpers in `db.ts`.
- * - `post.public_at` is the one exception: a calendar date stored as
- *   `YYYY-MM-DD` TEXT (GLOB CHECK'd), marshaled to `Temporal.PlainDate` by
- *   the calendar plugin at the query boundary.
- * - Booleans store `0`/`1` integers.
+ * - Timestamp columns (TIMESTAMP, no timezone) arrive as **Date** objects —
+ *   the db.ts parser override keeps the wall-clock-UTC instant, so no epoch
+ *   math anywhere; reads pass through, writes pass Date.
+ * - `post.public_at` is the calendar date (DATE column): marshaled to
+ *   `Temporal.PlainDate` by the calendar plugin at the query boundary.
+ * - Booleans are real booleans (BOOLEAN columns) — no 0/1.
  * - `kitty_theme.colors` stores JSON text.
  *
  * `Stored*` types are the decoded rows the blog models must match, and

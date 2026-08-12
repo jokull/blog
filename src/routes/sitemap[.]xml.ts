@@ -21,9 +21,8 @@ export const Route = createFileRoute("/sitemap.xml")({
 					{ loc: env.SITE_URL, lastmod: new Date(), changefreq: "weekly", priority: "1" },
 					...posts.map((post) => ({
 						loc: `${env.SITE_URL}/${post.slug}`,
-						lastmod: post.modified_at
-							? new Date(post.modified_at * 1000)
-							: new Date(`${post.public_at!.toString()}T00:00:00Z`),
+						lastmod:
+							post.modified_at ?? new Date(`${post.public_at!.toString()}T00:00:00Z`),
 						changefreq: "monthly",
 						priority: "0.8",
 					})),

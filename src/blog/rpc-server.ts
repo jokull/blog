@@ -11,7 +11,7 @@ import { type Selectable } from "kysely";
 import { Result } from "better-result";
 import { err, ok, type AnyTaggedError } from "result-rpc";
 import { isConstraintViolation, UniqueViolation, ForeignKeyViolation } from "db-result";
-import { decodeCategory, decodeComment, decodeNote, decodePost, epoch } from "@/db";
+import { decodeCategory, decodeComment, decodeNote, decodePost } from "@/db";
 import { Temporal } from "temporal-polyfill";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
@@ -155,8 +155,8 @@ const createPost = server
 					markdown: input.markdown,
 					preview_markdown: null,
 					public_at: input.publish ? Temporal.Now.plainDateISO() : null,
-					created_at: epoch(now),
-					published_at: epoch(now),
+					created_at: now,
+					published_at: now,
 					modified_at: null,
 					revision: 1,
 					locale: input.locale,
@@ -214,7 +214,7 @@ const updatePost = server
 
 		const patch: Partial<PostTable> = {};
 		if (input.title !== undefined) patch.title = input.title;
-		if (input.publishedAt !== undefined) patch.published_at = epoch(input.publishedAt);
+		if (input.publishedAt !== undefined) patch.published_at = input.publishedAt;
 		if (input.locale !== undefined) patch.locale = input.locale;
 		if (input.categorySlug !== undefined) patch.category_slug = input.categorySlug;
 
@@ -239,7 +239,7 @@ const updatePost = server
 				.updateTable("post")
 				.set({
 					...patch,
-					modified_at: epoch(new Date()),
+					modified_at: new Date(),
 					revision: existing.revision + 1,
 				})
 				// The revision is re-checked in the WHERE clause, not just above, so a
@@ -315,7 +315,7 @@ const setPublished = server
 					markdown,
 					preview_markdown: null,
 					hero_image: heroImage,
-					modified_at: epoch(new Date()),
+					modified_at: new Date(),
 					revision: existing.revision + 1,
 				})
 				.where("slug", "=", input.slug)
@@ -367,7 +367,7 @@ const createCategory = server
 		(
 			await context.db
 				.insertInto("category")
-				.values({ slug: input.slug, label: input.label, created_at: epoch(new Date()) })
+				.values({ slug: input.slug, label: input.label, created_at: new Date() })
 				.returningAll()
 				.executeTakeFirstOrThrow()
 		)
@@ -425,8 +425,8 @@ const createNote = server
 				.values({
 					id: input.id,
 					description: input.description,
-					published_at: input.publish ? epoch(new Date()) : null,
-					created_at: epoch(new Date()),
+					published_at: input.publish ? new Date() : null,
+					created_at: new Date(),
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow()
@@ -452,8 +452,7 @@ const updateNote = server
 
 		const patch: Partial<NoteTable> = {};
 		if (input.description !== undefined) patch.description = input.description;
-		if (input.publish !== undefined)
-			patch.published_at = input.publish ? epoch(new Date()) : null;
+		if (input.publish !== undefined) patch.published_at = input.publish ? new Date() : null;
 
 		const updated = (
 			await context.db
@@ -535,8 +534,8 @@ const createComment = server
 						author_github_username: author.login,
 						author_avatar_url: author.avatar_url,
 						content: input.content,
-						created_at: epoch(new Date()),
-						is_hidden: 0,
+						created_at: new Date(),
+						is_hidden: false,
 					})
 					.returningAll()
 					.executeTakeFirstOrThrow()
@@ -594,7 +593,7 @@ const setCommentHidden = server
 		const updated = (
 			await context.db
 				.updateTable("comment")
-				.set({ is_hidden: input.hidden ? 1 : 0 })
+				.set({ is_hidden: input.hidden })
 				.where("id", "=", input.id)
 				.returningAll()
 				.executeTakeFirstOrThrow()
