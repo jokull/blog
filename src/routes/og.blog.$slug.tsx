@@ -30,7 +30,7 @@ export const Route = createFileRoute("/og/blog/$slug")({
 				return ogImage({
 					title: post.title,
 					description: description || `Read ${post.title} on Jökull Sólberg's blog.`,
-					kicker: `Jökull Sólberg · ${post.publishedAt.toLocaleDateString(post.locale, { dateStyle: "long" })}`,
+					kicker: `Jökull Sólberg · ${post.publicAt!.toLocaleString(post.locale, { dateStyle: "long" })}`,
 				});
 			},
 		},

@@ -66,7 +66,8 @@ export async function generateMetadata({
 			type: "article",
 			url: `${baseUrl}/${post.slug}`,
 			locale: post.locale === "is" ? "is_IS" : "en_US",
-			publishedTime: post.publishedAt.toISOString(),
+			publishedTime:
+				post.publicAt?.toString() ?? post.publishedAt.toISOString().split("T")[0],
 			modifiedTime: (post.modifiedAt ?? post.publishedAt).toISOString(),
 			authors: ["Jökull Sólberg"],
 		},
@@ -95,7 +96,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 	}
 
 	// Format markdown document with title and date (same as .md version)
-	const formattedDate = post.publishedAt.toISOString().split("T")[0];
+	const formattedDate = post.publicAt?.toString() ?? post.publishedAt.toISOString().split("T")[0];
 	const markdownDocument = `# ${post.title}
 
 ${formattedDate}
@@ -107,10 +108,14 @@ ${post.markdown}`;
 			<div className="mb-7">
 				<h1 className="text-balance font-semibold">{post.title}</h1>
 				<p className="text-sm">
-					{post.publishedAt.toLocaleDateString(post.locale, {
+					{post.publicAt?.toLocaleString(post.locale, {
 						timeStyle: undefined,
 						dateStyle: "long",
-					})}
+					}) ??
+						post.publishedAt.toLocaleDateString(post.locale, {
+							timeStyle: undefined,
+							dateStyle: "long",
+						})}
 				</p>
 				<ClipboardCopyButton text={markdownDocument}>Copy as markdown</ClipboardCopyButton>
 			</div>

@@ -72,7 +72,7 @@ export default async function Page() {
 			.selectFrom("post")
 			.selectAll()
 			.where("public_at", "is not", null)
-			.orderBy("published_at", "desc")
+			.orderBy("public_at", "desc")
 			.execute()
 	)
 		.unwrap()
@@ -116,15 +116,18 @@ export default async function Page() {
 
 			<Suspense fallback={null}>
 				<PostList
-					posts={posts.map((post) => ({
-						...post,
-						formattedDate: post.publishedAt.toLocaleDateString(post.locale, {
-							year: undefined,
-							month: "short",
-							day: "numeric",
-						}),
-						year: post.publishedAt.getFullYear().toString(),
-					}))}
+					posts={posts.map((post) => {
+						// public_at is guaranteed non-null by the SQL filter above.
+						const publicAt = post.publicAt!;
+						return {
+							...post,
+							formattedDate: publicAt.toLocaleString(post.locale, {
+								month: "short",
+								day: "numeric",
+							}),
+							year: publicAt.year.toString(),
+						};
+					})}
 					commentCounts={commentCountsMap}
 					categories={categories}
 				/>

@@ -14,7 +14,6 @@ interface Category {
 interface Post {
 	slug: string;
 	title: string;
-	publishedAt: Date;
 	locale: "is" | "en";
 	categorySlug: string | null;
 	formattedDate: string;

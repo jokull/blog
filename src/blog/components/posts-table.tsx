@@ -55,10 +55,12 @@ export function PostsTable({ posts, categories, pageviewsBySlug }: PostsTablePro
 	);
 }
 
-const formatDate = (date: Date | null) =>
+const formatDate = (date: Date | Temporal.PlainDate | null) =>
 	date === null
 		? "—"
-		: date.toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" });
+		: date instanceof Temporal.PlainDate
+			? date.toLocaleString("en", { year: "numeric", month: "short", day: "numeric" })
+			: date.toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" });
 
 function PostRow({
 	post,
@@ -156,7 +158,7 @@ function PostRow({
 			</TableCell>
 
 			<TableCell>
-				<time className="text-sm tabular-nums">{formatDate(post.publishedAt)}</time>
+				<time className="text-sm tabular-nums">{formatDate(post.publicAt)}</time>
 			</TableCell>
 
 			<TableCell>

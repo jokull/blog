@@ -113,7 +113,7 @@ const listPosts = server
 		// scenario C — `unwrap` throws a Panic and the framework turns that
 		// into a sanitized server/internal with an incident id.
 		const rows = (
-			await db.selectFrom("post").selectAll().orderBy("published_at", "desc").execute()
+			await db.selectFrom("post").selectAll().orderBy("public_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map((row) => toPostRow(decodePost(row))));
 	});
@@ -123,7 +123,7 @@ const exportPosts = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db.selectFrom("post").selectAll().orderBy("published_at", "desc").execute()
+			await db.selectFrom("post").selectAll().orderBy("public_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map(decodePost));
 	});
