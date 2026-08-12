@@ -17,7 +17,7 @@ export const Route = createFileRoute("/api/markdown/$slug")({
 				const post = decodePost(row);
 				if (!post.publicAt) return new Response("Not Found", { status: 404 });
 
-				const formattedDate = post.publicAt.toISOString().split("T")[0];
+				const formattedDate = post.publicAt.toString();
 				const markdownDocument = `# ${post.title}
 
 ${formattedDate}

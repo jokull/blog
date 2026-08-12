@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Link } from "@/src/lib/navigation";
 import { client } from "@/src/rpc/client";
+import { Temporal } from "temporal-polyfill";
 import { PostModel, type PostRowValue, type SavedCategory } from "../models";
 import { AdminShell } from "../shells";
 
@@ -77,7 +78,7 @@ function PostRow({
 	const setPublished = AdminShell.useMutation(client.posts.setPublished, {
 		optimistic: (input, cache) => ({
 			rollback: cache.updateEntity(PostModel, input.slug, () => ({
-				publicAt: input.published ? new Date() : null,
+				publicAt: input.published ? Temporal.Now.plainDateISO() : null,
 			})),
 		}),
 		onFailure: (_error, _input, context) => context?.rollback(),

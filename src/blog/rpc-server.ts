@@ -11,7 +11,16 @@ import { type Selectable } from "kysely";
 import { Result } from "better-result";
 import { err, ok, type AnyTaggedError } from "result-rpc";
 import { isConstraintViolation, UniqueViolation, ForeignKeyViolation } from "db-result";
-import { db, decodeCategory, decodeComment, decodeNote, decodePost, epoch } from "@/db";
+import {
+	db,
+	decodeCategory,
+	decodeComment,
+	decodeNote,
+	decodePost,
+	epoch,
+	plainDateForStorage,
+} from "@/db";
+import { Temporal } from "temporal-polyfill";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
 import { extractFirstImage } from "@/lib/mdx-image-extractor";
@@ -153,7 +162,9 @@ const createPost = server
 					title: input.title,
 					markdown: input.markdown,
 					preview_markdown: null,
-					public_at: input.publish ? epoch(now) : null,
+					public_at: plainDateForStorage(
+						input.publish ? Temporal.Now.plainDateISO() : null,
+					),
 					created_at: epoch(now),
 					published_at: epoch(now),
 					modified_at: null,
@@ -310,7 +321,9 @@ const setPublished = server
 			await db
 				.updateTable("post")
 				.set({
-					public_at: input.published ? epoch(new Date()) : null,
+					public_at: plainDateForStorage(
+						input.published ? Temporal.Now.plainDateISO() : null,
+					),
 					markdown,
 					preview_markdown: null,
 					hero_image: heroImage,
