@@ -1,10 +1,10 @@
 import { env } from "cloudflare:workers";
+import { notFound } from "@tanstack/react-router";
 import { ClientErrorBoundary } from "@/components/error-boundary";
 import { db, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
-import { throwNotFound } from "@/src/lib/router-control";
 import { cache } from "react";
 // safe-mdx renders MDX without eval/new Function — required on Cloudflare Workers where
 // @mdx-js/mdx's run() is blocked (EvalError: Code generation from strings disallowed).
@@ -24,7 +24,7 @@ const getPost = cache(async (slug: string) => {
 		await db.selectFrom("post").selectAll().where("slug", "=", slug).executeTakeFirst()
 	).unwrap();
 	if (!row) {
-		throwNotFound();
+		throw notFound();
 	}
 	return decodePost(row);
 });
