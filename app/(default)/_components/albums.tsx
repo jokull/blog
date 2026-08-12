@@ -11,7 +11,7 @@ const albumSchema = v.object({
 const albumsSchema = v.array(albumSchema);
 
 export async function Albums() {
-	const result = await safeFetchJson("https://personal.plex.uno/random-albums", {
+	const result = await safeFetchJson("https://personal.solberg.club/random-albums", {
 		signal: AbortSignal.timeout(3000),
 	});
 	const albums = Result.unwrapOr(Result.andThen(result, safeParse(albumsSchema)), []);
@@ -23,7 +23,7 @@ export async function Albums() {
 					<img
 						key={`${album.artist}-${album.title}`}
 						alt={`${album.title} by ${album.artist}`}
-						src={`https://personal.plex.uno${album.coverPath}`}
+						src={`https://personal.solberg.club${album.coverPath}`}
 						className="aspect-square w-24 rounded-sm object-cover shadow-lg sm:w-32 md:w-full"
 					/>
 				))}

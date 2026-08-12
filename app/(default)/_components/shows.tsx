@@ -11,7 +11,7 @@ const showSchema = v.object({
 const showsSchema = v.array(showSchema);
 
 export async function RecentShows() {
-	const result = await safeFetchJson("https://personal.plex.uno/recent-shows", {
+	const result = await safeFetchJson("https://personal.solberg.club/recent-shows", {
 		signal: AbortSignal.timeout(3000),
 	});
 	const shows = Result.unwrapOr(Result.andThen(result, safeParse(showsSchema)), []);
@@ -22,7 +22,7 @@ export async function RecentShows() {
 				<div key={show.title} className="flex flex-col gap-1 shadow-lg">
 					<div className="w-full overflow-hidden rounded">
 						<img
-							src={`https://personal.plex.uno${show.poster}`}
+							src={`https://personal.solberg.club${show.poster}`}
 							alt={show.title}
 							className="aspect-10/16 h-full w-24 object-cover sm:w-32"
 						/>
