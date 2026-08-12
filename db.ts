@@ -63,10 +63,11 @@ export const decodePost = (row: PostTable): StoredPost => ({
 });
 
 /**
- * The plugin has already marshaled the column to `Temporal.PlainDate`, but
- * the type layer only sees `string` (storage-faithful types, decoders at the
- * edge — see the header comment). Accept both and validate strings through
- * `Temporal.PlainDate.from`, so a malformed date is a Panic, not a cast.
+ * The drift-boundary narrowing for `post.public_at`: the plugin hydrates the
+ * column on every read through `rawDb`, and it panics (scenario C) on a
+ * CHECK-legal but invalid date, so the `string` arm is the defensive path
+ * for a plugin-bypassed query. Normalize either shape by validation, not
+ * cast — a malformed date is a Panic, never a silent value.
  */
 const toPlainDate = (value: string | Temporal.PlainDate): Temporal.PlainDate =>
 	value instanceof Temporal.PlainDate ? value : Temporal.PlainDate.from(value);

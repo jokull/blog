@@ -99,6 +99,11 @@ export const plainDatePlugin = (columns: readonly string[]): KyselyPlugin => ({
 			for (const column of columns) {
 				const value = next[column];
 				if (typeof value === "string" && ISO_DATE.test(value)) {
+					// The GLOB CHECK guarantees the YYYY-MM-DD *format* but
+					// not a real calendar date, so `from` is the semantic
+					// gate: a regex-passing but invalid date ("2026-13-00")
+					// throws here, at the query boundary — scenario C, a
+					// sanitized internal — rather than surfacing as garbage.
 					next[column] = Temporal.PlainDate.from(value);
 				}
 			}
