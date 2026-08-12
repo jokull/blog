@@ -2,7 +2,6 @@ import { env } from "cloudflare:workers";
 import { plainDatePlugin } from "./lib/plain-date-plugin";
 import { Kysely, type Selectable } from "kysely";
 import { D1Dialect } from "kysely-d1";
-import { Temporal } from "temporal-polyfill";
 import { kyselyTryDb } from "db-result/kysely";
 import type { SqliteDbError } from "db-result/sqlite";
 import { ThemeColorsCodec, type ThemeColors } from "@/src/kitty/colors";
@@ -52,7 +51,10 @@ export const decodePost = (row: PostTable): StoredPost => ({
 	title: row.title,
 	markdown: row.markdown,
 	previewMarkdown: row.preview_markdown,
-	publicAt: row.public_at === null ? null : toPlainDate(row.public_at),
+	// The plugin already hydrated this (and panics on a CHECK-legal but
+	// invalid date); the type enforces it — a plugin-less query path would
+	// be a compile-time error here, not a silent string.
+	publicAt: row.public_at,
 	createdAt: new Date(row.created_at * 1000),
 	publishedAt: new Date(row.published_at * 1000),
 	modifiedAt: row.modified_at === null ? null : new Date(row.modified_at * 1000),
@@ -61,16 +63,6 @@ export const decodePost = (row: PostTable): StoredPost => ({
 	heroImage: row.hero_image,
 	categorySlug: row.category_slug,
 });
-
-/**
- * The drift-boundary narrowing for `post.public_at`: the plugin hydrates the
- * column on every read through `rawDb`, and it panics (scenario C) on a
- * CHECK-legal but invalid date, so the `string` arm is the defensive path
- * for a plugin-bypassed query. Normalize either shape by validation, not
- * cast — a malformed date is a Panic, never a silent value.
- */
-const toPlainDate = (value: string | Temporal.PlainDate): Temporal.PlainDate =>
-	value instanceof Temporal.PlainDate ? value : Temporal.PlainDate.from(value);
 
 export const decodeCategory = (row: CategoryTable): StoredCategory => ({
 	slug: row.slug,

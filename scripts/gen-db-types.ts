@@ -82,8 +82,10 @@ const columnType = (col: ColumnLike): string => {
  * `Temporal.PlainDate` to its ISO string for storage and hydrates it back on
  * reads, so `post.public_at` is `Temporal.PlainDate | null` — writes must
  * pass a PlainDate (the plugin's stringification is an implementation detail,
- * not part of the API) and reads hand the fancy type back. `db.ts`'s
- * `toPlainDate` keeps a defensive string arm for a plugin-bypassed query.
+ * not part of the API) and reads hand the fancy type back. Plugin processing
+ * is unconditional on every query compiled through the instance (raw queries
+ * included), so a plugin-less query path is a compile-time error, not a
+ * silent string.
  */
 const boundaryOverrides: Record<string, Partial<Record<string, string>>> = {
 	post: { public_at: "Temporal.PlainDate | null" },
