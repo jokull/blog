@@ -16,8 +16,14 @@ interface Post {
 	title: string;
 	locale: "is" | "en";
 	categorySlug: string | null;
-	formattedDate: string;
-	year: string;
+	/**
+	 * The byline date degraded for the RSC wire: Temporal.PlainDate is not
+	 * RSC-serializable, so it crosses as a Date at UTC midnight (Flight's
+	 * native Date encoding). The calendar date is recovered with UTC getters
+	 * / `timeZone: "UTC"` formatting — local-time formatting would shift the
+	 * day on negative-offset machines.
+	 */
+	publicAt: Date;
 }
 
 interface PostListProps {
@@ -32,6 +38,12 @@ interface PostLinkProps {
 }
 
 function PostLink({ item, commentCount }: PostLinkProps) {
+	// UTC-midnight Date: format in UTC so the calendar date survives.
+	const formattedDate = item.publicAt.toLocaleDateString(item.locale, {
+		month: "short",
+		day: "numeric",
+		timeZone: "UTC",
+	});
 	return (
 		<Link
 			href={`/${item.slug}`}
@@ -44,7 +56,7 @@ function PostLink({ item, commentCount }: PostLinkProps) {
 			<span className="dot-leaders mb-[0.1rem] flex-1 font-normal text-black/10 text-sm leading-none transition-colors group-hover:text-black/25 group-hover:transition-none" />
 			<span className="flex shrink-0 items-center gap-1.5 self-start">
 				<time className="block whitespace-nowrap font-normal text-black/40 tabular-nums tracking-tighter transition-colors group-hover:text-black/55 group-hover:transition-none">
-					{item.formattedDate}
+					{formattedDate}
 				</time>
 				{commentCount > 0 && (
 					<>
@@ -87,7 +99,7 @@ function PostLink({ item, commentCount }: PostLinkProps) {
 function groupByYear(posts: Post[]) {
 	const grouped = pipe(
 		posts,
-		groupBy((post) => post.year),
+		groupBy((post) => String(post.publicAt.getUTCFullYear())),
 	);
 	const sortedYears = Object.keys(grouped).sort((a, b) => (b > a ? 1 : -1));
 	return { grouped, sortedYears };

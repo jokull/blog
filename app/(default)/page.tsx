@@ -127,18 +127,17 @@ export default async function Page() {
 						// public_at is guaranteed non-null by the SQL filter above.
 						const publicAt = post.publicAt!;
 						// PostList's Post contract, nothing more: a Temporal.PlainDate
-						// is not RSC-serializable, and markdown must never cross to
-						// the client. The render shape, not the model.
+						// is not RSC-serializable, so it degrades to a Date at UTC
+						// midnight (Flight's native Date encoding); markdown must
+						// never cross to the client. The render shape, not the model.
 						return {
 							slug: post.slug,
 							title: post.title,
 							locale: post.locale,
 							categorySlug: post.categorySlug,
-							formattedDate: publicAt.toLocaleString(post.locale, {
-								month: "short",
-								day: "numeric",
-							}),
-							year: publicAt.year.toString(),
+							publicAt: new Date(
+								Date.UTC(publicAt.year, publicAt.month - 1, publicAt.day),
+							),
 						};
 					})}
 					commentCounts={commentCountsMap}
