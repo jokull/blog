@@ -15,7 +15,9 @@
 import { Result } from "better-result";
 import { defineErrors, err, ok, validateStandard, wire, type StandardSchemaV1 } from "result-rpc";
 
-const messageOf = (cause: unknown) => (cause instanceof Error ? cause.message : String(cause));
+function messageOf(cause: unknown) {
+	return cause instanceof Error ? cause.message : String(cause);
+}
 
 export const fetchErrors = defineErrors("fetch", {
 	/** The request never completed: DNS, TLS, timeout, abort. */
@@ -119,7 +121,7 @@ export async function safeFetchText(
  * cloak it behind a declared tag; genuine offline is the retryable, silent
  * lane. Returns true for offline so the fold can pick the tag.
  */
-export const isFetchUnreachable = (e: FetchJsonError | SchemaError): boolean => {
+export function isFetchUnreachable(e: FetchJsonError | SchemaError): boolean {
 	if (fetchErrors.unreachable.is(e)) return true;
 
 	if (fetchErrors.status.is(e)) {
@@ -130,7 +132,7 @@ export const isFetchUnreachable = (e: FetchJsonError | SchemaError): boolean => 
 		console.error(`[fetch] schema/invalid ${e.data.issues.join(", ")}`);
 	}
 	return false;
-};
+}
 
 /**
  * Schema validation as a Result-returning step, for use with `andThen`/`gen`.

@@ -14,10 +14,10 @@ import { createQueryRuntime } from "result-rpc/query";
 import { createServerClient } from "result-rpc/server";
 import { createContext, router } from "@/src/rpc/server";
 
-const buildRuntime = () => {
+function buildRuntime() {
 	const serverClient = createServerClient(router, { context: createContext() });
 	return { serverClient, runtime: createQueryRuntime({ client: serverClient }) };
-};
+}
 
 /**
  * The dashboard. Every panel is prefetched in one pass so the HTML arrives

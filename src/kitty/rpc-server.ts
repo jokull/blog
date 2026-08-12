@@ -27,17 +27,21 @@ import { defaultThemeColors } from "./lib/default-theme";
 import { parseThemeConfig, themeIndexEntries } from "./lib/theme-parser";
 import { KittyThemeModel, type SavedTheme } from "./models";
 
-const generateSlug = (name: string) =>
-	`${name
+function generateSlug(name: string) {
+	return `${name
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/^-+|-+$/g, "")}-${Date.now().toString(36)}`;
+}
 
 /** `colors` crosses the wire as an object but is stored as JSON text. */
-const encodeColors = (colors: SavedTheme["colors"]): string => JSON.stringify(colors);
+function encodeColors(colors: SavedTheme["colors"]): string {
+	return JSON.stringify(colors);
+}
 
-const canWrite = (row: Selectable<KittyThemeTable>, viewer: Viewer) =>
-	row.author_github_username === viewer.username || viewer.isAdmin;
+function canWrite(row: Selectable<KittyThemeTable>, viewer: Viewer) {
+	return row.author_github_username === viewer.username || viewer.isAdmin;
+}
 
 const published = server.implement(publishedThemesContract).handler(async ({ context }) => {
 	// A read with no declared failure: the query either answers or it is
@@ -275,13 +279,14 @@ const UPSTREAM = "https://raw.githubusercontent.com/kovidgoyal/kitty-themes/mast
  * All of them collapse to one declared tag, because a component rendering the
  * community list cannot act differently on "offline" versus "malformed JSON".
  */
-const fetchIndex = () =>
-	Result.gen(async function* () {
+function fetchIndex() {
+	return Result.gen(async function* () {
 		const payload = yield* (await safeFetchJson(`${UPSTREAM}/themes.json`))
 			.tapError(isFetchUnreachable)
 			.mapError(() => communityErrors.unavailable());
 		return ok(themeIndexEntries(payload));
 	});
+}
 
 const communityList = server.implement(communityListContract).handler(() => fetchIndex());
 

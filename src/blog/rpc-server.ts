@@ -58,18 +58,20 @@ import {
  * shape rather than stripping a wider one — so the bodies are dropped here on
  * purpose: `posts.list` cannot accidentally ship every post's markdown.
  */
-const toPostRow = (post: StoredPost): PostRowValue => ({
-	slug: post.slug,
-	title: post.title,
-	locale: post.locale,
-	revision: post.revision,
-	publicAt: post.publicAt,
-	createdAt: post.createdAt,
-	publishedAt: post.publishedAt,
-	modifiedAt: post.modifiedAt,
-	heroImage: post.heroImage,
-	categorySlug: post.categorySlug,
-});
+function toPostRow(post: StoredPost): PostRowValue {
+	return {
+		slug: post.slug,
+		title: post.title,
+		locale: post.locale,
+		revision: post.revision,
+		publicAt: post.publicAt,
+		createdAt: post.createdAt,
+		publishedAt: post.publishedAt,
+		modifiedAt: post.modifiedAt,
+		heroImage: post.heroImage,
+		categorySlug: post.categorySlug,
+	};
+}
 
 /**
  * `contentHtml` is rendered here rather than stored, so a change to the
@@ -78,10 +80,12 @@ const toPostRow = (post: StoredPost): PostRowValue => ({
  * `@tanstack/highlight` is a synchronous tokenizer with no WASM and no async
  * init.
  */
-const toComment = (row: Selectable<CommentTable>): SavedComment => ({
-	...decodeComment(row),
-	contentHtml: renderCommentHtml(row.content),
-});
+function toComment(row: Selectable<CommentTable>): SavedComment {
+	return {
+		...decodeComment(row),
+		contentHtml: renderCommentHtml(row.content),
+	};
+}
 
 /**
  * The single-tag constraint fold: when the database rejected the write with a
@@ -487,10 +491,12 @@ const deleteNote = server
 
 // ------------------------------------------------------------------ comments
 
-const canModerate = (
+function canModerate(
 	row: Selectable<CommentTable>,
 	viewer: { username: string; isAdmin: boolean },
-) => row.author_github_username === viewer.username || viewer.isAdmin;
+) {
+	return row.author_github_username === viewer.username || viewer.isAdmin;
+}
 
 /**
  * Public. Runs behind the optional session layer, so a signed-out reader gets
@@ -632,15 +638,16 @@ const checkLinks = server
 		return ok(await checkPostLinks(rows.map(decodePost), env.SITE_URL));
 	});
 
-const toChartPoints = (
+function toChartPoints(
 	rows: readonly { date: string; visitors: number; visits: number; pageviews: number }[],
-): ChartPoint[] =>
-	rows.map((row) => ({
+): ChartPoint[] {
+	return rows.map((row) => ({
 		date: new Date(row.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
 		Visitors: row.visitors,
 		Visits: row.visits,
 		Pageviews: row.pageviews,
 	}));
+}
 
 const statsOverview = server
 	.implement(statsOverviewContract)

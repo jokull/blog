@@ -219,7 +219,9 @@ type PostSnapshot = {
 	publicAt: Temporal.PlainDate | null;
 };
 
-const displayValue = (value: string | null) => value ?? "(none)";
+function displayValue(value: string | null) {
+	return value ?? "(none)";
+}
 
 function printCreateDiff(
 	slug: string,

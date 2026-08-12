@@ -50,14 +50,17 @@ interface ColumnLike {
 	readonly config: { readonly autoIncrement?: boolean };
 }
 
-const isColumn = (value: unknown): value is ColumnLike =>
-	typeof value === "object" &&
-	value !== null &&
-	"name" in value &&
-	"dataType" in value &&
-	"notNull" in value;
+function isColumn(value: unknown): value is ColumnLike {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"name" in value &&
+		"dataType" in value &&
+		"notNull" in value
+	);
+}
 
-const storageType = (col: ColumnLike): string => {
+function storageType(col: ColumnLike): string {
 	switch (col.dataType) {
 		case "number int53":
 			return "number";
@@ -76,13 +79,13 @@ const storageType = (col: ColumnLike): string => {
 		default:
 			throw new Error(`gen-db-types: unmapped dataType "${col.dataType}" on "${col.name}"`);
 	}
-};
+}
 
-const columnType = (col: ColumnLike): string => {
+function columnType(col: ColumnLike): string {
 	const base = storageType(col);
 	if (col.config.autoIncrement) return `Generated<${base}>`;
 	return col.notNull ? base : `${base} | null`;
-};
+}
 
 /**
  * Columns a plugin marshals at the query boundary. These types say what the

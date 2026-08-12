@@ -100,8 +100,9 @@ async function requestDeviceCode(clientId: string): Promise<Result<DeviceCode, D
 	);
 }
 
-const describeIssue = (error: { readonly _tag: string; readonly data: unknown }) =>
-	`${error._tag} ${JSON.stringify(error.data)}`;
+function describeIssue(error: { readonly _tag: string; readonly data: unknown }) {
+	return `${error._tag} ${JSON.stringify(error.data)}`;
+}
 
 async function pollForGitHubToken(
 	clientId: string,

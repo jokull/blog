@@ -20,10 +20,10 @@ import { createServerClient } from "result-rpc/server";
 import { createContext, router } from "@/src/rpc/server";
 import { communityErrors, themeErrors } from "@/src/kitty/errors";
 
-const buildRuntime = () => {
+function buildRuntime() {
 	const serverClient = createServerClient(router, { context: createContext() });
 	return { serverClient, runtime: createQueryRuntime({ client: serverClient }) };
-};
+}
 
 /**
  * The /kitty layout loader: the session (so SessionShell resolves without

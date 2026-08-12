@@ -39,8 +39,9 @@ const getPost = cache(async (slug: string) => {
  * pages). `PlainDate.from(Date)` would throw — a Date has no year/month/day
  * properties — so the fallback goes through the ISO string.
  */
-const bylineDate = (post: StoredPost): Temporal.PlainDate =>
-	post.publicAt ?? Temporal.PlainDate.from(post.publishedAt.toISOString().slice(0, 10));
+function bylineDate(post: StoredPost): Temporal.PlainDate {
+	return post.publicAt ?? Temporal.PlainDate.from(post.publishedAt.toISOString().slice(0, 10));
+}
 
 // Generate all possible slug values at build time
 export async function generateStaticParams() {

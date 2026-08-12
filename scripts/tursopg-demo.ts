@@ -207,58 +207,68 @@ const DDL = [
 // ---------------------------------------------------------------------------
 
 /** Drafts fall back to published_at's calendar day, like the app's bylineDate. */
-const bylineDate = (publicAt: Temporal.PlainDate | null, publishedAt: Date): Temporal.PlainDate =>
-	publicAt ??
-	Temporal.PlainDate.from({
-		year: publishedAt.getUTCFullYear(),
-		month: publishedAt.getUTCMonth() + 1,
-		day: publishedAt.getUTCDate(),
-	});
+function bylineDate(publicAt: Temporal.PlainDate | null, publishedAt: Date): Temporal.PlainDate {
+	return (
+		publicAt ??
+		Temporal.PlainDate.from({
+			year: publishedAt.getUTCFullYear(),
+			month: publishedAt.getUTCMonth() + 1,
+			day: publishedAt.getUTCDate(),
+		})
+	);
+}
 
-const plainDateToIso = (date: Temporal.PlainDate): string =>
-	`${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
+function plainDateToIso(date: Temporal.PlainDate): string {
+	return `${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
+}
 
-const oklch = (l: number, c: number, h: number): OklchColor => ({ l, c, h });
-const makeColors = (seed: number): ThemeColors => ({
-	color0: oklch(0.2 + seed * 0.01, 0.1, 0),
-	color1: oklch(0.3 + seed * 0.01, 0.15, 20),
-	color2: oklch(0.4 + seed * 0.01, 0.2, 40),
-	color3: oklch(0.5 + seed * 0.01, 0.2, 60),
-	color4: oklch(0.6 + seed * 0.01, 0.15, 80),
-	color5: oklch(0.7 + seed * 0.01, 0.1, 100),
-	color6: oklch(0.8 + seed * 0.01, 0.05, 120),
-	color7: oklch(0.9 + seed * 0.01, 0.05, 140),
-	color8: oklch(0.2 + seed * 0.02, 0.1, 160),
-	color9: oklch(0.3 + seed * 0.02, 0.15, 180),
-	color10: oklch(0.4 + seed * 0.02, 0.2, 200),
-	color11: oklch(0.5 + seed * 0.02, 0.2, 220),
-	color12: oklch(0.6 + seed * 0.02, 0.15, 240),
-	color13: oklch(0.7 + seed * 0.02, 0.1, 260),
-	color14: oklch(0.8 + seed * 0.02, 0.05, 280),
-	color15: oklch(0.9 + seed * 0.02, 0.05, 300),
-	foreground: oklch(0.95, 0.01, 0),
-	background: oklch(0.15, 0.02, 0),
-	cursor: oklch(0.95, 0.01, 0),
-	selection_foreground: oklch(0.15, 0.02, 0),
-	selection_background: oklch(0.6, 0.1, 240),
-});
+function oklch(l: number, c: number, h: number): OklchColor {
+	return { l, c, h };
+}
+function makeColors(seed: number): ThemeColors {
+	return {
+		color0: oklch(0.2 + seed * 0.01, 0.1, 0),
+		color1: oklch(0.3 + seed * 0.01, 0.15, 20),
+		color2: oklch(0.4 + seed * 0.01, 0.2, 40),
+		color3: oklch(0.5 + seed * 0.01, 0.2, 60),
+		color4: oklch(0.6 + seed * 0.01, 0.15, 80),
+		color5: oklch(0.7 + seed * 0.01, 0.1, 100),
+		color6: oklch(0.8 + seed * 0.01, 0.05, 120),
+		color7: oklch(0.9 + seed * 0.01, 0.05, 140),
+		color8: oklch(0.2 + seed * 0.02, 0.1, 160),
+		color9: oklch(0.3 + seed * 0.02, 0.15, 180),
+		color10: oklch(0.4 + seed * 0.02, 0.2, 200),
+		color11: oklch(0.5 + seed * 0.02, 0.2, 220),
+		color12: oklch(0.6 + seed * 0.02, 0.15, 240),
+		color13: oklch(0.7 + seed * 0.02, 0.1, 260),
+		color14: oklch(0.8 + seed * 0.02, 0.05, 280),
+		color15: oklch(0.9 + seed * 0.02, 0.05, 300),
+		foreground: oklch(0.95, 0.01, 0),
+		background: oklch(0.15, 0.02, 0),
+		cursor: oklch(0.95, 0.01, 0),
+		selection_foreground: oklch(0.15, 0.02, 0),
+		selection_background: oklch(0.6, 0.1, 240),
+	};
+}
 
 const results: { label: string; ok: boolean; detail?: string }[] = [];
-const check = (label: string, ok: boolean, detail?: string): void => {
+function check(label: string, ok: boolean, detail?: string): void {
 	results.push({ label, ok, detail });
 	console.log(`${ok ? "PASS" : "FAIL"}  ${label}${detail ? ` — ${detail}` : ""}`);
-};
+}
 
-const expectRejects = async (label: string, run: () => Promise<unknown>): Promise<void> => {
+async function expectRejects(label: string, run: () => Promise<unknown>): Promise<void> {
 	try {
 		await run();
 		check(label, false, "expected an error, got none");
 	} catch {
 		check(label, true);
 	}
-};
+}
 
-const slug = (prefix: string): string => `${prefix}-tursopg-${Date.now().toString(36)}`;
+function slug(prefix: string): string {
+	return `${prefix}-tursopg-${Date.now().toString(36)}`;
+}
 
 // ---------------------------------------------------------------------------
 // The experiment

@@ -21,10 +21,12 @@ export const server = serverRpc.context<AppContext>();
 /** The single account with write access. Mirrored nowhere else. */
 const ADMIN_USERNAME = "jokull";
 
-const asViewer = (username: string): Viewer => ({
-	username,
-	isAdmin: username === ADMIN_USERNAME,
-});
+function asViewer(username: string): Viewer {
+	return {
+		username,
+		isAdmin: username === ADMIN_USERNAME,
+	};
+}
 
 /**
  * Bearer authentication, for the CLI.

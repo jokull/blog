@@ -47,13 +47,15 @@ export type AppRouter = typeof router;
  * which is correct: they have no HTTP request, and the session middleware falls
  * through to the cookie in TanStack Start's ambient request scope.
  */
-export const createContext = (authorization: string | null = null): AppContext => ({
-	// Per-request: workerd cannot reuse a TCP connection across request
-	// handlers, so each request gets its own database (pool, max 1). The
-	// isolate reaps it when the request ends.
-	db: createDb().db,
-	authorization,
-});
+export function createContext(authorization: string | null = null): AppContext {
+	return {
+		// Per-request: workerd cannot reuse a TCP connection across request
+		// handlers, so each request gets its own database (pool, max 1). The
+		// isolate reaps it when the request ends.
+		db: createDb().db,
+		authorization,
+	};
+}
 
 /**
  * In-process caller for server routes that are not the RPC endpoint — OG image
@@ -63,7 +65,9 @@ export const createContext = (authorization: string | null = null): AppContext =
  * get the same visibility rules as the browser rather than a second, divergent
  * query.
  */
-export const appServerClient = () => createServerClient(router, { context: createContext() });
+export function appServerClient() {
+	return createServerClient(router, { context: createContext() });
+}
 
 /**
  * Mounted at POST /api/rpc by src/routes/api.rpc.ts. The library default is

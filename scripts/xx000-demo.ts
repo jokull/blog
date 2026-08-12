@@ -53,18 +53,18 @@ const rawDb = new Kysely<DemoDB>({
 const db = kyselyTryDb<typeof rawDb, SqliteDbError>(rawDb);
 
 const results: { label: string; ok: boolean; detail?: string }[] = [];
-const check = (label: string, ok: boolean, detail?: string): void => {
+function check(label: string, ok: boolean, detail?: string): void {
 	results.push({ label, ok, detail });
 	console.log(`${ok ? "PASS" : "FAIL"}  ${label}${detail ? ` — ${detail}` : ""}`);
-};
+}
 
-const tagOf = (e: unknown): string => {
+function tagOf(e: unknown): string {
 	if (typeof e === "object" && e !== null && "_tag" in e) {
 		const tag = e._tag;
 		return typeof tag === "string" ? tag : String(tag);
 	}
 	return "n/a";
-};
+}
 
 async function main(): Promise<void> {
 	const ddlClient = await pool.connect();

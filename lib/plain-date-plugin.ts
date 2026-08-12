@@ -24,26 +24,30 @@ import type {
  * they sit in the tree (select lists, insert values, where clauses).
  */
 
-const isPlainDate = (value: unknown): value is Temporal.PlainDate =>
-	value instanceof Temporal.PlainDate;
+function isPlainDate(value: unknown): value is Temporal.PlainDate {
+	return value instanceof Temporal.PlainDate;
+}
 
 /** Structural guard — kysely exports no runtime node type check. */
-const isNode = (value: unknown): value is OperationNode =>
-	typeof value === "object" &&
-	value !== null &&
-	typeof (value as { kind?: unknown }).kind === "string";
+function isNode(value: unknown): value is OperationNode {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		typeof (value as { kind?: unknown }).kind === "string"
+	);
+}
 
 /** The PlainDate a ValueNode holds, if it is one. */
-const plainDateIn = (node: OperationNode): Temporal.PlainDate | null => {
+function plainDateIn(node: OperationNode): Temporal.PlainDate | null {
 	if (node.kind !== "ValueNode") return null;
 	// OperationNode is a flat { kind } interface, so narrow the access with
 	// `in` and validate the value — no unchecked shape assertion.
 	if (!("value" in node)) return null;
 	const value: unknown = node.value;
 	return isPlainDate(value) ? value : null;
-};
+}
 
-const toIsoString = (node: OperationNode): OperationNode => {
+function toIsoString(node: OperationNode): OperationNode {
 	const date = plainDateIn(node);
 	if (date !== null) {
 		// The node is a ValueNode (plainDateIn checked kind + value); rebuild
@@ -86,37 +90,41 @@ const toIsoString = (node: OperationNode): OperationNode => {
 	// rewritten child values.
 	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return changed ? (next as unknown as OperationNode) : node;
-};
+}
 
 /**
  * The columns are the surface the plugin claims: only these come back as
  * `Temporal.PlainDate`, and the date column is the only place a PlainDate is
  * legal in this schema (post.public_at).
  */
-export const plainDatePlugin = (columns: readonly string[]): KyselyPlugin => ({
-	// The top node's kind is unchanged by the rewrite, so it stays a root node.
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-	transformQuery: ({ node }: PluginTransformQueryArgs) => toIsoString(node) as RootOperationNode,
-	transformResult: async ({ result }: PluginTransformResultArgs) => {
-		if (result.rows.length === 0) return result;
-		const rows = result.rows.map((row) => {
-			const next = { ...row };
-			for (const column of columns) {
-				const value = next[column];
-				if (value instanceof Date) {
-					// The PG DATE boundary: both pg and postgres.js parse OID
-					// 1082 as a JS Date at UTC midnight. Rebuild from UTC
-					// components — local getters would shift the calendar day
-					// on non-UTC machines.
-					next[column] = Temporal.PlainDate.from({
-						year: value.getUTCFullYear(),
-						month: value.getUTCMonth() + 1,
-						day: value.getUTCDate(),
-					});
+export function plainDatePlugin(columns: readonly string[]): KyselyPlugin {
+	return {
+		// The top node's kind is unchanged by the rewrite, so it stays a root node.
+		/* oxlint-disable typescript/no-unsafe-type-assertion */
+		transformQuery: ({ node }: PluginTransformQueryArgs) =>
+			toIsoString(node) as RootOperationNode,
+		/* oxlint-enable typescript/no-unsafe-type-assertion */
+		transformResult: async ({ result }: PluginTransformResultArgs) => {
+			if (result.rows.length === 0) return result;
+			const rows = result.rows.map((row) => {
+				const next = { ...row };
+				for (const column of columns) {
+					const value = next[column];
+					if (value instanceof Date) {
+						// The PG DATE boundary: both pg and postgres.js parse OID
+						// 1082 as a JS Date at UTC midnight. Rebuild from UTC
+						// components — local getters would shift the calendar day
+						// on non-UTC machines.
+						next[column] = Temporal.PlainDate.from({
+							year: value.getUTCFullYear(),
+							month: value.getUTCMonth() + 1,
+							day: value.getUTCDate(),
+						});
+					}
 				}
-			}
-			return next;
-		});
-		return { ...result, rows };
-	},
-});
+				return next;
+			});
+			return { ...result, rows };
+		},
+	};
+}

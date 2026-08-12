@@ -21,10 +21,11 @@ import type { Result } from "better-result";
 import { createBrowserClient, fetchTransport } from "result-rpc/client";
 import { appContract } from "../src/rpc/contract";
 
-const toHex = (buf: ArrayBuffer): string =>
-	Array.from(new Uint8Array(buf))
+function toHex(buf: ArrayBuffer): string {
+	return Array.from(new Uint8Array(buf))
 		.map((b) => b.toString(16).padStart(2, "0"))
 		.join("");
+}
 
 /** Mint a CLI token exactly as lib/cli-token.ts does — same payload, same key. */
 async function mintCliToken(username: string): Promise<string> {
