@@ -60,7 +60,33 @@ export default defineConfig({
 				// rendered through it 500s. Excluding it leaves the resolution
 				// to Vite, where it works.
 				exclude: ["safe-mdx", "@tanstack/start-server-core"],
-				include: ["boolbase", "cssom", "eval-estree-expression", "extend"],
+				include: [
+					"boolbase",
+					"cssom",
+					"eval-estree-expression",
+					"extend",
+					// The rsc optimizer discovers node_modules imports one pass at
+					// a time, and @cloudflare/vite-plugin forces discovery on —
+					// each pass triggers "optimized dependencies changed",
+					// reloading the page and recompiling. The TanStack subpath
+					// imports (one per server-rpc/router helper) each cost a
+					// pass; prebundling them at startup collapses the multi-
+					// minute cascade to a single startup pass (verified on the
+					// tursopg experiment branch: 0 reloads, cold start <15s).
+					// devalue + temporal-polyfill are the RSC payload serializer
+					// deps, same story.
+					"@tanstack/start-server-core/createServerRpc",
+					"@tanstack/router-core",
+					"@tanstack/router-core/isServer",
+					"@tanstack/router-core/ssr/server",
+					"@tanstack/start-client-core",
+					"@tanstack/start-storage-context",
+					"@tanstack/history",
+					"h3-v2",
+					"seroval",
+					"devalue",
+					"temporal-polyfill/global",
+				],
 			},
 			build: {
 				rollupOptions: {
