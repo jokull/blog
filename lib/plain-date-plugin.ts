@@ -67,10 +67,17 @@ const toIsoString = (node: OperationNode): OperationNode => {
 			}
 		} else if (Array.isArray(value)) {
 			// `value` is `any[]` (Object.entries on a non-index-signature type);
-			// children keeps only the OperationNode entries, all of which are
-			// plain object references, so the identity comparison is safe.
-			// oxlint-disable-next-line typescript/no-unsafe-return
-			const children = value.map((item) => (isNode(item) ? toIsoString(item) : item));
+			// children keeps the OperationNode entries and rewrites the raw
+			// cells. Insert values are the reason the raw check exists: kysely
+			// 0.29 packs them as `PrimitiveValueListNode.values` — a plain
+			// array of values, NOT per-cell nodes — so a Temporal.PlainDate
+			// insert cell reaches the driver untouched. D1 masked that (the
+			// binding coerces objects through `toJSON()`); a Postgres driver
+			// serializes the object as a JSON string instead. The identity
+			// comparison on the result is safe: plain objects only.
+			const children = value.map((item: unknown) =>
+				isPlainDate(item) ? item.toString() : isNode(item) ? toIsoString(item) : item,
+			);
 			if (children.some((item, index) => item !== value[index])) {
 				next[key] = children;
 				changed = true;
