@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import RSS, { type ItemOptions } from "rss";
-import { db, decodePost } from "@/db";
+import { decodePost, withDb } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { extractFirstImage, normalizeImageUrl } from "@/lib/mdx-image-extractor";
 
@@ -26,13 +26,15 @@ export const Route = createFileRoute("/feed.xml")({
 				});
 
 				const posts = (
-					await db
-						.selectFrom("post")
-						.selectAll()
-						.where("public_at", "is not", null)
-						.orderBy("public_at", "desc")
-						.limit(20)
-						.execute()
+					await withDb((db) =>
+						db
+							.selectFrom("post")
+							.selectAll()
+							.where("public_at", "is not", null)
+							.orderBy("public_at", "desc")
+							.limit(20)
+							.execute(),
+					)
 				).unwrap();
 				const decoded = posts.map(decodePost);
 

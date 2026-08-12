@@ -7,10 +7,10 @@
  * module means `app.ts` does not have to reach across the client boundary to
  * name its own context.
  */
-import type { db } from "@/db";
+import type { Db } from "@/db";
 
 export interface AppContext {
-	readonly db: typeof db;
+	readonly db: Db;
 	/**
 	 * The raw `Authorization` header, or null when there isn't one.
 	 *

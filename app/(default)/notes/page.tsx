@@ -1,4 +1,4 @@
-import { db, decodeNote, epoch } from "@/db";
+import { decodeNote, epoch, withDb } from "@/db";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
 import { Link } from "@/src/lib/navigation";
@@ -23,16 +23,18 @@ export default async function NotesPage({
 	const { cursor } = await searchParams;
 
 	const rows = (
-		await db
-			.selectFrom("note")
-			.selectAll()
-			.where("published_at", "is not", null)
-			.$if(Boolean(cursor), (qb) =>
-				qb.where("published_at", "<", epoch(new Date(Number(cursor)))),
-			)
-			.orderBy("published_at", "desc")
-			.limit(PAGE_SIZE + 1)
-			.execute()
+		await withDb((db) =>
+			db
+				.selectFrom("note")
+				.selectAll()
+				.where("published_at", "is not", null)
+				.$if(Boolean(cursor), (qb) =>
+					qb.where("published_at", "<", epoch(new Date(Number(cursor)))),
+				)
+				.orderBy("published_at", "desc")
+				.limit(PAGE_SIZE + 1)
+				.execute(),
+		)
 	).unwrap();
 	const notes = rows.map(decodeNote);
 

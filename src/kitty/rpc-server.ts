@@ -6,7 +6,7 @@ import { Result } from "better-result";
 import { isFetchUnreachable, safeFetchJson, safeFetchText } from "@/lib/safe-utils";
 import { err, ok } from "result-rpc";
 import { type Selectable } from "kysely";
-import { db, decodeTheme, epoch } from "@/db";
+import { decodeTheme, epoch } from "@/db";
 import type { Viewer } from "@/src/rpc/auth";
 import { fetchAuthor, requireViewer, server, session } from "@/src/rpc/server-base";
 import type { KittyThemeTable } from "@/schema";
@@ -44,7 +44,7 @@ const published = server.implement(publishedThemesContract).handler(async ({ con
 	// scenario C — `unwrap` throws a Panic and the framework turns that
 	// into a sanitized server/internal with an incident id.
 	const rows = (
-		await db
+		await context.db
 			.selectFrom("kitty_theme")
 			.selectAll()
 			.where("is_published", "=", 1)
@@ -59,7 +59,7 @@ const mine = server
 	.use(requireViewer)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db
+			await context.db
 				.selectFrom("kitty_theme")
 				.selectAll()
 				.where("author_github_username", "=", context.viewer.username)
@@ -80,7 +80,7 @@ const byId = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const row = (
-				await db
+				await context.db
 					.selectFrom("kitty_theme")
 					.selectAll()
 					.where("id", "=", input.id)
@@ -112,7 +112,7 @@ const create = server
 
 			// The insert has no declared fold: any database failure is scenario C.
 			const row = (
-				await db
+				await context.db
 					.insertInto("kitty_theme")
 					.values({
 						slug: generateSlug(input.name),
@@ -138,7 +138,7 @@ const update = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const existing = (
-				await db
+				await context.db
 					.selectFrom("kitty_theme")
 					.selectAll()
 					.where("id", "=", input.id)
@@ -150,7 +150,7 @@ const update = server
 			}
 
 			const row = (
-				await db
+				await context.db
 					.updateTable("kitty_theme")
 					.set({
 						name: input.name,
@@ -172,7 +172,7 @@ const togglePublish = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const existing = (
-				await db
+				await context.db
 					.selectFrom("kitty_theme")
 					.selectAll()
 					.where("id", "=", input.id)
@@ -184,7 +184,7 @@ const togglePublish = server
 			}
 
 			const row = (
-				await db
+				await context.db
 					.updateTable("kitty_theme")
 					.set({
 						is_published: existing.is_published === 1 ? 0 : 1,
@@ -204,7 +204,7 @@ const fork = server
 	.handler(({ input, errors, context }) =>
 		Result.gen(async function* () {
 			const original = (
-				await db
+				await context.db
 					.selectFrom("kitty_theme")
 					.selectAll()
 					.where("id", "=", input.id)
@@ -220,7 +220,7 @@ const fork = server
 			);
 
 			const row = (
-				await db
+				await context.db
 					.insertInto("kitty_theme")
 					.values({
 						slug: generateSlug(`${original.name} remix`),
@@ -247,7 +247,7 @@ const remove = server
 	.handler(({ input, errors, context, touch }) =>
 		Result.gen(async function* () {
 			const existing = (
-				await db
+				await context.db
 					.selectFrom("kitty_theme")
 					.selectAll()
 					.where("id", "=", input.id)
@@ -258,7 +258,9 @@ const remove = server
 				return yield* err(errors.notOwner({ themeId: input.id }));
 			}
 
-			(await db.deleteFrom("kitty_theme").where("id", "=", input.id).execute()).unwrap();
+			(
+				await context.db.deleteFrom("kitty_theme").where("id", "=", input.id).execute()
+			).unwrap();
 			// A deleted row cannot ride back as an entity, so invalidate by identity.
 			touch(KittyThemeModel, input.id);
 			return ok({ id: input.id });

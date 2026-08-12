@@ -8,6 +8,7 @@
 	"vars": {
 		"SITE_URL": "https://www.solberg.is",
 		"GITHUB_CLIENT_ID": "Ov23licJONCc4hbUWRuK",
+		"TURSO_PG_URL": "postgres://turso@127.0.0.1:5433/turso",
 	},
 	"d1_databases": [
 		{

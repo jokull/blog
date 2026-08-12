@@ -124,6 +124,10 @@ type TursopgDB = {
 // Connection — the whole driver story in one place
 // ---------------------------------------------------------------------------
 
+// Required per the generated ProcessEnv (every wrangler var is), but the
+// fallback is load-bearing for running outside the worker — same pattern as
+// cli/client.ts.
+// oxlint-disable-next-line typescript/no-unnecessary-condition
 const url = process.env.TURSO_PG_URL ?? "postgres://turso@127.0.0.1:5433/turso";
 
 // TIMESTAMP (1114): tursopg emits "YYYY-MM-DD HH:MM:SS" wall-clock UTC; pg's
@@ -542,7 +546,7 @@ async function main(): Promise<void> {
 	check(
 		"note: insert + list orderBy created_at desc",
 		notes.length === 1 &&
-			notes[0]?.description === "A note on tursopg." &&
+			notes[0].description === "A note on tursopg." &&
 			notes[0]?.published_at instanceof Date,
 	);
 

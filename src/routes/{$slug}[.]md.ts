@@ -1,16 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db, decodePost } from "@/db";
+import { decodePost, withDb } from "@/db";
 
 export const Route = createFileRoute("/{$slug}.md")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
 				const row = (
-					await db
-						.selectFrom("post")
-						.selectAll()
-						.where("slug", "=", params.slug)
-						.executeTakeFirst()
+					await withDb((db) =>
+						db
+							.selectFrom("post")
+							.selectAll()
+							.where("slug", "=", params.slug)
+							.executeTakeFirst(),
+					)
 				).unwrap();
 
 				if (!row) return new Response("Not Found", { status: 404 });

@@ -1,5 +1,5 @@
 import { Theater } from "@/components/theater";
-import { db, decodeCategory, decodePost } from "@/db";
+import { decodeCategory, decodePost, withDb } from "@/db";
 import type { Metadata } from "@/src/lib/metadata";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
@@ -16,11 +16,13 @@ export async function generateMetadata({
 
 	if (category) {
 		const cat = (
-			await db
-				.selectFrom("category")
-				.selectAll()
-				.where("slug", "=", category)
-				.executeTakeFirst()
+			await withDb((db) =>
+				db
+					.selectFrom("category")
+					.selectAll()
+					.where("slug", "=", category)
+					.executeTakeFirst(),
+			)
 		).unwrap();
 		if (cat) {
 			return {
@@ -66,40 +68,45 @@ function ShowsSkeleton() {
 }
 
 export default async function Page() {
-	// Fetch all posts with category information
-	const posts = (
-		await db
-			.selectFrom("post")
-			.selectAll()
-			.where("public_at", "is not", null)
-			.orderBy("public_at", "desc")
-			.execute()
-	)
-		.unwrap()
-		.map(decodePost);
+	// Fetch posts, categories and comment counts — one per-request database
+	// for the whole page.
+	const { posts, categories, commentCountsMap } = await withDb(async (db) => {
+		const posts = (
+			await db
+				.selectFrom("post")
+				.selectAll()
+				.where("public_at", "is not", null)
+				.orderBy("public_at", "desc")
+				.execute()
+		)
+			.unwrap()
+			.map(decodePost);
 
-	// Fetch all categories
-	const categories = (await db.selectFrom("category").selectAll().execute())
-		.unwrap()
-		.map(decodeCategory);
+		// Fetch all categories
+		const categories = (await db.selectFrom("category").selectAll().execute())
+			.unwrap()
+			.map(decodeCategory);
 
-	// Get comment counts for all posts
-	const commentCounts = (
-		await db
-			.selectFrom("comment")
-			.select((eb) => ["post_slug", eb.fn.countAll<number>().as("count")])
-			.where("is_hidden", "=", 0)
-			.groupBy("post_slug")
-			.execute()
-	).unwrap();
+		// Get comment counts for all posts
+		const commentCounts = (
+			await db
+				.selectFrom("comment")
+				.select((eb) => ["post_slug", eb.fn.countAll<number>().as("count")])
+				.where("is_hidden", "=", 0)
+				.groupBy("post_slug")
+				.execute()
+		).unwrap();
 
-	const commentCountsMap = commentCounts.reduce(
-		(acc, item) => {
-			acc[item.post_slug] = item.count;
-			return acc;
-		},
-		{} as Record<string, number>,
-	);
+		const commentCountsMap = commentCounts.reduce(
+			(acc, item) => {
+				acc[item.post_slug] = item.count;
+				return acc;
+			},
+			{} as Record<string, number>,
+		);
+
+		return { posts, categories, commentCountsMap };
+	});
 
 	return (
 		<div className="relative isolate">

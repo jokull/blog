@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { appServerClient } from "@/src/rpc/server";
-import { db, decodePost } from "@/db";
+import { decodePost, withDb } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { homeHead, pageHead, postHead } from "@/src/lib/seo";
 
@@ -8,7 +8,9 @@ export const getPostHead = createServerFn({ method: "GET" })
 	.validator((data: { slug: string }) => data)
 	.handler(async ({ data }) => {
 		const row = (
-			await db.selectFrom("post").selectAll().where("slug", "=", data.slug).executeTakeFirst()
+			await withDb((db) =>
+				db.selectFrom("post").selectAll().where("slug", "=", data.slug).executeTakeFirst(),
+			)
 		).unwrap();
 		if (!row?.public_at)
 			return pageHead({
@@ -26,11 +28,13 @@ export const getHomeHead = createServerFn({ method: "GET" })
 		const categorySlug = data.category;
 		const category = categorySlug
 			? (
-					await db
-						.selectFrom("category")
-						.select(["slug", "label"])
-						.where("slug", "=", categorySlug)
-						.executeTakeFirst()
+					await withDb((db) =>
+						db
+							.selectFrom("category")
+							.select(["slug", "label"])
+							.where("slug", "=", categorySlug)
+							.executeTakeFirst(),
+					)
 				).unwrap()
 			: null;
 		return homeHead(category);

@@ -1,18 +1,20 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "@/db";
+import { withDb } from "@/db";
 
 export const Route = createFileRoute("/sitemap.xml")({
 	server: {
 		handlers: {
 			GET: async () => {
 				const posts = (
-					await db
-						.selectFrom("post")
-						.select(["slug", "public_at", "modified_at"])
-						.where("public_at", "is not", null)
-						.orderBy("public_at", "desc")
-						.execute()
+					await withDb((db) =>
+						db
+							.selectFrom("post")
+							.select(["slug", "public_at", "modified_at"])
+							.where("public_at", "is not", null)
+							.orderBy("public_at", "desc")
+							.execute(),
+					)
 				).unwrap();
 
 				const urls = [

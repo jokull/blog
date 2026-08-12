@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { Temporal } from "temporal-polyfill";
 import { ClientErrorBoundary } from "@/components/error-boundary";
-import { db, decodePost } from "@/db";
+import { decodePost, withDb } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
@@ -23,7 +23,9 @@ export const dynamic = "force-dynamic";
 // Cache the database query for reuse
 const getPost = cache(async (slug: string) => {
 	const row = (
-		await db.selectFrom("post").selectAll().where("slug", "=", slug).executeTakeFirst()
+		await withDb((db) =>
+			db.selectFrom("post").selectAll().where("slug", "=", slug).executeTakeFirst(),
+		)
 	).unwrap();
 	if (!row) {
 		throw notFound();
@@ -43,7 +45,9 @@ const bylineDate = (post: StoredPost): Temporal.PlainDate =>
 // Generate all possible slug values at build time
 export async function generateStaticParams() {
 	const posts = (
-		await db.selectFrom("post").select("slug").where("public_at", "is not", null).execute()
+		await withDb((db) =>
+			db.selectFrom("post").select("slug").where("public_at", "is not", null).execute(),
+		)
 	).unwrap();
 
 	return posts.map((post) => ({

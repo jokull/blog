@@ -11,7 +11,7 @@ import { type Selectable } from "kysely";
 import { Result } from "better-result";
 import { err, ok, type AnyTaggedError } from "result-rpc";
 import { isConstraintViolation, UniqueViolation, ForeignKeyViolation } from "db-result";
-import { db, decodeCategory, decodeComment, decodeNote, decodePost, epoch } from "@/db";
+import { decodeCategory, decodeComment, decodeNote, decodePost, epoch } from "@/db";
 import { Temporal } from "temporal-polyfill";
 import { createCliToken } from "@/lib/cli-token";
 import { checkPostLinks } from "@/lib/link-checker";
@@ -105,7 +105,7 @@ const listPosts = server
 		// scenario C — `unwrap` throws a Panic and the framework turns that
 		// into a sanitized server/internal with an incident id.
 		const rows = (
-			await db.selectFrom("post").selectAll().orderBy("public_at", "desc").execute()
+			await context.db.selectFrom("post").selectAll().orderBy("public_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map((row) => toPostRow(decodePost(row))));
 	});
@@ -115,7 +115,7 @@ const exportPosts = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db.selectFrom("post").selectAll().orderBy("public_at", "desc").execute()
+			await context.db.selectFrom("post").selectAll().orderBy("public_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map(decodePost));
 	});
@@ -125,7 +125,7 @@ const postBySlug = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const row = (
-			await db
+			await context.db
 				.selectFrom("post")
 				.selectAll()
 				.where("slug", "=", input.slug)
@@ -137,7 +137,7 @@ const postBySlug = server
 const createPost = server
 	.implement(createPostContract)
 	.use(requireAdmin)
-	.handler(async ({ input, errors }) => {
+	.handler(async ({ input, errors, context }) => {
 		const now = new Date();
 		// The database owns both rules — `slug` is the primary key and
 		// `category_slug` a foreign key — so the insert's constraint tags are
@@ -147,7 +147,7 @@ const createPost = server
 		// an unhandled Panic and becomes a sanitized server/internal with an
 		// incident id.
 		return (
-			await db
+			await context.db
 				.insertInto("post")
 				.values({
 					slug: input.slug,
@@ -183,7 +183,7 @@ const updatePost = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const row = (
-			await db
+			await context.db
 				.selectFrom("post")
 				.selectAll()
 				.where("slug", "=", input.slug)
@@ -203,7 +203,7 @@ const updatePost = server
 
 		if (input.categorySlug != null) {
 			const category = (
-				await db
+				await context.db
 					.selectFrom("category")
 					.selectAll()
 					.where("slug", "=", input.categorySlug)
@@ -235,7 +235,7 @@ const updatePost = server
 		}
 
 		const updated = (
-			await db
+			await context.db
 				.updateTable("post")
 				.set({
 					...patch,
@@ -257,7 +257,7 @@ const updatePost = server
 		// write, which is the whole point of it.
 		if (updated === undefined) {
 			const current = (
-				await db
+				await context.db
 					.selectFrom("post")
 					.selectAll()
 					.where("slug", "=", input.slug)
@@ -289,7 +289,7 @@ const setPublished = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const row = (
-			await db
+			await context.db
 				.selectFrom("post")
 				.selectAll()
 				.where("slug", "=", input.slug)
@@ -308,7 +308,7 @@ const setPublished = server
 		const heroImage = markdown ? await extractFirstImage(markdown) : existing.heroImage;
 
 		const updated = (
-			await db
+			await context.db
 				.updateTable("post")
 				.set({
 					public_at: input.published ? Temporal.Now.plainDateISO() : null,
@@ -331,7 +331,7 @@ const deletePost = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context, touch }) => {
 		const post = (
-			await db
+			await context.db
 				.selectFrom("post")
 				.selectAll()
 				.where("slug", "=", input.slug)
@@ -339,7 +339,7 @@ const deletePost = server
 		).unwrap();
 		if (!post) return err(errors.notFound({ slug: input.slug }));
 
-		(await db.deleteFrom("post").where("slug", "=", input.slug).execute()).unwrap();
+		(await context.db.deleteFrom("post").where("slug", "=", input.slug).execute()).unwrap();
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(PostModel, input.slug);
 		return ok({ slug: input.slug });
@@ -352,7 +352,7 @@ const listCategories = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db.selectFrom("category").selectAll().orderBy("label").execute()
+			await context.db.selectFrom("category").selectAll().orderBy("label").execute()
 		).unwrap();
 		return ok(rows.map(decodeCategory));
 	});
@@ -363,9 +363,9 @@ const createCategory = server
 	// The slug pattern is enforced by the contract's `wire.standard`, so the
 	// only failure left is the one the database owns: the primary key.
 	// Everything else is scenario C.
-	.handler(async ({ input, errors }) =>
+	.handler(async ({ input, errors, context }) =>
 		(
-			await db
+			await context.db
 				.insertInto("category")
 				.values({ slug: input.slug, label: input.label, created_at: epoch(new Date()) })
 				.returningAll()
@@ -380,7 +380,7 @@ const deleteCategory = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const category = (
-			await db
+			await context.db
 				.selectFrom("category")
 				.selectAll()
 				.where("slug", "=", input.slug)
@@ -389,7 +389,7 @@ const deleteCategory = server
 		if (!category) return err(errors.notFound({ slug: input.slug }));
 
 		const counted = (
-			await db
+			await context.db
 				.selectFrom("post")
 				.select(({ fn }) => fn.countAll<number>().as("count"))
 				.where("category_slug", "=", input.slug)
@@ -399,7 +399,7 @@ const deleteCategory = server
 		const postCount = Number(counted?.count ?? 0);
 		if (postCount > 0) return err(errors.inUse({ slug: input.slug, postCount }));
 
-		(await db.deleteFrom("category").where("slug", "=", input.slug).execute()).unwrap();
+		(await context.db.deleteFrom("category").where("slug", "=", input.slug).execute()).unwrap();
 		return ok({ slug: input.slug });
 	});
 
@@ -410,7 +410,7 @@ const listNotes = server
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
 		const rows = (
-			await db.selectFrom("note").selectAll().orderBy("created_at", "desc").execute()
+			await context.db.selectFrom("note").selectAll().orderBy("created_at", "desc").execute()
 		).unwrap();
 		return ok(rows.map(decodeNote));
 	});
@@ -418,9 +418,9 @@ const listNotes = server
 const createNote = server
 	.implement(createNoteContract)
 	.use(requireAdmin)
-	.handler(async ({ input, errors }) =>
+	.handler(async ({ input, errors, context }) =>
 		(
-			await db
+			await context.db
 				.insertInto("note")
 				.values({
 					id: input.id,
@@ -442,7 +442,11 @@ const updateNote = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const row = (
-			await db.selectFrom("note").selectAll().where("id", "=", input.id).executeTakeFirst()
+			await context.db
+				.selectFrom("note")
+				.selectAll()
+				.where("id", "=", input.id)
+				.executeTakeFirst()
 		).unwrap();
 		if (!row) return err(errors.notFound({ id: input.id }));
 
@@ -452,7 +456,7 @@ const updateNote = server
 			patch.published_at = input.publish ? epoch(new Date()) : null;
 
 		const updated = (
-			await db
+			await context.db
 				.updateTable("note")
 				.set(patch)
 				.where("id", "=", input.id)
@@ -468,11 +472,15 @@ const deleteNote = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context, touch }) => {
 		const note = (
-			await db.selectFrom("note").selectAll().where("id", "=", input.id).executeTakeFirst()
+			await context.db
+				.selectFrom("note")
+				.selectAll()
+				.where("id", "=", input.id)
+				.executeTakeFirst()
 		).unwrap();
 		if (!note) return err(errors.notFound({ id: input.id }));
 
-		(await db.deleteFrom("note").where("id", "=", input.id).execute()).unwrap();
+		(await context.db.deleteFrom("note").where("id", "=", input.id).execute()).unwrap();
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(NoteModel, input.id);
 		return ok({ id: input.id });
@@ -495,7 +503,7 @@ const listComments = server
 	.use(session)
 	.handler(async ({ input, context }) => {
 		const rows = (
-			await db
+			await context.db
 				.selectFrom("comment")
 				.selectAll()
 				.where("post_slug", "=", input.postSlug)
@@ -519,7 +527,7 @@ const createComment = server
 			);
 
 			const inserted = yield* (
-				await db
+				await context.db
 					.insertInto("comment")
 					.values({
 						post_slug: input.postSlug,
@@ -549,13 +557,17 @@ const updateComment = server
 	.use(requireViewer)
 	.handler(async ({ input, errors, context }) => {
 		const existing = (
-			await db.selectFrom("comment").selectAll().where("id", "=", input.id).executeTakeFirst()
+			await context.db
+				.selectFrom("comment")
+				.selectAll()
+				.where("id", "=", input.id)
+				.executeTakeFirst()
 		).unwrap();
 		if (!existing) return err(errors.notFound({ id: input.id }));
 		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
 		const updated = (
-			await db
+			await context.db
 				.updateTable("comment")
 				.set({ content: input.content })
 				.where("id", "=", input.id)
@@ -571,12 +583,16 @@ const setCommentHidden = server
 	.use(requireAdmin)
 	.handler(async ({ input, errors, context }) => {
 		const comment = (
-			await db.selectFrom("comment").selectAll().where("id", "=", input.id).executeTakeFirst()
+			await context.db
+				.selectFrom("comment")
+				.selectAll()
+				.where("id", "=", input.id)
+				.executeTakeFirst()
 		).unwrap();
 		if (!comment) return err(errors.notFound({ id: input.id }));
 
 		const updated = (
-			await db
+			await context.db
 				.updateTable("comment")
 				.set({ is_hidden: input.hidden ? 1 : 0 })
 				.where("id", "=", input.id)
@@ -592,12 +608,16 @@ const deleteComment = server
 	.use(requireViewer)
 	.handler(async ({ input, errors, context, touch }) => {
 		const existing = (
-			await db.selectFrom("comment").selectAll().where("id", "=", input.id).executeTakeFirst()
+			await context.db
+				.selectFrom("comment")
+				.selectAll()
+				.where("id", "=", input.id)
+				.executeTakeFirst()
 		).unwrap();
 		if (!existing) return err(errors.notFound({ id: input.id }));
 		if (!canModerate(existing, context.viewer)) return err(errors.notAuthor({ id: input.id }));
 
-		(await db.deleteFrom("comment").where("id", "=", input.id).execute()).unwrap();
+		(await context.db.deleteFrom("comment").where("id", "=", input.id).execute()).unwrap();
 		// A deleted row cannot ride back as an entity, so invalidate by identity.
 		touch(CommentModel, input.id);
 		return ok({ id: input.id });
@@ -609,7 +629,7 @@ const checkLinks = server
 	.implement(checkLinksContract)
 	.use(requireAdmin)
 	.handler(async ({ context }) => {
-		const rows = (await db.selectFrom("post").selectAll().execute()).unwrap();
+		const rows = (await context.db.selectFrom("post").selectAll().execute()).unwrap();
 		return ok(await checkPostLinks(rows.map(decodePost), env.SITE_URL));
 	});
 

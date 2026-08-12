@@ -1,19 +1,21 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
 import { groupBy, pipe } from "remeda";
-import { db, decodePost } from "@/db";
+import { decodePost, withDb } from "@/db";
 
 export const Route = createFileRoute("/llm.txt")({
 	server: {
 		handlers: {
 			GET: async () => {
 				const posts = (
-					await db
-						.selectFrom("post")
-						.selectAll()
-						.where("public_at", "is not", null)
-						.orderBy("public_at", "desc")
-						.execute()
+					await withDb((db) =>
+						db
+							.selectFrom("post")
+							.selectAll()
+							.where("public_at", "is not", null)
+							.orderBy("public_at", "desc")
+							.execute(),
+					)
 				)
 					.unwrap()
 					.map(decodePost);

@@ -19,7 +19,7 @@ import {
 	statsRouter,
 } from "@/src/blog/rpc-server";
 import { communityRouter, themesRouter } from "@/src/kitty/rpc-server";
-import { db } from "@/db";
+import { createDb } from "@/db";
 import { AdminLayer, SessionLayer, ViewerLayer } from "./auth";
 import { adminContract, sessionContract, viewerContract } from "./contract";
 import type { AppContext } from "./context";
@@ -48,7 +48,10 @@ export type AppRouter = typeof router;
  * through to the cookie in TanStack Start's ambient request scope.
  */
 export const createContext = (authorization: string | null = null): AppContext => ({
-	db,
+	// Per-request: workerd cannot reuse a TCP connection across request
+	// handlers, so each request gets its own database (pool, max 1). The
+	// isolate reaps it when the request ends.
+	db: createDb().db,
 	authorization,
 });
 

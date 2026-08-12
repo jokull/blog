@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db, decodePost } from "@/db";
+import { decodePost, withDb } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { ogImage } from "@/src/lib/og";
 
@@ -15,11 +15,13 @@ export const Route = createFileRoute("/og/blog/$slug")({
 				}
 
 				const row = (
-					await db
-						.selectFrom("post")
-						.selectAll()
-						.where("slug", "=", params.slug)
-						.executeTakeFirst()
+					await withDb((db) =>
+						db
+							.selectFrom("post")
+							.selectAll()
+							.where("slug", "=", params.slug)
+							.executeTakeFirst(),
+					)
 				).unwrap();
 				if (!row?.public_at) return new Response("Not Found", { status: 404 });
 				const post = decodePost(row);
