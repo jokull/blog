@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { KittyEditor } from "@/src/kitty/components/kitty-editor";
 import { defaultThemeView } from "@/src/kitty/lib/default-theme";
 import { communityFileToSlug } from "@/src/kitty/lib/theme-parser";
-import { throwRedirect } from "@/src/lib/router-control";
 import { asHead, pageHead } from "@/src/lib/seo";
 
 export const Route = createFileRoute("/kitty/")({
@@ -16,11 +15,11 @@ export const Route = createFileRoute("/kitty/")({
 		if (!search.theme) return;
 		if (search.theme.startsWith("community:")) {
 			const slug = communityFileToSlug(search.theme.slice("community:".length));
-			throwRedirect({ href: `/kitty/community/${slug}` });
+			throw redirect({ href: `/kitty/community/${slug}` });
 		}
 		const id = parseInt(search.theme, 10);
 		if (!Number.isNaN(id)) {
-			throwRedirect({ href: `/kitty/${id}` });
+			throw redirect({ href: `/kitty/${id}` });
 		}
 	},
 	head: () =>

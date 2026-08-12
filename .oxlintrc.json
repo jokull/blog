@@ -74,7 +74,9 @@
 		"typescript/prefer-find": "error",
 		"typescript/use-unknown-in-catch-callback-variable": "error",
 		"typescript/no-floating-promises": "error",
-		"typescript/only-throw-error": "error",
+		// TanStack Router's redirect()/notFound() are thrown control-flow
+		// objects, not Errors — idiomatic here, so the rule is off.
+		"typescript/only-throw-error": "off",
 		"typescript/return-await": "error",
 		"typescript/no-unsafe-type-assertion": "error"
 	},

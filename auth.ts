@@ -1,9 +1,9 @@
 import { env } from "cloudflare:workers";
 import { GitHub, generateState } from "arctic";
 import { getIronSession } from "iron-session";
+import { redirect } from "@tanstack/react-router";
 import { getCookie, getRequestHeader, setCookie } from "@tanstack/react-start/server";
 import { fetchAuthenticatedUser, fetchGithubUser } from "@/lib/github";
-import { throwRedirect } from "@/src/lib/router-control";
 
 export function getOauthClient(redirectUri: string = "") {
 	return new GitHub(env.GITHUB_CLIENT_ID, env.GITHUB_CLIENT_SECRET, redirectUri);
@@ -16,7 +16,7 @@ export async function requireAuth(currentUrl?: string) {
 	if (!session.githubUsername) {
 		// In development, redirect to dev auth route handler
 		if (import.meta.env.DEV) {
-			throwRedirect({ href: `/api/dev-auth?next=${encodeURIComponent(currentUrl ?? "/")}` });
+			throw redirect({ href: `/api/dev-auth?next=${encodeURIComponent(currentUrl ?? "/")}` });
 		}
 
 		const host = getRequestHeader("host");
@@ -27,7 +27,7 @@ export async function requireAuth(currentUrl?: string) {
 		const scopes = ["user:email"];
 		const authorizationURL = github.createAuthorizationURL(state, scopes);
 
-		throwRedirect({ href: authorizationURL.toString() });
+		throw redirect({ href: authorizationURL.toString() });
 	}
 	return session.githubUsername;
 }
