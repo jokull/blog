@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Link } from "@/src/lib/navigation";
 import { client } from "@/src/rpc/client";
+import { Temporal } from "temporal-polyfill";
 import { PostModel, type PostRowValue, type SavedCategory } from "../models";
 import { AdminShell } from "../shells";
 
@@ -54,10 +55,12 @@ export function PostsTable({ posts, categories, pageviewsBySlug }: PostsTablePro
 	);
 }
 
-const formatDate = (date: Date | null) =>
+const formatDate = (date: Date | Temporal.PlainDate | null) =>
 	date === null
 		? "—"
-		: date.toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" });
+		: date instanceof Temporal.PlainDate
+			? date.toLocaleString("en", { year: "numeric", month: "short", day: "numeric" })
+			: date.toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" });
 
 function PostRow({
 	post,
@@ -77,7 +80,7 @@ function PostRow({
 	const setPublished = AdminShell.useMutation(client.posts.setPublished, {
 		optimistic: (input, cache) => ({
 			rollback: cache.updateEntity(PostModel, input.slug, () => ({
-				publicAt: input.published ? new Date() : null,
+				publicAt: input.published ? Temporal.Now.plainDateISO() : null,
 			})),
 		}),
 		onFailure: (_error, _input, context) => context?.rollback(),
@@ -155,7 +158,7 @@ function PostRow({
 			</TableCell>
 
 			<TableCell>
-				<time className="text-sm tabular-nums">{formatDate(post.publishedAt)}</time>
+				<time className="text-sm tabular-nums">{formatDate(post.publicAt)}</time>
 			</TableCell>
 
 			<TableCell>

@@ -9,17 +9,21 @@
  * - Every timestamp column stores **epoch seconds** as an integer — never a
  *   Date and never milliseconds. Reads decode with `new Date(v * 1000)`; a
  *   write converts with the `epoch`/`epochOrNull` helpers in `db.ts`.
+ * - `post.public_at` is the one exception: a calendar date stored as
+ *   `YYYY-MM-DD` TEXT (GLOB CHECK'd), marshaled to `Temporal.PlainDate` by
+ *   the calendar plugin at the query boundary.
  * - Booleans store `0`/`1` integers.
  * - `kitty_theme.colors` stores JSON text.
  *
  * `Stored*` types are the decoded rows the blog models must match, and
  * `decode*` in `db.ts` is the one bridge from the raw kysely row.
  */
-import { defineRelations } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { defineRelations, sql } from "drizzle-orm";
+import { check, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 // Type-only: the same declaration the wire codec uses, so the column and the
 // RPC contract cannot drift. Erased at build.
 import type { ThemeColors } from "@/src/kitty/colors";
+import type { Temporal } from "temporal-polyfill";
 
 export const Category = sqliteTable("category", {
 	slug: text("slug").notNull().primaryKey(),
@@ -29,24 +33,38 @@ export const Category = sqliteTable("category", {
 		.$default(() => new Date()),
 });
 
-export const Post = sqliteTable("post", {
-	slug: text("slug").notNull().primaryKey(),
-	title: text("title").notNull(),
-	markdown: text("markdown").notNull(),
-	previewMarkdown: text("preview_markdown"),
-	publicAt: integer("public_at", { mode: "timestamp" }),
-	createdAt: integer("created_at", { mode: "timestamp" })
-		.notNull()
-		.$default(() => new Date()),
-	publishedAt: integer("published_at", { mode: "timestamp" }).notNull(),
-	modifiedAt: integer("modified_at", { mode: "timestamp" }),
-	revision: integer("revision").default(1).notNull(),
-	locale: text("locale", { enum: ["is", "en"] })
-		.default("en")
-		.notNull(),
-	heroImage: text("hero_image"),
-	categorySlug: text("category_slug").references(() => Category.slug),
-});
+export const Post = sqliteTable(
+	"post",
+	{
+		slug: text("slug").notNull().primaryKey(),
+		title: text("title").notNull(),
+		markdown: text("markdown").notNull(),
+		previewMarkdown: text("preview_markdown"),
+		publicAt: text("public_at"),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$default(() => new Date()),
+		publishedAt: integer("published_at", { mode: "timestamp" }).notNull(),
+		modifiedAt: integer("modified_at", { mode: "timestamp" }),
+		revision: integer("revision").default(1).notNull(),
+		locale: text("locale", { enum: ["is", "en"] })
+			.default("en")
+			.notNull(),
+		heroImage: text("hero_image"),
+		categorySlug: text("category_slug").references(() => Category.slug),
+	},
+	(table) => [
+		// public_at is a calendar date, not a timestamp: YYYY-MM-DD TEXT with a
+		// format CHECK (SQLite has no date type and D1 registers no REGEXP, so
+		// the constraint is GLOB character classes; semantic validity is
+		// Temporal.PlainDate.from's job when the row is read). The calendar
+		// plugin marshals it to Temporal.PlainDate at the query boundary.
+		check(
+			"public_at_iso",
+			sql`${table.publicAt} GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'`,
+		),
+	],
+);
 
 export const Comment = sqliteTable("comment", {
 	id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -173,7 +191,8 @@ export type StoredPost = {
 	title: string;
 	markdown: string;
 	previewMarkdown: string | null;
-	publicAt: Date | null;
+	/** A calendar date, marshaled to Temporal.PlainDate by the plugin. */
+	publicAt: Temporal.PlainDate | null;
 	createdAt: Date;
 	publishedAt: Date;
 	modifiedAt: Date | null;

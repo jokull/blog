@@ -12,7 +12,7 @@ export const Route = createFileRoute("/llm.txt")({
 						.selectFrom("post")
 						.selectAll()
 						.where("public_at", "is not", null)
-						.orderBy("published_at", "desc")
+						.orderBy("public_at", "desc")
 						.execute()
 				)
 					.unwrap()
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/llm.txt")({
 				for (const year of sortedYears) {
 					lines.push(`## ${year}`, "");
 					for (const post of postsByYear[year]) {
-						const date = post.publishedAt.toLocaleDateString(post.locale, {
+						const date = post.publicAt!.toLocaleString(post.locale, {
 							year: "numeric",
 							month: "short",
 							day: "numeric",

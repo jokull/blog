@@ -1,10 +1,12 @@
 import { env } from "cloudflare:workers";
-import { notFound } from "@tanstack/react-router";
+import { Temporal } from "temporal-polyfill";
 import { ClientErrorBoundary } from "@/components/error-boundary";
 import { db, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
 import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
+import type { StoredPost } from "@/schema";
+import { notFound } from "@tanstack/react-router";
 import { cache } from "react";
 // safe-mdx renders MDX without eval/new Function — required on Cloudflare Workers where
 // @mdx-js/mdx's run() is blocked (EvalError: Code generation from strings disallowed).
@@ -29,6 +31,15 @@ const getPost = cache(async (slug: string) => {
 	return decodePost(row);
 });
 
+/**
+ * The byline date, folded to a single calendar date: the author-intended
+ * `public_at` when set, else the creation day from `published_at` (draft
+ * pages). `PlainDate.from(Date)` would throw — a Date has no year/month/day
+ * properties — so the fallback goes through the ISO string.
+ */
+const bylineDate = (post: StoredPost): Temporal.PlainDate =>
+	post.publicAt ?? Temporal.PlainDate.from(post.publishedAt.toISOString().slice(0, 10));
+
 // Generate all possible slug values at build time
 export async function generateStaticParams() {
 	const posts = (
@@ -50,6 +61,7 @@ export async function generateMetadata({
 
 	const description = await extractFirstParagraph(post.markdown);
 	const baseUrl = env.SITE_URL;
+	const date = bylineDate(post);
 
 	const metadata: Metadata = {
 		title: post.title,
@@ -66,7 +78,7 @@ export async function generateMetadata({
 			type: "article",
 			url: `${baseUrl}/${post.slug}`,
 			locale: post.locale === "is" ? "is_IS" : "en_US",
-			publishedTime: post.publishedAt.toISOString(),
+			publishedTime: date.toString(),
 			modifiedTime: (post.modifiedAt ?? post.publishedAt).toISOString(),
 			authors: ["Jökull Sólberg"],
 		},
@@ -94,8 +106,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 		mdx = null;
 	}
 
+	// The byline date is one Temporal.PlainDate regardless of which column
+	// backed it — draft pages fall back to the creation day.
+	const date = bylineDate(post);
+
 	// Format markdown document with title and date (same as .md version)
-	const formattedDate = post.publishedAt.toISOString().split("T")[0];
+	const formattedDate = date.toString();
 	const markdownDocument = `# ${post.title}
 
 ${formattedDate}
@@ -106,12 +122,7 @@ ${post.markdown}`;
 		<div className="">
 			<div className="mb-7">
 				<h1 className="text-balance font-semibold">{post.title}</h1>
-				<p className="text-sm">
-					{post.publishedAt.toLocaleDateString(post.locale, {
-						timeStyle: undefined,
-						dateStyle: "long",
-					})}
-				</p>
+				<p className="text-sm">{date.toLocaleString(post.locale, { dateStyle: "long" })}</p>
 				<ClipboardCopyButton text={markdownDocument}>Copy as markdown</ClipboardCopyButton>
 			</div>
 			<ClientErrorBoundary>{mdx}</ClientErrorBoundary>

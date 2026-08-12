@@ -30,7 +30,7 @@ export const Route = createFileRoute("/feed.xml")({
 						.selectFrom("post")
 						.selectAll()
 						.where("public_at", "is not", null)
-						.orderBy("published_at", "desc")
+						.orderBy("public_at", "desc")
 						.limit(20)
 						.execute()
 				).unwrap();
@@ -49,7 +49,9 @@ export const Route = createFileRoute("/feed.xml")({
 						description: description || post.title,
 						url: `${baseUrl}/${post.slug}`,
 						guid: post.slug,
-						date: post.publishedAt,
+						// The feed date is the byline date; the RFC822 formatter
+						// wants a Date, so midnight UTC.
+						date: new Date(`${post.publicAt!.toString()}T00:00:00Z`),
 						author: "jokull@solberg.is (Jökull Sólberg)",
 						...(heroImageUrl
 							? {

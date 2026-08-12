@@ -9,9 +9,9 @@ export const Route = createFileRoute("/sitemap.xml")({
 				const posts = (
 					await db
 						.selectFrom("post")
-						.select(["slug", "published_at", "modified_at"])
+						.select(["slug", "public_at", "modified_at"])
 						.where("public_at", "is not", null)
-						.orderBy("published_at", "desc")
+						.orderBy("public_at", "desc")
 						.execute()
 				).unwrap();
 
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 						loc: `${env.SITE_URL}/${post.slug}`,
 						lastmod: post.modified_at
 							? new Date(post.modified_at * 1000)
-							: new Date(post.published_at * 1000),
+							: new Date(`${post.public_at}T00:00:00Z`),
 						changefreq: "monthly",
 						priority: "0.8",
 					})),

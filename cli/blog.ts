@@ -21,6 +21,7 @@ import { createTwoFilesPatch } from "diff";
 import type { Result } from "result-rpc";
 import * as v from "valibot";
 import { createPostEtag, matchesPostEtag } from "../lib/post-etag";
+import type { Temporal } from "temporal-polyfill";
 import {
 	CategorySlugSchema,
 	LocaleSchema,
@@ -215,7 +216,7 @@ type PostSnapshot = {
 	locale: "en" | "is";
 	categorySlug: string | null;
 	heroImage: string | null;
-	publicAt: Date | null;
+	publicAt: Temporal.PlainDate | null;
 };
 
 const displayValue = (value: string | null) => value ?? "(none)";
