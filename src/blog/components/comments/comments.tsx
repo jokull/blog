@@ -10,8 +10,9 @@
  * only the identity layers it needs:
  *
  *   SessionShell   provides `viewer: Viewer | null`
- *     SignInShell  claims `auth/required` — a signed-out reader may type and
- *                  press Post; the shell sends them to GitHub
+ *     SignInShell  claims `auth/required` — the composer shows a GitHub CTA
+ *                  in place of the box when signed out, and the shell still
+ *                  guards every mutation beneath it
  *       AdminShell claims `auth/forbidden` — moderation controls only ever
  *                  render for the admin, so this is belt-and-braces
  *

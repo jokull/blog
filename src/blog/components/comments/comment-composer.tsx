@@ -6,10 +6,12 @@
  *     wire would have produced.
  *   - Posting is optimistic. The comment appears in the thread on the next
  *     frame, and `onFailure` puts it back in the textarea rather than losing it.
- *   - Signing in is not this component's job. `SignInShell` claims
- *     `auth/required`, so a signed-out reader can type and press Post; the
- *     shell intercepts and sends them to GitHub. The tag is subtracted from
- *     this mutation's union, so there is no branch here for it at all.
+ *   - Signing in is this component's job only as a doorway: a signed-out
+ *     reader sees a GitHub CTA instead of the box, so there is never a draft
+ *     to lose in the auth redirect. Once past auth, the form renders.
+ *     `SignInShell` still claims `auth/required` for every mutation in the
+ *     tree below (edits, removals), which is why the tag is absent from this
+ *     mutation's union.
  */
 import { Field, Form, reset, useForm } from "@formisch/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -19,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { OctocatIcon } from "@/components/octocat-icon";
 import { client } from "@/src/rpc/client";
 import { commentErrors } from "@/src/blog/errors";
-import { SessionShell, SignInShell } from "@/src/rpc/shells";
+import { SessionShell, SignInShell, signIn } from "@/src/rpc/shells";
 import { CommentFormSchema, type CommentForm } from "../../schemas";
 import { CONFIRMATION_MS, confirmation, springy } from "./motion";
 
@@ -91,6 +93,23 @@ export function CommentComposer({ postSlug }: { postSlug: string }) {
 
 	const isPending = create.state === "pending";
 
+	// Signed out: the box is not worth showing — a draft would only be lost in
+	// the auth redirect, which is the failure this CTA replaces. SignInShell
+	// still claims `auth/required` for every mutation below, so this branch is
+	// purely presentational.
+	if (viewer === null) {
+		return (
+			<Button
+				intent="secondary"
+				onPress={signIn}
+				className="w-full bg-[#0d1117] text-white hover:bg-[#161b22]"
+			>
+				<OctocatIcon className="size-5" />
+				Login with GitHub to comment
+			</Button>
+		);
+	}
+
 	return (
 		<Form of={form} onSubmit={handleSubmit} className="space-y-3">
 			<Field of={form} path={["content"]}>
@@ -99,11 +118,7 @@ export function CommentComposer({ postSlug }: { postSlug: string }) {
 						<Textarea
 							{...field.props}
 							value={field.input ?? ""}
-							placeholder={
-								viewer
-									? "Markdown with codeblocks and syntax highlighting supported"
-									: "Write a comment — you'll sign in when you post"
-							}
+							placeholder="Markdown with codeblocks and syntax highlighting supported"
 							className="min-h-24"
 						/>
 						<AnimatePresence>
@@ -125,7 +140,7 @@ export function CommentComposer({ postSlug }: { postSlug: string }) {
 
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-h-6 items-center gap-2 text-muted-fg text-sm">
-					{viewer ? <span>Commenting as @{viewer.username}</span> : null}
+					<span>Commenting as @{viewer.username}</span>
 
 					{/*
 					 * The confirmation. Deliberately quiet and deliberately
@@ -160,18 +175,7 @@ export function CommentComposer({ postSlug }: { postSlug: string }) {
 				</div>
 
 				<Button type="submit" isDisabled={isPending}>
-					{viewer ? (
-						isPending ? (
-							"Posting…"
-						) : (
-							"Post"
-						)
-					) : (
-						<>
-							<OctocatIcon className="size-5" />
-							Sign in &amp; post
-						</>
-					)}
+					{isPending ? "Posting…" : "Post"}
 				</Button>
 			</div>
 
