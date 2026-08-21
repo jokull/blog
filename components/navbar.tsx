@@ -33,6 +33,7 @@ export default function Navbar() {
 					<span className="font-bold text-base text-black leading-tight">solberg.is</span>
 				</a>
 				<div className="flex flex-col gap-2 text-right">
+					<Item href="/blog">blog</Item>
 					<Item href="/notes">notes</Item>
 					<Item href="/projects">projects</Item>
 					<a

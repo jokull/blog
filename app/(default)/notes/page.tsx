@@ -1,9 +1,7 @@
 import { db, decodeNote, epoch } from "@/db";
-import { components } from "@/mdx-components";
 import type { Metadata } from "@/src/lib/metadata";
 import { Link } from "@/src/lib/navigation";
-import { SafeMdxRenderer } from "safe-mdx";
-import { mdxParse } from "safe-mdx/parse";
+import { NoteBody } from "../_components/note-body";
 
 export const metadata: Metadata = {
 	title: "Notes — Jökull Sólberg",
@@ -45,22 +43,6 @@ export default async function NotesPage({
 			<h1 className="mb-8 font-medium text-lg">Notes</h1>
 			<div className="flex flex-col gap-8">
 				{items.map((note) => {
-					let rendered: React.ReactElement | null = null;
-					if (note.description) {
-						try {
-							const mdast = mdxParse(note.description);
-							rendered = (
-								<SafeMdxRenderer
-									mdast={mdast}
-									markdown={note.description}
-									components={components}
-								/>
-							);
-						} catch {
-							rendered = null;
-						}
-					}
-
 					const date = note.publishedAt
 						? note.publishedAt.toLocaleDateString("en", {
 								month: "short",
@@ -70,9 +52,7 @@ export default async function NotesPage({
 
 					return (
 						<article key={note.id} className="flex flex-col gap-1">
-							{rendered ? (
-								<div className="prose prose-stone prose-sm">{rendered}</div>
-							) : null}
+							{note.description ? <NoteBody markdown={note.description} /> : null}
 							{date ? (
 								<a
 									href={`https://x.com/i/status/${note.id}`}

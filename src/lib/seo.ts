@@ -146,14 +146,18 @@ export function postHead({
 	return head;
 }
 
-export const homeHead = (category?: { slug: string; label: string } | null): SeoData =>
+export const blogHead = (category?: { slug: string; label: string } | null): SeoData =>
 	category
 		? pageHead({
 				title: `${category.label} — ${SITE_NAME}`,
 				description: SITE_DESCRIPTION,
-				path: `/?category=${encodeURIComponent(category.slug)}`,
+				path: `/blog?category=${encodeURIComponent(category.slug)}`,
 			})
-		: pageHead({ title: SITE_NAME, description: SITE_DESCRIPTION, path: "/" });
+		: pageHead({
+				title: `Blog — ${SITE_NAME}`,
+				description: SITE_DESCRIPTION,
+				path: "/blog",
+			});
 
 export const staticPageHead = (title: string, pageDescription: string, path: string): SeoData =>
 	pageHead({ title, description: pageDescription, path });

@@ -2,7 +2,7 @@ import { Image } from "@/src/lib/navigation";
 
 export function Hero() {
 	return (
-		<div className="mb-10 flex max-w-2xl items-start gap-5 sm:mb-12 sm:gap-6">
+		<div className="mb-10 flex max-w-xl items-start gap-5 sm:mb-12 sm:gap-6">
 			<Image
 				src="/baldur-square.jpg"
 				width={288}

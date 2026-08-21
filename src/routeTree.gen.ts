@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as KittyRouteRouteImport } from './routes/kitty.route'
@@ -46,6 +47,11 @@ const SlugRoute = SlugRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallbackRoute = CallbackRouteImport.update({
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/kitty': typeof KittyRouteRouteWithChildren
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRoute
+  '/blog': typeof BlogRoute
   '/callback': typeof CallbackRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/llm.txt': typeof LlmDottxtRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRoute
+  '/blog': typeof BlogRoute
   '/callback': typeof CallbackRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/llm.txt': typeof LlmDottxtRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/kitty': typeof KittyRouteRouteWithChildren
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRoute
+  '/blog': typeof BlogRoute
   '/callback': typeof CallbackRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/llm.txt': typeof LlmDottxtRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/kitty'
     | '/$slug'
     | '/admin'
+    | '/blog'
     | '/callback'
     | '/feed.xml'
     | '/llm.txt'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/admin'
+    | '/blog'
     | '/callback'
     | '/feed.xml'
     | '/llm.txt'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/kitty'
     | '/$slug'
     | '/admin'
+    | '/blog'
     | '/callback'
     | '/feed.xml'
     | '/llm.txt'
@@ -308,6 +320,7 @@ export interface RootRouteChildren {
   KittyRouteRoute: typeof KittyRouteRouteWithChildren
   SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRoute
+  BlogRoute: typeof BlogRoute
   CallbackRoute: typeof CallbackRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   LlmDottxtRoute: typeof LlmDottxtRoute
@@ -347,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/callback': {
@@ -513,6 +533,7 @@ const rootRouteChildren: RootRouteChildren = {
   KittyRouteRoute: KittyRouteRouteWithChildren,
   SlugRoute: SlugRoute,
   AdminRoute: AdminRoute,
+  BlogRoute: BlogRoute,
   CallbackRoute: CallbackRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
   LlmDottxtRoute: LlmDottxtRoute,

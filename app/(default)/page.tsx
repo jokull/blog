@@ -1,40 +1,17 @@
 import { Theater } from "@/components/theater";
-import { db, decodeCategory, decodePost } from "@/db";
 import type { Metadata } from "@/src/lib/metadata";
 import { Suspense } from "react";
 import { Albums } from "./_components/albums";
 import { Hero } from "./_components/hero";
-import { PostList } from "./_components/post-list";
+import { RecentStream } from "./_components/recent-stream";
+import { SelectedProjects } from "./_components/selected-projects";
 import { RecentShows } from "./_components/shows";
 
-export async function generateMetadata({
-	searchParams,
-}: {
-	searchParams: Promise<{ category?: string }>;
-}): Promise<Metadata> {
-	const { category } = await searchParams;
-
-	if (category) {
-		const cat = (
-			await db
-				.selectFrom("category")
-				.selectAll()
-				.where("slug", "=", category)
-				.executeTakeFirst()
-		).unwrap();
-		if (cat) {
-			return {
-				title: `${cat.label} — Jökull Sólberg`,
-				alternates: { canonical: `/?category=${category}` },
-			};
-		}
-	}
-
-	return {
-		title: "Jökull Sólberg",
-		alternates: { canonical: "/" },
-	};
-}
+export const metadata: Metadata = {
+	title: "Jökull Sólberg",
+	description: "Personal blog about web development, technology, and software engineering",
+	alternates: { canonical: "/" },
+};
 
 function AlbumsSkeleton() {
 	return (
@@ -65,42 +42,7 @@ function ShowsSkeleton() {
 	);
 }
 
-export default async function Page() {
-	// Fetch all posts with category information
-	const posts = (
-		await db
-			.selectFrom("post")
-			.selectAll()
-			.where("public_at", "is not", null)
-			.orderBy("public_at", "desc")
-			.execute()
-	)
-		.unwrap()
-		.map(decodePost);
-
-	// Fetch all categories
-	const categories = (await db.selectFrom("category").selectAll().execute())
-		.unwrap()
-		.map(decodeCategory);
-
-	// Get comment counts for all posts
-	const commentCounts = (
-		await db
-			.selectFrom("comment")
-			.select((eb) => ["post_slug", eb.fn.countAll<number>().as("count")])
-			.where("is_hidden", "=", 0)
-			.groupBy("post_slug")
-			.execute()
-	).unwrap();
-
-	const commentCountsMap = commentCounts.reduce(
-		(acc, item) => {
-			acc[item.post_slug] = item.count;
-			return acc;
-		},
-		{} as Record<string, number>,
-	);
-
+export default function Page() {
 	return (
 		<div className="relative isolate">
 			<div
@@ -114,29 +56,13 @@ export default async function Page() {
 
 			<Hero />
 
-			<Suspense fallback={null}>
-				<PostList
-					posts={posts.map((post) => {
-						// public_at is guaranteed non-null by the SQL filter above.
-						const publicAt = post.publicAt!;
-						// PostList's Post contract, nothing more: a Temporal.PlainDate
-						// is not RSC-serializable, so it degrades to a Date at UTC
-						// midnight (Flight's native Date encoding); markdown must
-						// never cross to the client. The render shape, not the model.
-						return {
-							slug: post.slug,
-							title: post.title,
-							locale: post.locale,
-							categorySlug: post.categorySlug,
-							publicAt: new Date(
-								Date.UTC(publicAt.year, publicAt.month - 1, publicAt.day),
-							),
-						};
-					})}
-					commentCounts={commentCountsMap}
-					categories={categories}
-				/>
-			</Suspense>
+			<div className="mb-7 max-w-xl">
+				<RecentStream />
+			</div>
+
+			<div className="mb-7 max-w-xl">
+				<SelectedProjects />
+			</div>
 
 			<div className="mb-7 max-w-xl">
 				<Theater>

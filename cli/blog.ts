@@ -67,10 +67,22 @@ Blog CLI - Manage blog posts
 
 Usage: bun run blog <command> [options]
 
+API target:
+  Every command talks to $BLOG_API_URL (default http://localhost:5173).
+  \`bun run blog:prod\` targets the live site. \`whoami\` shows which one is
+  in use; mutating commands print it with the result.
+
+Revisions:
+  Every write bumps the post's revision. \`get\` prints the current ETag
+  (post-N) and \`get --json\` returns it with the post. Pass the ETag to
+  \`update --if-match\` to abort if the post changed since you fetched it.
+  Publish state is separate from content: \`update --publish|--unpublish\`
+  flips it without touching the body.
+
 Commands:
   login              Authenticate via browser
   logout             Clear stored authentication
-  whoami             Show authenticated user
+  whoami             Show authenticated user and API target
   list               List all posts
   get <slug>         View post details
   edit <slug>        Open the post body in $EDITOR and save it back
@@ -100,16 +112,16 @@ Options for create:
   -l, --locale       Locale (en or is, default: en)
       --hero-image   Hero image URL
       --publish      Publish immediately (default: draft)
-      --diff         Show the content to be created
-      --dry-run      Show the content without creating the post
+      --diff         Print the diff, then create
+      --dry-run      Print the diff without creating anything
 
 Options for get:
       --body-only    Print only the Markdown body
-      --json         Print the post and ETag as JSON
+      --json         Print the post and its ETag as JSON
 
 Options for edit:
-      --diff         Show the changes before saving
-      --dry-run      Show the changes without saving
+      --diff         Print the diff, then save
+      --dry-run      Print the diff without saving
       --publish      Also publish the post afterwards
       --unpublish    Also unpublish the post afterwards
 
@@ -122,24 +134,24 @@ Options for update:
       --hero-image   Hero image URL
       --publish      Publish the post
       --unpublish    Unpublish the post
-      --if-match     Only update the ETag returned by get --json
-      --diff         Show the changes before updating
-      --dry-run      Show the changes without updating
+      --if-match     ETag from get --json; abort if the post changed
+      --diff         Print the diff, then apply the update
+      --dry-run      Print the diff without updating
 
 Examples:
   bun run blog login
+  bun run blog whoami
   bun run blog list
   bun run blog get my-post
+  bun run blog get my-post --body-only > post.md
+  bun run blog get my-post --json           # shows the ETag
   bun run blog create --slug my-post --title "My Post" --body "# Hello"
   bun run blog create --slug my-post --title "My Post" --body-file - --publish < post.md
-  bun run blog get my-post --json
-  bun run blog get my-post --body-only > post.md
+  bun run blog update my-post --title "New Title"
+  bun run blog update my-post --body-file post.md --if-match '"post-3"'
+  bun run blog update my-post --publish     # publish an existing draft
   bun run blog edit my-post
   EDITOR="code -w" bun run blog edit my-post
-  bun run blog update my-post --body-file - --diff < post.md
-  bun run blog update my-post --body-file post.md --if-match '"post-3"'
-  bun run blog update my-post --publish
-  bun run blog update my-post --title "New Title"
   bun run blog delete my-post
 `);
 }
@@ -463,7 +475,7 @@ async function handleEdit(slug: string) {
 		latest = expect(await client.posts.setPublished({ slug, published: publish }));
 	}
 
-	console.log(`Post updated: ${slug}`);
+	console.log(`Post updated at ${API_BASE}: ${slug}`);
 	console.log(`ETag: ${createPostEtag(latest.revision)}`);
 }
 
@@ -502,7 +514,9 @@ async function handleCreate() {
 		}),
 	);
 
-	console.log(`Post created: ${post.slug} (${post.publicAt ? "published" : "draft"})`);
+	console.log(
+		`Post created at ${API_BASE}: ${post.slug} (${post.publicAt ? "published" : "draft"})`,
+	);
 	console.log(`ETag: ${createPostEtag(post.revision)}`);
 }
 
@@ -575,13 +589,13 @@ async function handleUpdate(slug: string) {
 		latest = expect(await client.posts.setPublished({ slug, published: update.publish }));
 	}
 
-	console.log(`Post updated: ${slug}`);
+	console.log(`Post updated at ${API_BASE}: ${slug}`);
 	console.log(`ETag: ${createPostEtag(latest.revision)}`);
 }
 
 async function handleDelete(slug: string) {
 	expect(await authed().posts.remove({ slug }));
-	console.log(`Post deleted: ${slug}`);
+	console.log(`Post deleted at ${API_BASE}: ${slug}`);
 }
 
 async function handleCategories() {

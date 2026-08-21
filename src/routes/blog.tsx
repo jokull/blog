@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { renderLegacyRoute } from "@/src/server/render-route";
 import { asHead, pageHead } from "@/src/lib/seo";
+import { getBlogHead } from "@/src/server/seo";
 import type { ReactNode } from "react";
 
-export const Route = createFileRoute("/")({
-	loader: async () => ({
-		content: await renderLegacyRoute({ data: { route: "home" } }),
-		head: asHead(
-			pageHead({
-				title: "Jökull Sólberg",
-				description:
-					"Personal blog about web development, technology, and software engineering",
-				path: "/",
-			}),
-		),
+export const Route = createFileRoute("/blog")({
+	validateSearch: (search: Record<string, unknown>) => ({
+		category: typeof search.category === "string" ? search.category : undefined,
+	}),
+	loaderDeps: ({ search }) => search,
+	loader: async ({ deps }) => ({
+		content: await renderLegacyRoute({ data: { route: "blog", search: deps } }),
+		head: asHead(await getBlogHead({ data: { category: deps.category } })),
 	}),
 	head: ({ loaderData }) => {
 		// TanStack Start's server-function serialization currently erases loader types here.
@@ -25,10 +23,10 @@ export const Route = createFileRoute("/")({
 			data?.head ??
 			asHead(
 				pageHead({
-					title: "Jökull Sólberg",
+					title: "Blog — Jökull Sólberg",
 					description:
-						"Personal blog about web development, technology, and software engineering",
-					path: "/",
+						"Long-form posts about web development, technology, and software engineering",
+					path: "/blog",
 				}),
 			)
 		);

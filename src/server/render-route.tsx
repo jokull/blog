@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { renderServerComponent } from "@tanstack/react-start/rsc";
 
 type RenderRequest =
-	| { route: "home"; search?: { category?: string } }
+	| { route: "home" }
+	| { route: "blog"; search?: { category?: string } }
 	| { route: "notes"; search?: { cursor?: string } }
 	| { route: "projects" }
 	| { route: "post"; slug: string }
@@ -24,6 +25,17 @@ export const renderLegacyRoute = createServerFn({ method: "GET" })
 				return renderServerComponent(
 					<DefaultLayout>
 						<HomePage />
+					</DefaultLayout>,
+				);
+			}
+			case "blog": {
+				const [{ default: DefaultLayout }, { default: BlogPage }] = await Promise.all([
+					import("../../app/(default)/layout"),
+					import("../../app/(default)/blog/page"),
+				]);
+				return renderServerComponent(
+					<DefaultLayout>
+						<BlogPage searchParams={promise(data.search ?? {})} />
 					</DefaultLayout>,
 				);
 			}

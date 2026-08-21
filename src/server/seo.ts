@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { appServerClient } from "@/src/rpc/server";
 import { db, decodePost } from "@/db";
 import { extractFirstParagraph } from "@/lib/mdx-content-utils";
-import { homeHead, pageHead, postHead } from "@/src/lib/seo";
+import { blogHead, pageHead, postHead } from "@/src/lib/seo";
 
 export const getPostHead = createServerFn({ method: "GET" })
 	.validator((data: { slug: string }) => data)
@@ -20,7 +20,7 @@ export const getPostHead = createServerFn({ method: "GET" })
 		return postHead({ ...post, markdown: await extractFirstParagraph(post.markdown) });
 	});
 
-export const getHomeHead = createServerFn({ method: "GET" })
+export const getBlogHead = createServerFn({ method: "GET" })
 	.validator((data: { category?: string }) => data)
 	.handler(async ({ data }) => {
 		const categorySlug = data.category;
@@ -33,7 +33,7 @@ export const getHomeHead = createServerFn({ method: "GET" })
 						.executeTakeFirst()
 				).unwrap()
 			: null;
-		return homeHead(category);
+		return blogHead(category);
 	});
 
 export const getKittyThemeHead = createServerFn({ method: "GET" })
