@@ -45,7 +45,8 @@ const icelandProjects: Project[] = [
 	},
 	{
 		name: "icelandic-data",
-		description: "A Claude Code–native data toolkit for Icelandic public datasets.",
+		description:
+			"A harness-agnostic data toolkit for Icelandic public datasets — skills plus the scripts they reference, drivable by any agent.",
 		href: "https://github.com/jokull/icelandic-data",
 		repo: "https://github.com/jokull/icelandic-data",
 		image: "/projects/icelandic-data.webp",
