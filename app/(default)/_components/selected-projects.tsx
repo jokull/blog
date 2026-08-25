@@ -12,28 +12,46 @@ export function SelectedProjects() {
 			</div>
 			<ul className="flex flex-col gap-4">
 				{featuredProjects.map((project) => (
-					<li key={project.name} className="flex flex-col gap-0.5">
-						<div className="flex items-baseline gap-2">
+					<li key={project.name} className="flex items-start gap-3">
+						{project.image ? (
 							<a
 								href={project.href}
 								target="_blank"
 								rel="noopener"
-								className="font-medium text-blue-500 hover:text-blue-600"
+								className="shrink-0"
+								aria-label={project.name}
 							>
-								{project.name}
+								<img
+									src={project.image}
+									alt=""
+									loading="lazy"
+									className="aspect-[16/10] w-24 rounded-sm border border-stone-200 bg-stone-100 object-cover sm:w-28"
+								/>
 							</a>
-							{project.repo ? (
+						) : null}
+						<div className="flex flex-col gap-0.5">
+							<div className="flex items-baseline gap-2">
 								<a
-									href={project.repo}
+									href={project.href}
 									target="_blank"
 									rel="noopener"
-									className="text-stone-400 text-xs hover:text-stone-600"
+									className="font-medium text-blue-500 hover:text-blue-600"
 								>
-									source
+									{project.name}
 								</a>
-							) : null}
+								{project.repo ? (
+									<a
+										href={project.repo}
+										target="_blank"
+										rel="noopener"
+										className="text-stone-400 text-xs hover:text-stone-600"
+									>
+										source
+									</a>
+								) : null}
+							</div>
+							<p className="text-sm text-stone-600">{project.description}</p>
 						</div>
-						<p className="text-sm text-stone-600">{project.description}</p>
 					</li>
 				))}
 			</ul>
