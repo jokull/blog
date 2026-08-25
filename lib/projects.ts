@@ -42,6 +42,7 @@ const icelandProjects: Project[] = [
 		name: "icelandic-data",
 		description: "A Claude Code–native data toolkit for Icelandic public datasets.",
 		href: "https://github.com/jokull/icelandic-data",
+		repo: "https://github.com/jokull/icelandic-data",
 		featured: true,
 	},
 	{
@@ -61,12 +62,6 @@ const icelandProjects: Project[] = [
 		name: "RÚV Noise",
 		description: "macOS menubar app that streams RÚV radio with a lo-fi FM effect.",
 		href: "https://github.com/jokull/ruv-noise",
-	},
-	{
-		name: "moona",
-		description:
-			"Command line for the Noona.is appointment marketplace — search, book, cancel.",
-		href: "https://github.com/jokull/moona",
 	},
 ];
 
@@ -98,14 +93,6 @@ const otherProjects: Project[] = [
 		description:
 			"Agent-first headless CMS on Cloudflare Workers. Schemas, content, and publishing driven by MCP.",
 		href: "https://github.com/jokull/agent-cms",
-	},
-	{
-		name: "Loftur",
-		description:
-			"A runtime website engine for AI agents over MCP — schema, content, code and design with no build step.",
-		href: "https://loftur.app",
-		repo: "https://github.com/jokull/loftur",
-		featured: true,
 	},
 	{
 		name: "UDL",
