@@ -2,21 +2,29 @@
 
 Source for [solberg.is](https://www.solberg.is), my personal blog and projects page.
 
-The site includes the public blog, an authenticated Markdown editor and admin area, a CLI for
-managing posts, and the [Kitty](https://www.solberg.is/kitty) terminal-theme editor.
+The site includes the public blog, an authenticated admin area for moderation and publishing, a Bun
+CLI for managing and editing posts (in your own editor), and the [Kitty](https://www.solberg.is/kitty)
+terminal-theme editor.
 
 ## Stack
 
-- [TanStack Start](https://tanstack.com/start) with React Server Components and React 19
-- [Vite](https://vite.dev) and the Cloudflare Vite plugin
-- [Cloudflare Workers](https://workers.cloudflare.com) and
-  [Cloudflare D1](https://developers.cloudflare.com/d1/)
-- [Kysely](https://kysely.dev) for typed queries, with `db-result` classifying failures into Result tags
-- Markdown and MDX rendered with `safe-mdx`, with server-side Shiki highlighting
-- Monaco for post editing
-- Tailwind CSS v4
-- Hono for the authenticated blog API
-- Bun, TypeScript, oxlint, and oxfmt
+- [TanStack Start](https://tanstack.com/start) with React Server Components and React 19, built with
+  Vite via the [Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/) and
+  deployed to [Cloudflare Workers](https://workers.cloudflare.com)
+- [Cloudflare D1](https://developers.cloudflare.com/d1/) (binding `DB`) with a
+  [Drizzle](https://orm.drizzle.team/) schema as the source of truth — it drives `drizzle-kit`
+  migration generation, and `scripts/gen-db-types.ts` derives the
+  [Kysely](https://kysely.dev) table types from it. Queries run through Kysely, wrapped in
+  [`db-result`](https://www.npmjs.com/package/db-result)'s `kyselyTryDb` so failures are classified
+  into Result tags and transient errors auto-retry.
+- [result-rpc](https://result-rpc.com) — typed RPC contracts and routers for the blog, Kitty, CLI and
+  admin APIs, with one wire-safe error union from the server to the component that handles it.
+- Posts are authored as MDX and rendered with `safe-mdx` + Shiki (server-side). Comments are
+  stranger-authored, so they render with `@tanstack/markdown` + `@tanstack/highlight` — a
+  synchronous, WASM-free tokenizer chosen over Shiki's grammar load, sanitised by construction.
+- Tailwind CSS v4, [arctic](https://arcticjs.dev) (GitHub OAuth), iron-session (admin sessions), and
+  valibot (schema validation).
+- Bun, TypeScript, oxlint, oxfmt, and Lefthook pre-commit hooks.
 
 ## Local development
 
@@ -27,15 +35,21 @@ bun install
 bun run dev
 ```
 
-Local configuration lives in `.env`, which is ignored by Git. The application expects:
+Local configuration lives in `.env` and `.env.local`, both ignored by Git. Vite and the Cloudflare
+Vite plugin load them for the local Worker:
 
 ```dotenv
-NODE_ENV=development
-SITE_URL=http://localhost:5173
+# .env
+BLOG_API_URL=https://www.solberg.is
+
+# .env.local
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
-ONEDOLLARSTATS_API_KEY=...
 ```
+
+`SITE_URL` and `GITHUB_CLIENT_ID` are declared as `vars` in `wrangler.jsonc`; the secret
+(`GITHUB_CLIENT_SECRET`) and any others (e.g. `ONEDOLLARSTATS_API_KEY`) are set in production with
+`wrangler secret put`. There is no `NODE_ENV` — use `import.meta.env.DEV` for dev-only code.
 
 The development app bypasses GitHub OAuth through `/api/dev-auth`, but still needs a sufficiently
 long `GITHUB_CLIENT_SECRET` for the encrypted admin session. Use the URL printed by Vite if it
@@ -51,9 +65,10 @@ for migration in migrations/*/migration.sql; do
 done
 ```
 
-After changing [schema.ts](./schema.ts), generate and inspect a new migration:
+After changing [schema.ts](./schema.ts), regenerate the Kysely types and inspect a new migration:
 
 ```sh
+bun run gen:db-types
 bun run generate:migration
 ```
 
@@ -80,18 +95,21 @@ work is not applied automatically by a Worker deployment.
 ## Blog CLI
 
 The Bun CLI in [`cli/blog.ts`](./cli/blog.ts) manages posts and notes through the authenticated
-Hono API.
+[`result-rpc`](https://result-rpc.com) API.
 
-It targets the Vite development server at `http://localhost:5173` by default. Set `BLOG_API_URL`
-if Vite chooses another port, or use the production shortcut:
+It reads `BLOG_API_URL` from `.env`, which points at production, so a bare `bun run blog` is the
+production shortcut. For local development, point it at the Vite server:
 
 ```sh
-bun run blog:prod login
+BLOG_API_URL=http://localhost:5173 bun run blog login
 bun run blog:prod list
 bun run blog:prod get how-i-use-claude-code
 ```
 
 Login uses GitHub's device flow and stores the resulting app token in `~/.blog-cli-session`.
+
+There is no browser editor — `edit <slug>` opens the post body in `$VISUAL`/`$EDITOR`, and a
+non-zero exit (e.g. `:cq`) abandons the edit.
 
 ### Create a post
 
@@ -176,10 +194,12 @@ bun run deploy
 
 ## Repository map
 
-- [`src/routes`](./src/routes) — TanStack Start file routes and API endpoints
-- [`app`](./app) — shared page, layout, editor, and admin components rendered by the current routes
-- [`cli`](./cli) — authenticated blog CLI and GitHub device-flow login
-- [`lib/api.ts`](./lib/api.ts) — Hono post, note, category, and CLI-auth API
-- [`schema.ts`](./schema.ts) and [`migrations`](./migrations) — D1 schema and forward migrations
+- [`src/routes`](./src/routes) — TanStack Start file routes: SSR pages, feed/sitemap/robots/llm.txt,
+  dynamic OG images, and the `api/rpc` + `api/dev-auth` endpoints
+- [`src/blog`](./src/blog) — blog RPC server, contracts, model decoding, and comment rendering
 - [`src/kitty`](./src/kitty) — Kitty theme editor, parser, gallery, and RPC implementation
+- [`app`](./app) — shared page, layout, and admin/dashboard components
+- [`cli`](./cli) — authenticated blog CLI and GitHub device-flow login
+- [`schema.ts`](./schema.ts), [`src/db`](./src/db), and [`migrations`](./migrations) — Drizzle schema,
+  generated Kysely types, and forward migrations
 - [`components`](./components) — shared UI and data visualizations
