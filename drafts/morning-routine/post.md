@@ -4,9 +4,9 @@ I wanted to turn that agreement into something our six-year-old and three-year-o
 
 The result is [Morgnarnir okkar](https://morgunrutina.solberg.club): five weekday lanes, familiar food stickers, a small parent editor, and stars we award ourselves. It is a static website that remembers the plan in the browser. The complete prompt template below lets you build a version around your own family.
 
-![The Icelandic weekly routine, with five weekday lanes, two breakfast options per day, shared illustrated steps and a rewards column.](/blog/morning-routine/week.webp)
+![A playful overlapping collage of the clay sibling stickers, getting dressed, brushing teeth and ready for school.](/blog/morning-routine/siblings-collage.webp)
 
-_Real app capture with example breakfast picks, progress and rewards, framed for this post._
+_The app's sibling stickers, reimagined as a promotional collage. The images in this post are art-directed details rather than literal screenshots._
 
 ## Decide the morning before designing the screen
 
@@ -34,9 +34,9 @@ Codex generated the sheets, then extracted individual transparent PNGs. Backgrou
 
 The week comes populated with two different breakfast choices per day. Editing means pulling a food sticker from the tray into either slot. There is also a tap-to-place option, so changing the plan doesn't depend on dragging.
 
-![Two framed editor details: the five-food sticker tray and Monday's lane with editable breakfast slots and routine ordering controls.](/blog/morning-routine/editor.webp)
+![An oversized breakfast detail with Cheerios and cheese-and-jam toast, the 07:10 start time and separate blue and pink choice markers.](/blog/morning-routine/breakfast-detail.webp)
 
-_The parent editor: change what is offered, then let each child make their own pick._
+_Two familiar foods, two independent picks. Parents edit what is offered; each child chooses their breakfast._
 
 The behavior around a replacement matters. Dropping the other offered food into a slot swaps the choices instead of creating two identical options. A child's existing pick survives while that food is still available. The middle steps can be reordered, with breakfast fixed first and departure fixed last.
 
@@ -48,9 +48,9 @@ Each weekday has two star slots, one for each child. Our agreement is five stars
 
 The rewards are an ice cream outing, the Pokémon shop, the cinema, Húsdýragarðurinn, the LEGO shop and new hairpins. Tapping a reward makes it glow. More than one can be highlighted.
 
-![A large Tuesday routine beside six illustrated rewards; the Pokémon shop and pink hairpins have colored halos following their sticker outlines.](/blog/morning-routine/day-and-rewards.webp)
+![A close-up composition of smiling star stickers, a pink ice cream shop with a soft pink-and-blue halo.](/blog/morning-routine/rewards-detail.webp)
 
-_The daily view gives the pictures more room. The rewards remain selectable regardless of the stars._
+_Stars to give and something to look forward to. The rewards remain selectable regardless of the stars._
 
 The pink-and-blue halo follows the transparent sticker's silhouette. It is a small detail, but much nicer than lighting up a rectangular card. It pulses gently, with a static version when reduced motion is requested.
 
