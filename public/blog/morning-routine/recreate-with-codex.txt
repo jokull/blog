@@ -1,0 +1,57 @@
+Build a visual morning routine app for my family. Work with me in stages so I can choose the product direction and illustration style before you generate the full sticker library.
+
+FAMILY BRIEF — replace these values, or ask me to fill them in
+- Language: [Icelandic / your language]
+- Children: [ages, hair, distinguishing features, favorite colors and interests]
+- Optional likeness references: [local photo paths or attached photos]
+- Days: Monday–Friday
+- Start: breakfast at [07:10]
+- Shared steps after breakfast: [get dressed, brush teeth, outdoor clothes]
+- Departure differences: [schoolchild with lunchbox; preschooler with bike helmet]
+- Breakfast library: [five foods, their toppings, optional packaging photos]
+- Rewards: [ice cream, a favorite shop, cinema, petting zoo, LEGO, hair accessories]
+- Main device: [tablet / laptop / phone]
+- Hosting: [local only initially; discuss deployment later]
+
+1. SETTLE THE ROUTINE
+Read repository instructions and inspect the project first. Ask only the few product questions that matter: language, timing/order, shared versus separate steps, breakfast foods, devices, and rewards. Treat appearance and family preferences as choices for me. Make routine technical decisions yourself.
+
+Use pictures to make each action understandable to a child who cannot read. Keep labels short and in our language. Two children share the same sequence; each independently chooses one of that day's two breakfast foods. No assigning adult support. The final picture should make their different departure needs obvious.
+
+Summarize the brief in a file, then show your proposed layout and next decision. Don't build a large app before the direction is clear.
+
+2. LET ME CHOOSE THE ART
+Use Codex's image-generation capability. If it is unavailable, tell me what is missing instead of substituting generic icons or pretending artwork has been generated.
+
+Generate a comparison sheet with the SAME children, poses and example objects in three styles: picture-book watercolor, textured paper cutouts, and playful matte 3D clay. Use my optional photos for likeness and food-packaging references. Show the drafts; on macOS, open them in Preview if I request that. Wait for my style choice.
+
+Refine the selected style using the children's interests. Keep the actual hair shapes, age difference and recognizable features. Put favorite themes in small clothing details, so the action remains clear. Show the revised children for approval before making the complete atlas.
+
+3. GENERATE STICKERS THAT CAN BE CUT APART
+Use the approved character sheet as the style reference for every new atlas. Make separate sheets for routine actions, breakfast foods, and rewards. Use a strict 3-by-2 grid with one isolated sticker per cell, generous clear gutters, and no overlap. Keep each entire object and its shadow inside the cell. For more than six stickers, make more sheets.
+
+Prefer real transparency if the tool supports it. Otherwise use a uniform white background that can be removed. Do not put labels into the artwork; render them as app text. Preserve recognizable food packaging when I supplied references.
+
+I authorize cropping and background removal to extract the generated stickers. Inspect the actual grid boundaries; do not assume the generator obeyed the requested coordinates. Save separate transparent PNGs with descriptive filenames. Remove stray fragments from neighboring cells. Preserve white clothing, eyes and sticker borders; do not make every white pixel transparent. Check every result on both light and dark backgrounds. Retain original atlases and exact prompts in the project, but keep original family photos out of the public build.
+
+4. BUILD THE SINGLE-PAGE APP
+Use a simple stack suitable for the repository. Include:
+- Five weekday lanes. Breakfast and its time come first, followed by the shared steps and a final departure picture.
+- Exactly two DIFFERENT default breakfast choices per day, selected from the food library. Populate all days on first load.
+- Individual breakfast picks for each child, with understandable visual markers. Shared completion marks for the remaining steps.
+- A parent editing mode with a food-sticker tray. Drag a sticker onto either breakfast slot to replace that choice. If it duplicates the other slot, swap them. Clear a child's saved pick only if that food is no longer offered.
+- A tap-to-place alternative and accessible buttons for people who cannot drag. Support pointer/touch dragging, a visible drag preview, and clear valid drop targets.
+- Reordering the middle routine steps within a weekday. Keep breakfast first and departure last. Include buttons as an alternative to dragging.
+- One manually awarded star slot for EACH child on EACH day. Stars must be independent of checkbox completion.
+- A rightmost rewards column on wide screens. Tap rewards to highlight them, including multiple rewards if desired. Explain the family's five-star agreement in a short sentence; do not enforce unlocking, disable rewards, or award stars automatically.
+- A soft pulsing pink-and-blue glow around the actual transparent sticker silhouette, using its alpha as a mask or colored drop shadows. No rectangular card glow. Honor prefers-reduced-motion with a static highlight.
+- A large daily view and responsive layouts with practical touch targets.
+- Versioned localStorage for menus, choices, manual stars and highlighted rewards. Separate progress by local calendar week, while retaining the menu. Handle malformed or unavailable storage visibly and safely.
+- Undo, JSON export/import, and a printable week if useful.
+
+The finished app should use bundled artwork and require no image API key, account, backend database, or cloud sync. Explain that different browsers/devices have separate plans and that export/import moves them.
+
+5. VERIFY AND DELIVER
+Test actual breakfast dragging, tap placement, reordering, independent picks, manual stars and reward highlights in a browser. Refresh to verify persistence. Test two-choice invariants and invalid saved data. Check phone/tablet layouts, missing images, console errors, and reduced motion. Keep test/demo state separate from my real plan.
+
+Show me the working app and the next design checkpoint. Include run/build instructions, saved asset paths, and any real limitations. If I authorize GitHub/deployment, create a private repository, inspect the host's existing setup, deploy the static build with HTTPS, and verify the public assets. Do not assume my server, domain, SSH alias or ports match the author's.

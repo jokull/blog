@@ -1,0 +1,330 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			@font-face {
+				font-family: Inter;
+				src: url(Inter.woff2);
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				font-family: Inter, sans-serif;
+				color: #304237;
+				background: #e8eee4;
+			}
+			.canvas {
+				width: 1600px;
+				height: 1660px;
+				padding: 66px 74px;
+				position: relative;
+				overflow: hidden;
+				background:
+					radial-gradient(ellipse at 95% 6%, #f5dfeb77, transparent 45%),
+					radial-gradient(ellipse at 2% 100%, #d5e5f099, transparent 40%), #e9efe5;
+			}
+			.eyebrow {
+				font-size: 15px;
+				font-weight: 650;
+				letter-spacing: 3px;
+				text-transform: uppercase;
+				color: #71816e;
+			}
+			.heading {
+				font-size: 54px;
+				font-weight: 650;
+				letter-spacing: -2.8px;
+				line-height: 1.08;
+				margin: 19px 0 0;
+			}
+			.sub {
+				font-size: 20px;
+				color: #758173;
+				line-height: 1.6;
+				max-width: 850px;
+				margin-top: 15px;
+			}
+			.top {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+			}
+			.edition {
+				font-size: 14px;
+				line-height: 1.8;
+				text-align: right;
+				color: #87917f;
+				margin-top: 4px;
+			}
+			.window {
+				border: 1px solid #ffffffaa;
+				background: #f8f5ee;
+				border-radius: 19px;
+				overflow: hidden;
+				box-shadow:
+					0 24px 65px #3f533022,
+					0 3px 8px #3f533010;
+			}
+			.browser-bar {
+				height: 34px;
+				background: #fdfcf6;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 0 15px;
+				border-bottom: 1px solid #e8e6dc;
+			}
+			.dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: #dfdad0;
+			}
+			.address {
+				flex: 1;
+				text-align: center;
+				color: #969b8e;
+				font-size: 10px;
+				letter-spacing: 0.3px;
+				padding-right: 28px;
+			}
+			.week-window {
+				margin: 34px auto 0;
+				width: 1280px;
+			}
+			.week-window img {
+				width: 100%;
+				display: block;
+			}
+			.folio {
+				position: absolute;
+				left: 74px;
+				right: 74px;
+				bottom: 32px;
+				display: flex;
+				justify-content: space-between;
+				font-size: 12px;
+				letter-spacing: 1px;
+				color: #8a9684;
+			}
+			.editor-canvas {
+				height: 1050px;
+				background: radial-gradient(ellipse at 90% 4%, #dcd2f1aa, transparent 50%), #efede7;
+			}
+			.editor-canvas .heading {
+				color: #444059;
+			}
+			.editor-canvas .sub {
+				color: #817a87;
+			}
+			.editor-layout {
+				margin-top: 40px;
+			}
+			.detail-label {
+				font-size: 12px;
+				letter-spacing: 2px;
+				color: #8b8590;
+				margin-bottom: 12px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.num {
+				background: #ddd6eb;
+				color: #6f608d;
+				font-size: 11px;
+				letter-spacing: 0;
+				display: inline-grid;
+				place-items: center;
+				width: 23px;
+				height: 23px;
+				border-radius: 50%;
+			}
+			.detail-window {
+				padding: 14px;
+				background: #faf8f3;
+				width: 1452px;
+				box-shadow: 0 12px 36px #5c526b16;
+				border: 1px solid #fff9;
+				border-radius: 16px;
+			}
+			.detail-window img {
+				width: 100%;
+				display: block;
+				border-radius: 10px;
+			}
+			.detail-two {
+				margin-top: 30px;
+			}
+			.editor-notes {
+				display: flex;
+				gap: 42px;
+				margin-top: 30px;
+				padding: 0 10px;
+				font-size: 15px;
+				color: #847b87;
+				align-items: center;
+			}
+			.editor-notes span {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.circle {
+				height: 7px;
+				width: 7px;
+				border-radius: 50%;
+				background: #aba29b;
+			}
+			.daily-canvas {
+				height: 1390px;
+				background:
+					radial-gradient(ellipse at 89% 0%, #edcce5aa, transparent 46%),
+					radial-gradient(ellipse at 20% 80%, #dce7f599, transparent 48%), #f0ede8;
+			}
+			.daily-layout {
+				display: grid;
+				grid-template-columns: 540px 1fr;
+				gap: 104px;
+				margin-top: 40px;
+				padding: 0 78px;
+			}
+			.day-frame {
+				width: 390px;
+				background: #fcfaf4;
+				padding: 12px;
+				border: 1px solid #fff;
+				border-radius: 23px;
+				box-shadow: 0 18px 60px #62475720;
+			}
+			.day-frame img {
+				width: 100%;
+				display: block;
+				border-radius: 14px;
+			}
+			.right-detail {
+				padding-top: 32px;
+			}
+			.right-detail h2 {
+				font-size: 32px;
+				letter-spacing: -1.2px;
+				line-height: 1.2;
+				font-weight: 600;
+				margin: 0 0 16px;
+			}
+			.right-detail p {
+				font-size: 18px;
+				line-height: 1.65;
+				color: #8d828b;
+				margin: 0 0 27px;
+				max-width: 390px;
+			}
+			.reward-frame {
+				width: 430px;
+				border-radius: 20px;
+				overflow: hidden;
+				background: #fffcf9;
+				box-shadow: 0 14px 45px #7751681c;
+				border: 1px solid #fff;
+			}
+			.reward-frame img {
+				width: 100%;
+				display: block;
+			}
+			.tiny-note {
+				font-size: 12px !important;
+				margin-top: 20px !important;
+				color: #a0949e !important;
+			}
+			.canvas[hidden] {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<section class="canvas" id="week">
+			<div class="top">
+				<div>
+					<div class="eyebrow">A tiny app for our mornings</div>
+					<h1 class="heading">One routine. Two little people.</h1>
+					<p class="sub">
+						Familiar faces, two breakfast choices, and a week they can see.
+					</p>
+				</div>
+				<div class="edition">Built with Codex<br />Designed around our family</div>
+			</div>
+			<div class="window week-window">
+				<div class="browser-bar">
+					<i class="dot"></i><i class="dot"></i><i class="dot"></i
+					><span class="address">morgunrutina.solberg.club</span>
+				</div>
+				<img src="week.png" />
+			</div>
+			<div class="folio">
+				<span>MORGNARNIR OKKAR</span><span>01 / THE WEEK · STAGED DEMO</span>
+			</div>
+		</section>
+		<section class="canvas editor-canvas" id="editor" hidden>
+			<div class="top">
+				<div>
+					<div class="eyebrow">The parent side</div>
+					<h1 class="heading">Five familiar foods. Two choices each morning.</h1>
+					<p class="sub">Real sticker cutouts make the plan easy to change.</p>
+				</div>
+			</div>
+			<div class="editor-layout">
+				<div class="detail-label">
+					<span class="num">1</span> CHOOSE FROM THE STICKER TRAY
+				</div>
+				<div class="detail-window"><img src="tray.png" /></div>
+				<div class="detail-two">
+					<div class="detail-label">
+						<span class="num">2</span> REPLACE EITHER BREAKFAST CHOICE
+					</div>
+					<div class="detail-window"><img src="lane.png" /></div>
+				</div>
+				<div class="editor-notes">
+					<span><i class="circle"></i>Drag and drop</span
+					><span><i class="circle"></i>Or tap to place</span
+					><span><i class="circle"></i>Saved in this browser</span>
+				</div>
+			</div>
+			<div class="folio">
+				<span>MORGNARNIR OKKAR</span><span>02 / EDITOR DETAILS · STAGED DEMO</span>
+			</div>
+		</section>
+		<section class="canvas daily-canvas" id="daily" hidden>
+			<div class="top">
+				<div>
+					<div class="eyebrow">Pictures do the explaining</div>
+					<h1 class="heading">A little focus. A little anticipation.</h1>
+					<p class="sub">
+						A bigger view for the morning, and something to look forward to.
+					</p>
+				</div>
+			</div>
+			<div class="daily-layout">
+				<div class="day-frame"><img src="day.png" /></div>
+				<div class="right-detail">
+					<h2>Let the reward glow.</h2>
+					<p>
+						A soft pink–blue halo follows the actual sticker edge. Stars are given by
+						us, whenever we decide.
+					</p>
+					<div class="reward-frame"><img src="rewards.png" /></div>
+					<p class="tiny-note">Actual app captures. Example choices and progress.</p>
+				</div>
+			</div>
+			<div class="folio">
+				<span>MORGNARNIR OKKAR</span><span>03 / THE DAY & THE REWARD</span>
+			</div>
+		</section>
+		<script>
+			const mode = new URLSearchParams(location.search).get("view") || "week";
+			document.querySelectorAll(".canvas").forEach((el) => (el.hidden = el.id !== mode));
+		</script>
+	</body>
+</html>
