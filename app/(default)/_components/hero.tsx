@@ -1,20 +1,12 @@
-import { Image } from "@/src/lib/navigation";
+import { PuddleLogo } from "./puddle-logo";
 
 export function Hero() {
 	return (
-		<div className="mb-10 flex max-w-xl items-start gap-5 sm:mb-12 sm:gap-6">
-			<Image
-				src="/baldur-square.jpg"
-				width={288}
-				height={288}
-				quality={95}
-				alt="Jökull Sólberg"
-				className="size-20 shrink-0 rounded-2xl shadow-lg ring-1 ring-white/60 sm:size-24"
-				priority
-			/>
+		<div className="mb-10 max-w-xl sm:mb-12">
 			<div className="flex min-w-0 flex-col gap-1.5">
-				<h1 className="font-bold text-black text-lg leading-tight sm:text-xl">
-					Jökull Sólberg
+				<h1 className="-mt-4 -mb-3 -ml-5">
+					<PuddleLogo className="block h-auto w-100 max-w-full" />
+					<span className="sr-only">Jökull Sólberg</span>
 				</h1>
 				<p className="text-balance text-black/75 text-sm leading-snug sm:text-[15px]">
 					<strong className="font-semibold text-black">

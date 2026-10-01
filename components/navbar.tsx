@@ -1,7 +1,7 @@
 "use client";
 
 import cn from "clsx";
-import { Link, usePathname } from "@/src/lib/navigation";
+import { Image, Link, usePathname } from "@/src/lib/navigation";
 
 function Item(props: React.ComponentProps<typeof Link>) {
 	const pathname = usePathname();
@@ -27,10 +27,21 @@ function Item(props: React.ComponentProps<typeof Link>) {
 
 export default function Navbar() {
 	return (
-		<nav className="mobile:mr-3 mobile:w-22 w-full font-sans sm:mr-5 md:mr-7">
+		<nav className="mobile:mr-3 mobile:w-32 w-full font-sans sm:mr-5 md:mr-7">
 			<div className="mobile:sticky top-6 mb-6 mobile:mb-0 w-full sm:top-10 md:top-14">
-				<a href="/" className="mb-8 block mobile:text-right">
-					<span className="font-bold text-base text-black leading-tight">solberg.is</span>
+				<a href="/" className="mb-8 flex flex-col gap-3 mobile:items-end">
+					<Image
+						src="/baldur-square.jpg"
+						width={288}
+						height={288}
+						quality={95}
+						alt=""
+						className="size-20 rounded-2xl shadow-lg ring-1 ring-white/60 sm:size-24"
+						priority
+					/>
+					<span className="whitespace-nowrap font-bold text-base text-black leading-tight">
+						Jökull Sólberg
+					</span>
 				</a>
 				<div className="flex flex-col gap-2 text-right">
 					<Item href="/blog">blog</Item>
