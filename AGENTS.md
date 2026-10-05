@@ -7,8 +7,10 @@ not add pnpm lockfiles or workspace configuration.
 
 ## Build and deployment
 
-- `bun run build` runs the production Vite build and TypeScript check.
-- `bun run deploy` builds and publishes `solberg-blog` with Wrangler.
+- `bun run build` generates types (`cf workers types`), runs the production Vite build and the TypeScript check.
+- `bun run deploy` builds and publishes `solberg-blog` with the `cf` CLI (`cf deploy --prebuilt`).
+- Worker config lives in `cloudflare.config.ts`. `wrangler.jsonc` remains only so
+  `wrangler d1 execute solberg-blog` can resolve the database; keep the two in sync.
 - Pushes to `main` are built by Cloudflare Workers Builds, not GitHub Actions.
   Check the commit status with:
 

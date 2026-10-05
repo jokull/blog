@@ -18,6 +18,6 @@
 		},
 		"target": "ES2017"
 	},
-	"include": ["**/*.ts", "**/*.tsx"],
+	"include": ["**/*.ts", "**/*.tsx", ".cloudflare/types/index.d.ts"],
 	"exclude": ["node_modules"]
 }

@@ -50,3 +50,4 @@ next-env.d.ts
 # turso
 database.db*
 .env*
+.cloudflare/

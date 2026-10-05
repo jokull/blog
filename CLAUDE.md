@@ -20,11 +20,12 @@ secret from browser code is a build error rather than a silent `undefined`.
 There is no `NODE_ENV` — use `import.meta.env.DEV`, which Vite constant-folds so
 dev-only routes are dead code in the production bundle.
 
-Secrets are deliberately **not** declared in `wrangler.jsonc`. Wrangler reads
-them from `.env` locally and `wrangler secret put` in production, and
-`npx wrangler types` writes them into `Env` as required keys — that generated
-file is the compile-time check. Never hand-edit it; regenerate after touching
-`wrangler.jsonc`.
+Secrets are declared in `cloudflare.config.ts` as `bindings.secret()` (no
+values). Locally they come from `.env`, in production from `wrangler secret put`.
+`cf workers types` writes them into `Env` as required keys in
+`.cloudflare/types/index.d.ts` (gitignored, included by `tsconfig.json`) — that
+generated file is the compile-time check. Regenerate it (`bun run types`) after
+touching `cloudflare.config.ts`; `bun run build` does so.
 
 Side effect of that generation: every binding is also declared a **required**
 `NodeJS.ProcessEnv` key. True inside the Worker, false in `cli/`, which runs on

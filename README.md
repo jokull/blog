@@ -47,7 +47,7 @@ GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
 ```
 
-`SITE_URL` and `GITHUB_CLIENT_ID` are declared as `vars` in `wrangler.jsonc`; the secret
+`SITE_URL` and `GITHUB_CLIENT_ID` are declared as text bindings in `cloudflare.config.ts`; the secret
 (`GITHUB_CLIENT_SECRET`) and any others (e.g. `ONEDOLLARSTATS_API_KEY`) are set in production with
 `wrangler secret put`. There is no `NODE_ENV` — use `import.meta.env.DEV` for dev-only code.
 

@@ -14,7 +14,7 @@
 import { createBrowserClient, fetchTransport } from "result-rpc/client";
 import { appContract } from "../src/rpc/contract";
 
-// `worker-configuration.d.ts` declares every binding as a required
+// the generated `.cloudflare/types/index.d.ts` declares every binding as a required
 // `ProcessEnv` key, which is true inside the Worker and a lie here — this CLI
 // runs on plain Bun, where the variable really can be absent.
 // oxlint-disable-next-line typescript/no-unnecessary-condition
